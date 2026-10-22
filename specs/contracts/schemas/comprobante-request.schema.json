@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/comprobante-request.schema.json",
   "title": "EmitirComprobanteRequest",
-  "description": "Entrada para emitir factura (01) o boleta (03). RF-01 a RF-15.",
+  "description": "Entrada para emitir factura (01) o boleta (03). RF-01 a RF-15. La idempotencia va en la cabecera HTTP Idempotency-Key (UUID), no en el body.",
   "type": "object",
   "required": [
     "tipo",
@@ -49,11 +49,6 @@
     "enviarCorreo": {
       "type": "boolean",
       "default": false
-    },
-    "idempotencyKey": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Evita doble emisión ante reintentos del cliente"
     }
   },
   "allOf": [

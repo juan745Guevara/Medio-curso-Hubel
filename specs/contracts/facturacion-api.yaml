@@ -338,7 +338,12 @@ components:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   parameters:
     Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
-    IdempotencyKey: { name: Idempotency-Key, in: header, required: false, schema: { type: string, format: uuid } }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: "UUID que genera el cliente por cada intento de emisión. Si llega repetido, el servidor devuelve el mismo documento y no asigna un nuevo correlativo (evita doble emisión en reintentos)."
+      schema: { type: string, format: uuid }
   responses:
     BadRequest:
       description: El JSON no cumple el schema
