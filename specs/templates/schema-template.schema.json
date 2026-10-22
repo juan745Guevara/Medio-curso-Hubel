@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/<nombre>.schema.json",
+  "title": "<NombreDTO>",
+  "description": "RF-NN. Campos obligatorios iguales a los del RF.",
+  "type": "object",
+  "required": [],
+  "properties": {},
+  "additionalProperties": false
+}

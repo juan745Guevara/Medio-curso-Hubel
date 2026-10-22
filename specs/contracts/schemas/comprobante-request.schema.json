@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/comprobante-request.schema.json",
+  "title": "EmitirComprobanteRequest",
+  "description": "Entrada para emitir factura (01) o boleta (03). RF-01 a RF-15.",
+  "type": "object",
+  "required": [
+    "tipo",
+    "serie",
+    "moneda",
+    "tipoOperacion",
+    "adquirente",
+    "formaPago",
+    "items"
+  ],
+  "properties": {
+    "tipo": {
+      "enum": [
+        "01",
+        "03"
+      ]
+    },
+    "serie": {
+      "$ref": "comunes.schema.json#/$defs/Serie"
+    },
+    "fechaEmision": {
+      "$ref": "comunes.schema.json#/$defs/Fecha",
+      "description": "Por defecto, hoy"
+    },
+    "moneda": {
+      "$ref": "comunes.schema.json#/$defs/Moneda"
+    },
+    "tipoOperacion": {
+      "$ref": "comunes.schema.json#/$defs/TipoOperacion"
+    },
+    "adquirente": {
+      "$ref": "comunes.schema.json#/$defs/Adquirente"
+    },
+    "formaPago": {
+      "$ref": "comunes.schema.json#/$defs/FormaPago"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "item.schema.json"
+      }
+    },
+    "enviarCorreo": {
+      "type": "boolean",
+      "default": false
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Evita doble emisión ante reintentos del cliente"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "01"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "serie": {
+            "pattern": "^F"
+          },
+          "adquirente": {
+            "properties": {
+              "documento": {
+                "properties": {
+                  "tipo": {
+                    "const": "6"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "03"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "serie": {
+            "pattern": "^B"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/envio-lote-response.schema.json",
+  "title": "EnvioLoteResponse",
+  "description": "Resumen diario o comunicación de baja (RF-23 a RF-26)",
+  "type": "object",
+  "required": [
+    "id",
+    "tipo",
+    "identificador",
+    "estado"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "tipo": {
+      "enum": [
+        "RESUMEN_DIARIO",
+        "COMUNICACION_BAJA"
+      ]
+    },
+    "identificador": {
+      "type": "string",
+      "pattern": "^R[CA]-[0-9]{8}-[0-9]{1,5}$"
+    },
+    "ticket": {
+      "type": "string"
+    },
+    "estado": {
+      "enum": [
+        "EN_PROCESO",
+        "ACEPTADO",
+        "RECHAZADO"
+      ]
+    },
+    "lineas": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500
+    },
+    "cdr": {
+      "type": "object",
+      "properties": {
+        "codigo": {
+          "type": "string"
+        },
+        "descripcion": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

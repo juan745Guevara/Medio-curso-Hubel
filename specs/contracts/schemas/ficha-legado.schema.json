@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/ficha-legado.schema.json",
+  "title": "FichaLegadoDTO",
+  "description": "Fila del software anterior tal como se exporta (RF-28 a RF-35). Tipos laxos a propósito: la validación de negocio decide el rechazo.",
+  "type": "object",
+  "required": [
+    "fila",
+    "fecha",
+    "ingreso",
+    "salida",
+    "producto",
+    "nro_documento"
+  ],
+  "properties": {
+    "fila": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fecha": {
+      "type": "string"
+    },
+    "ingreso": {
+      "type": "string"
+    },
+    "salida": {
+      "type": "string"
+    },
+    "producto": {
+      "type": "string"
+    },
+    "nro_documento": {
+      "type": "string"
+    }
+  }
+}

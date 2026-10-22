@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: ABC Facturación Electrónica API
+  version: 0.1.0
+  summary: Contrato spec-first del monolito MVC (controladores de API) que consumen las apps Windows y Android.
+  description: |
+    Cada operación nombra los RF/CA que cubre. Los DTO viven en `schemas/` (JSON Schema 2020-12).
+    Errores con RFC 9457 (`application/problem+json`). Los tributos siempre los calcula el servidor.
+servers:
+  - url: https://api.abc.local/v1
+    description: Servidor del monolito (on-premise de ABC)
+security:
+  - bearerAuth: []
+tags:
+  - name: Comprobantes
+  - name: Notas
+  - name: Bajas y resúmenes
+  - name: Catálogo
+  - name: Migración
+  - name: Registros
+  - name: Configuración
+paths:
+  /comprobantes:
+    post:
+      tags: [Comprobantes]
+      operationId: emitirComprobante
+      summary: Emite factura (01) o boleta (03)
+      description: "RF-01 a RF-15. CA-01 a CA-25. Calcula tributos, genera XML UBL 2.1, valida XSD, firma y encola el envío."
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/comprobante-request.schema.json' }
+      responses:
+        '201':
+          description: Emitido. `estado` puede ser ACEPTADO, OBSERVADO, RECHAZADO o PENDIENTE_REENVIO.
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: './schemas/comprobante-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+    get:
+      tags: [Comprobantes]
+      operationId: listarComprobantes
+      summary: Lista documentos electrónicos con filtros
+      description: RF-27
+      parameters:
+        - { name: tipo, in: query, schema: { $ref: './schemas/comunes.schema.json#/$defs/TipoComprobante' } }
+        - { name: estado, in: query, schema: { $ref: './schemas/comunes.schema.json#/$defs/EstadoSunat' } }
+        - { name: desde, in: query, schema: { type: string, format: date } }
+        - { name: hasta, in: query, schema: { type: string, format: date } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200':
+          description: Página de resultados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: './schemas/comprobante-response.schema.json' } }
+                  total: { type: integer }
+  /comprobantes/{id}:
+    get:
+      tags: [Comprobantes]
+      operationId: obtenerComprobante
+      summary: Consulta estado SUNAT y CDR
+      description: RF-27, CA-38
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Documento
+          content:
+            application/json:
+              schema: { $ref: './schemas/comprobante-response.schema.json' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /comprobantes/{id}/reenviar:
+    post:
+      tags: [Comprobantes]
+      operationId: reenviarComprobante
+      summary: Reenvía un documento en PENDIENTE_REENVIO
+      description: RF-11, RF-27, CA-38
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '202': { description: Reenvío encolado }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /comprobantes/{id}/xml:
+    get:
+      tags: [Comprobantes]
+      operationId: descargarXml
+      description: RF-13, CA-23
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: XML firmado, content: { application/xml: { schema: { type: string } } } }
+  /comprobantes/{id}/cdr:
+    get:
+      tags: [Comprobantes]
+      operationId: descargarCdr
+      description: RF-13, CA-23
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: ZIP del CDR, content: { application/zip: { schema: { type: string, contentEncoding: base64 } } } }
+  /comprobantes/{id}/pdf:
+    get:
+      tags: [Comprobantes]
+      operationId: descargarPdf
+      description: Representación impresa con QR. RF-13, CA-23
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: formato, in: query, schema: { enum: [A4, TICKET_80MM], default: A4 } }
+      responses:
+        '200': { description: PDF, content: { application/pdf: { schema: { type: string, contentEncoding: base64 } } } }
+  /comprobantes/{id}/enviar-correo:
+    post:
+      tags: [Comprobantes]
+      operationId: enviarCorreo
+      description: RF-14, CA-24
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { correo: { type: string, format: email } } }
+      responses:
+        '202': { description: Envío encolado }
+  /notas:
+    post:
+      tags: [Notas]
+      operationId: emitirNota
+      summary: Emite nota de crédito (07) o débito (08)
+      description: RF-18 a RF-22. CA-28 a CA-33.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/nota-request.schema.json' }
+      responses:
+        '201':
+          description: Nota emitida
+          content:
+            application/json:
+              schema: { $ref: './schemas/comprobante-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /bajas:
+    post:
+      tags: [Bajas y resúmenes]
+      operationId: comunicarBaja
+      description: RF-23, RF-24. CA-34, CA-35.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/baja-request.schema.json' }
+      responses:
+        '202':
+          description: Comunicación enviada, ticket pendiente
+          content:
+            application/json:
+              schema: { $ref: './schemas/envio-lote-response.schema.json' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /resumenes-diarios:
+    post:
+      tags: [Bajas y resúmenes]
+      operationId: generarResumenDiario
+      description: RF-25. CA-36. Normalmente lo dispara el planificador al cierre del día.
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, required: [fecha], properties: { fecha: { type: string, format: date } } }
+      responses:
+        '202':
+          description: Uno o más envíos de hasta 500 líneas
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/envio-lote-response.schema.json' } }
+  /envios-lote/{id}:
+    get:
+      tags: [Bajas y resúmenes]
+      operationId: consultarEnvioLote
+      description: Estado del ticket. RF-26, CA-37.
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Estado
+          content:
+            application/json:
+              schema: { $ref: './schemas/envio-lote-response.schema.json' }
+  /adquirentes/validar-documento:
+    post:
+      tags: [Catálogo]
+      operationId: validarDocumento
+      description: Valida formato y dígito verificador del RUC. RF-02, CA-03, CA-04.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/comunes.schema.json#/$defs/DocumentoIdentidad' }
+      responses:
+        '200':
+          description: Resultado
+          content:
+            application/json:
+              schema: { type: object, required: [valido], properties: { valido: { type: boolean }, motivo: { type: string } } }
+  /productos:
+    get:
+      tags: [Catálogo]
+      operationId: listarProductos
+      responses: { '200': { description: Lista de productos } }
+    post:
+      tags: [Catálogo]
+      operationId: crearProducto
+      description: Afectación IGV (cat. 07), Sistema ISC (cat. 08), bolsa ICBPER. RF-05, RF-36.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codigo, descripcion, unidad, afectacionIgv]
+              properties:
+                codigo: { type: string, maxLength: 30 }
+                descripcion: { type: string, maxLength: 500 }
+                unidad: { $ref: './schemas/comunes.schema.json#/$defs/UnidadMedida' }
+                afectacionIgv: { $ref: './schemas/comunes.schema.json#/$defs/AfectacionIgv' }
+                isc:
+                  type: object
+                  required: [sistema]
+                  properties:
+                    sistema: { $ref: './schemas/comunes.schema.json#/$defs/SistemaIsc' }
+                    tasa: { type: string, description: "Porcentaje, para sistemas 01 y 03" }
+                    montoFijo: { type: string, description: "Por unidad, para sistema 02" }
+                esBolsaPlastica: { type: boolean, default: false }
+      responses:
+        '201': { description: Creado }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /migraciones:
+    post:
+      tags: [Migración]
+      operationId: cargarLoteMigracion
+      description: RF-28 a RF-35. CA-39 a CA-46.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archivo]
+              properties:
+                archivo: { type: string, contentMediaType: application/octet-stream }
+      responses:
+        '202':
+          description: Lote creado y en proceso
+          content:
+            application/json:
+              schema: { $ref: './schemas/lote-migracion-response.schema.json' }
+  /migraciones/{id}:
+    get:
+      tags: [Migración]
+      operationId: obtenerLoteMigracion
+      description: Reporte de conciliación. RF-34, CA-45.
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Lote
+          content:
+            application/json:
+              schema: { $ref: './schemas/lote-migracion-response.schema.json' }
+  /registros/ventas/{periodo}:
+    get:
+      tags: [Registros]
+      operationId: obtenerRegistroVentas
+      description: RF-37 a RF-39, RF-41. CA-48 a CA-50, CA-52.
+      parameters:
+        - { name: periodo, in: path, required: true, schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' } }
+      responses:
+        '200':
+          description: Registro del periodo
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/registro-ventas-fila.schema.json' } }
+            text/csv:
+              schema: { type: string }
+  /productos/{codigo}/kardex:
+    get:
+      tags: [Registros]
+      operationId: obtenerKardex
+      description: RF-40. CA-51.
+      parameters:
+        - { name: codigo, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Movimientos y saldo }
+  /configuracion/emisor:
+    put:
+      tags: [Configuración]
+      operationId: configurarEmisor
+      description: "RUC, razón social, domicilio, validador (SUNAT u OSE), ambiente (beta/producción). RNF-07. Rol Administrador."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ruc, razonSocial, validador, ambiente]
+              properties:
+                ruc: { $ref: './schemas/comunes.schema.json#/$defs/Ruc' }
+                razonSocial: { type: string }
+                validador: { enum: [SUNAT, OSE] }
+                ambiente: { enum: [BETA, PRODUCCION] }
+      responses:
+        '204': { description: Guardado }
+  /configuracion/certificado:
+    put:
+      tags: [Configuración]
+      operationId: cargarCertificado
+      description: Sube el .pfx; se guarda cifrado y nunca se devuelve. RNF-05.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archivo, clave]
+              properties:
+                archivo: { type: string, contentMediaType: application/x-pkcs12 }
+                clave: { type: string, format: password }
+      responses:
+        '204': { description: Certificado vigente cargado }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: false, schema: { type: string, format: uuid } }
+  responses:
+    BadRequest:
+      description: El JSON no cumple el schema
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    NotFound:
+      description: No existe
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Conflict:
+      description: "Conflicto de estado (correlativo, nota sobre doc. no aceptado, reenvío de doc. ya aceptado). CA-02, CA-30."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Unprocessable:
+      description: "Regla de negocio violada: RUC_INVALIDO, FACTURA_REQUIERE_RUC, BOLETA_REQUIERE_DOCUMENTO, CREDITO_SIN_CUOTAS, CUOTAS_NO_CUADRAN, XSD_INVALIDO, NOTA_MULTIPLE, CREDITO_EXCEDIDO, BAJA_FUERA_DE_PLAZO, PRODUCTO_SIN_CLASIFICAR."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }

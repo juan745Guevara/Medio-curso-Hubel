@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/nota-request.schema.json",
+  "title": "EmitirNotaRequest",
+  "description": "Nota de crédito (07, cat. 09) o débito (08, cat. 10). RF-18 a RF-22.",
+  "type": "object",
+  "required": [
+    "tipo",
+    "serie",
+    "documentoModificado",
+    "motivo",
+    "items"
+  ],
+  "properties": {
+    "tipo": {
+      "enum": [
+        "07",
+        "08"
+      ]
+    },
+    "serie": {
+      "$ref": "comunes.schema.json#/$defs/Serie"
+    },
+    "documentoModificado": {
+      "type": "object",
+      "required": [
+        "tipo",
+        "numero"
+      ],
+      "properties": {
+        "tipo": {
+          "enum": [
+            "01",
+            "03"
+          ]
+        },
+        "numero": {
+          "$ref": "comunes.schema.json#/$defs/NumeroDocumento"
+        }
+      },
+      "additionalProperties": false
+    },
+    "motivo": {
+      "type": "object",
+      "required": [
+        "codigo",
+        "descripcion"
+      ],
+      "properties": {
+        "codigo": {
+          "type": "string",
+          "pattern": "^[0-9]{2}$"
+        },
+        "descripcion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "item.schema.json"
+      }
+    },
+    "formaPago": {
+      "$ref": "comunes.schema.json#/$defs/FormaPago"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "07"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "motivo": {
+            "properties": {
+              "codigo": {
+                "enum": [
+                  "01",
+                  "02",
+                  "03",
+                  "04",
+                  "05",
+                  "06",
+                  "07",
+                  "08",
+                  "09",
+                  "10",
+                  "13"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "tipo": {
+            "const": "08"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "motivo": {
+            "properties": {
+              "codigo": {
+                "enum": [
+                  "01",
+                  "02",
+                  "03"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

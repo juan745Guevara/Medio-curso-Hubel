@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/error.schema.json",
+  "title": "ErrorResponse",
+  "description": "RFC 9457 Problem Details. Nunca expone trazas internas (constitución 16).",
+  "type": "object",
+  "required": [
+    "type",
+    "title",
+    "status",
+    "code"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "code": {
+      "type": "string",
+      "description": "Código interno estable, p. ej. RUC_INVALIDO, FACTURA_REQUIERE_RUC, XSD_INVALIDO"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "sunatCodigo": {
+      "type": "string",
+      "description": "Código del CDR si viene de SUNAT/OSE"
+    },
+    "errores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "campo",
+          "mensaje"
+        ],
+        "properties": {
+          "campo": {
+            "type": "string"
+          },
+          "mensaje": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

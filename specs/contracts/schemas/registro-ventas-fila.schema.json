@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/registro-ventas-fila.schema.json",
+  "title": "RegistroVentasFila",
+  "description": "RF-37 a RF-39",
+  "type": "object",
+  "required": [
+    "fechaEmision",
+    "tipo",
+    "serie",
+    "correlativo",
+    "adquirente",
+    "baseGravada",
+    "exonerado",
+    "inafecto",
+    "igv",
+    "isc",
+    "icbper",
+    "importeTotal",
+    "estado"
+  ],
+  "properties": {
+    "fechaEmision": {
+      "$ref": "comunes.schema.json#/$defs/Fecha"
+    },
+    "tipo": {
+      "$ref": "comunes.schema.json#/$defs/TipoComprobante"
+    },
+    "serie": {
+      "$ref": "comunes.schema.json#/$defs/Serie"
+    },
+    "correlativo": {
+      "$ref": "comunes.schema.json#/$defs/Correlativo"
+    },
+    "adquirente": {
+      "$ref": "comunes.schema.json#/$defs/DocumentoIdentidad"
+    },
+    "baseGravada": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "exonerado": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "inafecto": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "igv": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "isc": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "icbper": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "importeTotal": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    },
+    "estado": {
+      "$ref": "comunes.schema.json#/$defs/EstadoSunat"
+    },
+    "documentoModificado": {
+      "$ref": "comunes.schema.json#/$defs/NumeroDocumento"
+    }
+  }
+}

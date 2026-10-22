@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/item.schema.json",
+  "title": "ItemDTO",
+  "description": "Línea del documento. Los tributos los calcula el sistema (RF-05); el cliente no los envía.",
+  "type": "object",
+  "required": [
+    "codigoProducto",
+    "cantidad",
+    "unidad",
+    "valorUnitario"
+  ],
+  "properties": {
+    "codigoProducto": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "descripcion": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Si se omite, se toma del Producto"
+    },
+    "cantidad": {
+      "$ref": "comunes.schema.json#/$defs/Cantidad"
+    },
+    "unidad": {
+      "$ref": "comunes.schema.json#/$defs/UnidadMedida"
+    },
+    "valorUnitario": {
+      "$ref": "comunes.schema.json#/$defs/ImporteUnitario",
+      "description": "Sin tributos"
+    },
+    "descuento": {
+      "$ref": "comunes.schema.json#/$defs/Importe"
+    }
+  },
+  "additionalProperties": false
+}
