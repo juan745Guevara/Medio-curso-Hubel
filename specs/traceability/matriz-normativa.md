@@ -2,11 +2,43 @@
 
 Entregable 4 del examen. Cada fila cruza un dato que exige SUNAT con su catálogo, su cardinalidad en el XSD oficial de OASIS, su tag en el XML (mapeo del Anexo 9-A), el campo del DTO que lo alimenta, la regla, el código de error con que SUNAT u OSE rechaza si falla, y el CA que lo prueba.
 
+**Alcance:** UBL 2.1 en su personalización peruana de SUNAT (ver §0).
+
 **Lectura clave:** el XSD de OASIS solo obliga 6 elementos de la cabecera (`ID`, `IssueDate`, `AccountingSupplierParty`, `AccountingCustomerParty`, `LegalMonetaryTotal`, `InvoiceLine`). SUNAT vuelve obligatorios 22 datos más que en el XSD son opcionales (columna SUNAT = M con XSD 0..x). Por eso validar contra el XSD es necesario pero no suficiente: el sistema aplica además las reglas del Anexo 9-A y del catálogo de errores ([ADR 0003](../adr/0003-validar-xsd-antes-de-firmar.md)).
 
 **Fuentes**: [UBL-Invoice-2.1.xsd](https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd) y [UBL-CreditNote-2.1.xsd](https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd) de OASIS; tipos agregados consultados en [data2type UBL 2.1](https://repository.data2type.de/UBL/v_2.1/html/co.TaxSubtotalType.html); Anexo 1 y Anexo 9-A de la RS 097-2012 según [Anexo VII RS 114-2019](https://ww3.sunat.gob.pe/legislacion/superin/2019/anexoVII-114-2019.pdf); catálogos del Anexo 8 ([Anexo E RS 245-2017](https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf), [Anexo D RS 357-2015](https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)); ICBPER [Anexos RS 150-2019](https://www.sunat.gob.pe/legislacion/superin/2019/anexos-150-2019.pdf); forma de pago [Anexo IV RS 193-2020](https://www.sunat.gob.pe/legislacion/superin/2020/anexo4-193-2020.pdf); códigos de error del catálogo de retorno de SUNAT en la copia mantenida por [Greenter (CodeErrors.xml)](https://github.com/thegreenter/xcodes/blob/master/src/data/CodeErrors.xml), a contrastar con el Excel de validaciones vigente del micrositio CPE.
 
 Convenciones: `cbc` = CommonBasicComponents-2 · `cac` = CommonAggregateComponents-2 · `ext` = CommonExtensionComponents-2 · `ds` = xmldsig. **SUNAT**: M obligatorio, C condicional. **XSD**: cardinalidad del elemento (y de sus padres cuando importa); en **negrita** lo que el XSD ya obliga.
+
+## 0. UBL genérico vs. UBL de SUNAT (Perú)
+
+UBL 2.1 de OASIS (también norma ISO/IEC 19845) es una **base genérica e internacional**: define qué etiquetas existen y en qué orden, pero no qué datos son obligatorios en cada país, qué códigos usar ni qué impuestos hay. Cada administración tributaria publica su propia **personalización** encima de la misma base. Este sistema implementa **solo la personalización peruana de SUNAT**; no usa la europea.
+
+| Capa | Europa (otra personalización) | **Perú — la de este sistema** |
+|---|---|---|
+| Base | OASIS UBL 2.1 (`UBL-Invoice-2.1.xsd`) | OASIS UBL 2.1 (el **mismo** `UBL-Invoice-2.1.xsd`) |
+| Norma que personaliza | EN 16931 + Peppol BIS Billing 3.0 | RS 097-2012/SUNAT y modificatorias, Anexo 9-A |
+| `cbc:CustomizationID` | `urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0` | **`2.0`** (versión de estructura SUNAT) |
+| Impuestos | VAT con categorías S, Z, E… | **IGV, ISC, ICBPER** (catálogo 05) |
+| Códigos | Listas UN/ECE y del CEN | **Catálogos del Anexo 8 de SUNAT** (01 a 59), con UN/ECE solo para unidades y moneda |
+| Identificación de partes | VAT ID europeo, Peppol ID | **RUC, DNI** (catálogo 06) |
+| Moneda habitual | EUR | **PEN** |
+| Quién valida | Red Peppol / administración de cada país | **SUNAT u OSE**, que devuelve el CDR |
+| Documentos propios (fuera de OASIS) | — | Resumen diario y comunicación de baja: esquemas **de SUNAT** (`urn:sunat:names:specification:ubl:peru:schema:xsd:SummaryDocuments-1` y `…VoidedDocuments-1`) construidos con componentes UBL 2.0 y el prefijo `sac` |
+
+Por eso, si un XML trae `CustomizationID` de EN 16931, PEN no aparece o los impuestos son "VAT S", ese XML es de la personalización europea y SUNAT lo rechaza (2072 "CustomizationID - La versión del documento no es la correcta").
+
+**Atributos que marcan el XML como peruano** (Anexo 9-A, [Anexo VII RS 114-2019](https://www.sunat.gob.pe/legislacion/superin/2019/anexoVII-114-2019.pdf)):
+
+| Tag | Atributos SUNAT |
+|---|---|
+| `cbc:InvoiceTypeCode` (cat. 01) | `@listAgencyName="PE:SUNAT"`, `@listName="Tipo de Documento"`, `@listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01"`, `@listID` = tipo de operación (cat. 51) |
+| `cac:PartyIdentification/cbc:ID` (cat. 06) | `@schemeID` (6 = RUC), `@schemeName="Documento de Identidad"`, `@schemeAgencyName="PE:SUNAT"`, `@schemeURI` del catálogo 06 |
+| `cbc:DocumentCurrencyCode` (cat. 02) | `@listID="ISO 4217 Alpha"`, `@listName="Currency"`, `@listAgencyName="United Nations Economic Commission for Europe"` |
+| `cbc:InvoicedQuantity@unitCode` (cat. 03) | `@unitCodeListID="UN/ECE rec 20"`, `@unitCodeListAgencyName="United Nations Economic Commission for Europe"` |
+| `cbc:ItemClassificationCode` (cat. 25) | `@listID="UNSPSC"`, `@listAgencyName="GS1 US"`, `@listName="Item Classification"` |
+
+Patrón general: todo código de un catálogo propio de SUNAT lleva `listAgencyName`/`schemeAgencyName = "PE:SUNAT"` y un `listURI`/`schemeURI` `urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogoNN`. El generador UBL (`GeneradorUblPort`) los agrega siempre.
 
 ## A. Cabecera
 

@@ -14,6 +14,11 @@ description: Cómo obtener, leer y validar UBL 2.1 (UBL-Invoice-2.1.xsd y relaci
 - Mantén la estructura de carpetas: `maindoc` importa `../common/`.
 - Versiona los XSD dentro del proyecto (ADR 0003) con un archivo `VERSION` y su hash.
 
+## 1b. Personalización peruana, no europea
+- El XSD de OASIS es genérico; lo peruano lo pone el Anexo 9-A de SUNAT. Usa `cbc:CustomizationID` = `2.0`, nunca el de EN 16931/Peppol.
+- Todo código de catálogo SUNAT lleva `listAgencyName`/`schemeAgencyName="PE:SUNAT"` y `listURI`/`schemeURI` `urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogoNN` (tabla en `specs/traceability/matriz-normativa.md` §0).
+- Resumen diario y baja usan esquemas propios de SUNAT (`urn:sunat:names:specification:ubl:peru:schema:xsd:…-1`), no los de OASIS.
+
 ## 2. Leer el XSD sin perderse
 - Raíz: `xsd:element name="Invoice"` → `InvoiceType`, una secuencia ordenada. **El orden de los elementos importa**: un `cbc:IssueDate` después de `cbc:InvoiceTypeCode` invalida el XML.
 - `minOccurs="0"` en OASIS no significa opcional para SUNAT: la obligatoriedad real sale del Anexo 9-A (columna "Oblig." de la matriz).
@@ -33,7 +38,8 @@ description: Cómo obtener, leer y validar UBL 2.1 (UBL-Invoice-2.1.xsd y relaci
   <cbc:CustomizationID>2.0</cbc:CustomizationID>
   <cbc:ID>F001-00000042</cbc:ID>
   <cbc:IssueDate>2026-10-22</cbc:IssueDate>
-  <cbc:InvoiceTypeCode listID="0101">01</cbc:InvoiceTypeCode>
+  <cbc:InvoiceTypeCode listID="0101" listAgencyName="PE:SUNAT" listName="Tipo de Documento"
+    listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01">01</cbc:InvoiceTypeCode>
   <cbc:Note languageLocaleID="1000">SETENTA Y NUEVE CON 00/100 SOLES</cbc:Note>
   <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
   <!-- cac:Signature, partes, PaymentTerms, TaxTotal, LegalMonetaryTotal, InvoiceLine… -->
