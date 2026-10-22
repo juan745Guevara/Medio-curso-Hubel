@@ -24,7 +24,7 @@ Mandatory order, with exact decimals (never floating point):
 2. ISC per catalog 08 (`cbc:TierRange`):
    - `01` Ad valorem: `isc = saleValue × iscRate`
    - `02` Fixed amount: `isc = quantity × fixedAmountPerUnit`
-   - `03` Retail sale price: `isc = suggestedRetailPrice × factor × iscRate` (factor formula to be verified in Appendix IV lit. C and the SUNAT guide)
+   - `03` Retail sale price (art. 56 lit. c TUO IGV/ISC law): `isc = quantity × suggestedRetailPrice × factor × iscRate`, where `factor = 1 / (1 + IGV rate incl. IPM) = 1 / 1.18 = 0.847` (expressed with 3 decimals; unchanged in 2026 because 15.5 % + 2.5 % = 18 %). The suggested retail price already includes IGV and ISC and must be shown on the product or a seal. Example: price S/ 10.00, rate 25 % (illustrative) → base 10.00 × 0.847 = 8.47 → ISC 2.12.
 3. IGV per catalog 07:
    - `10`–`17` taxed: `igv = (saleValue + isc) × 0.18`
    - `20`–`21` exempt, `30`–`37` non-taxable, `40` export: `igv = 0`

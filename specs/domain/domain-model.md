@@ -174,7 +174,7 @@ classDiagram
 | `Currency` | ISO 4217 code (cat. 02) | PEN or USD | FR-07 |
 | `UnitOfMeasure` | UN/ECE Rec 20 code (cat. 03) | Must exist in the catalog | FR-07 |
 | `IgvTreatment` | Cat. 07 code | 10–17 taxed, 20–21 exempt, 30–37 non-taxable, 40 export | FR-05 |
-| `IscConfig` / `IscLine` | System (cat. 08) + rate or fixed amount | 01 → rate %; 02 → amount per unit; 03 → rate on retail sale price | FR-05 |
+| `IscConfig` / `IscLine` | System (cat. 08) + rate or fixed amount | 01 → rate %; 02 → amount per unit; 03 → rate on (suggested retail price × 0.847) | FR-05 |
 | `OperationType` | Cat. 51 code | 0101 in this scope | FR-07 |
 | `PaymentTerms` | Cash / Credit | Credit ⇒ ≥ 1 Installment and Σ installments = outstandingAmount | FR-12 |
 
