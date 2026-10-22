@@ -23,6 +23,8 @@ Regla de dependencias (verificada con pruebas de arquitectura):
 | Infrastructure | Application, Domain | Web |
 | Web (Controllers + Views) | Application | Domain directamente, Infrastructure (solo vía composición) |
 
+Esta regla es la que comparten Hexagonal y Clean Architecture; la equivalencia capa por capa está en [arquitectura.md §4b](../architecture/arquitectura.md#4b-hexagonal-o-clean-la-misma-regla-de-dependencias).
+
 Así, "migrar a hexagonal" es renombrar Web e Infrastructure como adaptadores, sin tocar Domain ni Application; y "migrar a microservicios" es separar por contextos acotados (Facturación, Catálogo, Inventario, Migración, Registros) que ya no se llaman por dentro sino por puertos y eventos.
 
 # Alternativas evaluadas

@@ -2,7 +2,6 @@
 
 Fuente: enunciado §3, operaciones de la API de Nubefact (generar, consultar, anular y consultar anulación de comprobantes) y problemas frecuentes reportados en facturación electrónica (rechazos por datos mal calculados, caídas del servicio, plazos de envío, contingencia).
 
-> No se pudo crear el usuario DEMO de Nubefact desde este entorno. La lista se basa en su API pública documentada y en guías de SUNAT. **Pendiente**: crear la cuenta demo y confirmar pantallas (ver Clarificaciones al final).
 
 ## Diagrama
 
@@ -67,5 +66,4 @@ flowchart LR
 | Cambio de proveedor OSE | Puerto `ValidadorSunatPort` con adaptadores intercambiables (ADR 0001) |
 
 ## Clarificaciones
-- [NEEDS CLARIFICATION] Crear la cuenta DEMO de Nubefact y validar si sus pantallas sugieren casos de uso adicionales (p. ej. cotizaciones, guías).
 - [NEEDS CLARIFICATION] ¿El Vendedor puede emitir notas, o solo el Administrador?

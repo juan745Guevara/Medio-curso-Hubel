@@ -50,7 +50,7 @@ En el XML se consigna 18 (`cbc:Percent`). Internamente, por la Ley 32387: 2026 =
 | 01 | Tipo de documento | 01 factura, 03 boleta, 07 NC, 08 ND |
 | 02 | Moneda | PEN, USD |
 | 03 | Unidad | NIU (unidad), KGM, LTR, ZZ (servicio) |
-| 05 | Tributo | 1000 IGV (VAT), 2000 ISC (EXC), 7152 ICBPER (por verificar), 9997 exonerado, 9998 inafecto, 9999 otros |
+| 05 | Tributo | 1000 IGV (VAT), 2000 ISC (EXC), 7152 ICBPER (OTH), 9997 exonerado, 9998 inafecto, 9999 otros |
 | 06 | Doc. identidad | 0 otros, 1 DNI, 4 CE, 6 RUC, 7 pasaporte, A céd. diplomática |
 | 07 | Afectación IGV | 10 gravado oneroso, 20 exonerado oneroso, 30 inafecto oneroso, 40 exportación |
 | **08** | **Sistema ISC** | **01 al valor, 02 monto fijo, 03 precio de venta al público** |
@@ -75,5 +75,14 @@ Implementa los plazos en un solo servicio (`PlazosSunat`) que reciba la fecha de
 ## 7. Nombres de archivo
 `<RUC>-<TT>-<SERIE>-<NUMERO>.xml`, empaquetado en `.zip` con el mismo nombre. Resumen: `<RUC>-RC-<AAAAMMDD>-<n>`. Baja: `<RUC>-RA-<AAAAMMDD>-<n>`.
 
-## 8. Monto en letras (leyenda 1000)
+## 8. Antes de enviar: errores SUNAT que se evitan localmente
+Valida en este orden y devuelve el código interno; la tabla completa está en `specs/traceability/matriz-normativa.md` §G.
+1. RUC y documento del Adquirente (evita 2016, 2017, 2800, 2802).
+2. Forma de pago y cuotas (evita 3244–3267).
+3. Recalcular cada línea y los totales con el procedimiento §2–§3 (evita 4287, 4288, 4290, 4301, 4309, 4211, 4321).
+4. Catálogo 08 solo con tributo 2000 (evita 2041, 2373, 3210).
+5. XSD (evita 1002, 1010, 2073, 2075).
+6. Firmar y verificar la firma sin reformatear (evita 1059, 2335, 2336).
+
+## 9. Monto en letras (leyenda 1000)
 `<entero en palabras> CON <centavos>/100 <MONEDA>`, en mayúsculas: 79.00 PEN → "SETENTA Y NUEVE CON 00/100 SOLES".

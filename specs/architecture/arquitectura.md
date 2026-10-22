@@ -109,6 +109,43 @@ flowchart LR
 
 Detalle de cada puerto en [`contracts/puertos.md`](../contracts/puertos.md).
 
+## 4b. Hexagonal o Clean: la misma regla de dependencias
+
+El enunciado pide migrar "hacia una Arquitectura Hexagonal o Clean Architecture". Las dos comparten la regla central: las dependencias apuntan hacia el dominio. Este diseño sirve para ambas sin cambiar código del núcleo; solo cambia el nombre de las capas.
+
+| Proyecto propuesto | MVC (hoy) | Hexagonal ([Cockburn](https://alistaircockburn.com/Articles/Hexagonal-Architecture)) | Clean Architecture (Robert C. Martin) | Ejemplos en este sistema |
+|---|---|---|---|---|
+| `Abc.Facturacion.Domain` | Modelo (núcleo) | Dentro del hexágono: dominio | **Entities** | `DocumentoElectronico`, `Item`, `Ruc`, `Dinero`, `CalculadoraTributos`, `PoliticaEmision` |
+| `Abc.Facturacion.Application` | Modelo (servicios) | Puertos de entrada (casos de uso) y definición de puertos de salida | **Use Cases** (interactors) e interfaces de gateways | `EmitirComprobante`, `EmitirNota`, `MigrarLote`; `ValidadorSunatPort`, `FirmadorPort` |
+| `Abc.Facturacion.Web` (Controllers) | **Controlador** | Adaptadores primarios (driving) | **Interface Adapters**: controllers y presenters | `ComprobantesController`, mapeo DTO ↔ caso de uso |
+| `Abc.Facturacion.Web` (Views), `Abc.Cliente.Maui` | **Vista** | Adaptadores primarios | **Frameworks & Drivers**: UI | Vistas Razor de administración, app Windows/Android |
+| `Abc.Facturacion.Infrastructure` | Modelo (acceso a datos) | Adaptadores secundarios (driven) | **Interface Adapters** (gateways, repositorios) + **Frameworks & Drivers** (BD, web) | `PostgresDocumentoRepository`, `GeneradorUbl21`, `ValidadorXsdOasis`, `ClienteSoapSunat`, `ClienteOse` |
+| `Abc.Contracts` | DTO de la Vista | Formato de los puertos de entrada | Request / Response models | `EmitirComprobanteRequest`, `DocumentoElectronicoResponse` |
+
+```mermaid
+flowchart LR
+  subgraph FD[Frameworks & Drivers]
+    UI[App MAUI · Vistas Razor]
+    DB[(PostgreSQL)]
+    SUNAT[(SUNAT / OSE)]
+  end
+  subgraph IA[Interface Adapters]
+    CTRL[Controllers MVC]
+    GW[Repositorios · Cliente SUNAT/OSE · Generador UBL · Firmador]
+  end
+  subgraph UC[Use Cases]
+    UCS[EmitirComprobante · EmitirNota · ComunicarBaja · MigrarLote]
+  end
+  subgraph EN[Entities]
+    DOM[DocumentoElectronico · CalculadoraTributos · Ruc · Dinero]
+  end
+  UI --> CTRL --> UCS --> DOM
+  GW -. implementa puertos de .-> UCS
+  GW --> DB & SUNAT
+```
+
+Las flechas solo cruzan los círculos hacia dentro: `Entities` no conoce `Use Cases`, y `Use Cases` no conoce ni la base de datos ni SUNAT. Es la misma regla de dependencias del [ADR 0001](../adr/0001-arquitectura.md), que una prueba de arquitectura verifica en cada build.
+
 ## 5. Ruta de migración
 
 | Paso | De | A | Qué cambia | Qué NO cambia |

@@ -7,9 +7,9 @@ Examen de medio curso de Arquitectura de Software, Grupo A, UNAS (19/10/2026). F
 | Ítem pedido (§4) | Archivo(s) |
 |---|---|
 | **1. Modelo de Dominio y Contratos (DTOs / Schemas)** | [`specs/domain/modelo-dominio.md`](specs/domain/modelo-dominio.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (11 JSON Schema 2020-12) |
-| **2. Diagramas de Arquitectura MVC con visión a Hexagonal** | [`specs/architecture/arquitectura.md`](specs/architecture/arquitectura.md) (C4 1 y 2, vista MVC, vista hexagonal, ruta de migración a microservicios, secuencia) · [ADR 0001](specs/adr/0001-arquitectura.md) |
+| **2. Diagramas de Arquitectura MVC con visión a Hexagonal** | [`specs/architecture/arquitectura.md`](specs/architecture/arquitectura.md) (C4 1 y 2, vista MVC, vista hexagonal, equivalencia con Clean Architecture, ruta de migración a microservicios, secuencia) · [ADR 0001](specs/adr/0001-arquitectura.md) |
 | **3. Especificación de Endpoints / Servicios (Contratos API)** | [`specs/contracts/facturacion-api.yaml`](specs/contracts/facturacion-api.yaml) (OpenAPI 3.1) · [`specs/contracts/puertos.md`](specs/contracts/puertos.md) (puertos y contrato SUNAT) |
-| **4. Matriz de Trazabilidad Normativa SUNAT ↔ UBL** | [`specs/traceability/matriz-normativa.md`](specs/traceability/matriz-normativa.md) (49 filas: dato → norma → catálogo → tag UBL → DTO → CA) · [`specs/traceability/trazabilidad.md`](specs/traceability/trazabilidad.md) (HU → RF → CA → UC → test) |
+| **4. Matriz de Trazabilidad Normativa SUNAT ↔ UBL** | [`specs/traceability/matriz-normativa.md`](specs/traceability/matriz-normativa.md) (49 filas: dato → norma → catálogo → cardinalidad en el XSD → tag UBL → DTO → error SUNAT → CA) · [`specs/traceability/trazabilidad.md`](specs/traceability/trazabilidad.md) (HU → RF → CA → UC → test) |
 | Casos de uso (§3) | [`specs/use-cases/casos-de-uso.md`](specs/use-cases/casos-de-uso.md) |
 | Legado y migración (§2) | [`specs/migration/mapeo-legado.md`](specs/migration/mapeo-legado.md) · [feature 003](specs/features/003-migrar-datos-legado/spec.md) |
 | Catálogo 8 (§2, "punto clave") | Matriz fila 33 · [`modelo-dominio.md`](specs/domain/modelo-dominio.md) (`ConfigIsc`) · CA-09, CA-10 · skill [`facturacion-sunat`](.claude/skills/facturacion-sunat/SKILL.md) §2 |
@@ -41,7 +41,6 @@ Examen de medio curso de Arquitectura de Software, Grupo A, UNAS (19/10/2026). F
 - Alcance: factura, boleta, notas, baja y resumen diario en venta interna (catálogo 51 = 0101), soles y dólares.
 - Se adopta ya la regla "una nota modifica un solo comprobante" (vigente en SEE-OSE desde el 1/1/2027).
 - El legado no tiene precios ni clientes; solo se migran movimientos de inventario.
-- No se pudo crear la cuenta DEMO de Nubefact desde este entorno: los casos de uso se basan en su API pública y en guías SUNAT (pendiente confirmar).
 
 ## Cómo trabajan agentes y skills
 

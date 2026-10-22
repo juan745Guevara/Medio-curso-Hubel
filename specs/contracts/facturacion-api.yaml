@@ -350,5 +350,5 @@ components:
       description: "Conflicto de estado (correlativo, nota sobre doc. no aceptado, reenvío de doc. ya aceptado). CA-02, CA-30."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     Unprocessable:
-      description: "Regla de negocio violada: RUC_INVALIDO, FACTURA_REQUIERE_RUC, BOLETA_REQUIERE_DOCUMENTO, CREDITO_SIN_CUOTAS, CUOTAS_NO_CUADRAN, XSD_INVALIDO, NOTA_MULTIPLE, CREDITO_EXCEDIDO, BAJA_FUERA_DE_PLAZO, PRODUCTO_SIN_CLASIFICAR."
+      description: "Regla de negocio violada: RUC_INVALIDO, FACTURA_REQUIERE_RUC, BOLETA_REQUIERE_DOCUMENTO, CREDITO_SIN_CUOTAS, CUOTAS_NO_CUADRAN, XSD_INVALIDO, TOTALES_INCONSISTENTES, SISTEMA_ISC_INVALIDO, FIRMA_INVALIDA, NOTA_MULTIPLE, DOC_NO_ACEPTADO, CREDITO_EXCEDIDO, BAJA_FUERA_DE_PLAZO, PRODUCTO_SIN_CLASIFICAR. Correspondencia con los errores SUNAT en matriz-normativa.md §G."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }

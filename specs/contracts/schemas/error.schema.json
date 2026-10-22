@@ -23,7 +23,7 @@
     },
     "code": {
       "type": "string",
-      "description": "Código interno estable, p. ej. RUC_INVALIDO, FACTURA_REQUIERE_RUC, XSD_INVALIDO"
+      "description": "Código interno estable, p. ej. RUC_INVALIDO, FACTURA_REQUIERE_RUC, XSD_INVALIDO. Tabla código interno → errores SUNAT en traceability/matriz-normativa.md §G"
     },
     "detail": {
       "type": "string"
