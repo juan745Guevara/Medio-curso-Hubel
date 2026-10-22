@@ -1,4 +1,4 @@
 # Review 00N
 
-| # | Ubicación | Hallazgo | Corrección aplicada |
-|---|---|---|---|
+| # | Location | Finding | Severity | Correction applied |
+|---|---|---|---|---|

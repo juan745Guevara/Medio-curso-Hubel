@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/legacy-record.schema.json",
+  "title": "LegacyRecordDTO",
+  "description": "Row of the previous software as exported (FR-28 to FR-35). Field names kept as in the legacy system. Loose types on purpose: business validation decides rejection.",
+  "type": "object",
+  "required": [
+    "row",
+    "fecha",
+    "ingreso",
+    "salida",
+    "producto",
+    "nro_documento"
+  ],
+  "properties": {
+    "row": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fecha": {
+      "type": "string",
+      "description": "date"
+    },
+    "ingreso": {
+      "type": "string",
+      "description": "inflow"
+    },
+    "salida": {
+      "type": "string",
+      "description": "outflow"
+    },
+    "producto": {
+      "type": "string",
+      "description": "product"
+    },
+    "nro_documento": {
+      "type": "string",
+      "description": "internal document number"
+    }
+  }
+}

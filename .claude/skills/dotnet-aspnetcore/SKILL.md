@@ -1,20 +1,20 @@
 ---
 name: dotnet-aspnetcore
-description: Buenas prácticas de C# / .NET 10 y ASP.NET Core MVC aplicadas al monolito de facturación con núcleo hexagonal (ADR 0001 y 0002).
+description: C# / .NET 10 and ASP.NET Core MVC best practices applied to the invoicing monolith with a hexagonal core (ADR 0001 and 0002).
 ---
 
-# .NET 10 + ASP.NET Core MVC en este proyecto
+# .NET 10 + ASP.NET Core MVC in this project
 
-1. **Controladores delgados.** Un controlador recibe el DTO (`Abc.Contracts`), llama a un caso de uso de `Application` y devuelve `ProblemDetails` en errores. Cero reglas tributarias, cero `DbContext` en controladores. Revisa que cada acción tenga una línea de negocio como mucho.
+1. **Thin controllers.** A controller receives the DTO (`Abc.Contracts`), calls an `Application` use case and returns `ProblemDetails` on errors. Zero tax rules, zero `DbContext` in controllers. Check that each action has at most one line of business logic.
 
-2. **`decimal` siempre para dinero.** Nunca `double` ni `float` (constitución 7). Redondeo con `Math.Round(x, 2, MidpointRounding.AwayFromZero)` encapsulado en el value object `Dinero`, no disperso.
+2. **Always `decimal` for money.** Never `double` or `float` (constitution 7). Round with `Math.Round(x, 2, MidpointRounding.AwayFromZero)` encapsulated in the `Money` value object, not scattered.
 
-3. **Regla de dependencias comprobada.** Proyecto `Architecture.Tests` con NetArchTest o ArchUnitNET: "Domain no depende de Microsoft.EntityFrameworkCore, Microsoft.AspNetCore ni Infrastructure". Falla el build si se rompe.
+3. **Enforced dependency rule.** `Architecture.Tests` project with NetArchTest or ArchUnitNET: "Domain does not depend on Microsoft.EntityFrameworkCore, Microsoft.AspNetCore or Infrastructure". The build fails if it breaks.
 
-4. **XML y firma con la librería estándar.** `System.Xml.Schema.XmlSchemaSet` para XSD y `System.Security.Cryptography.Xml.SignedXml` para XMLDSig, detrás de `ValidadorXsdPort` y `FirmadorPort`. Nunca reformatear el XML después de firmar (`PreserveWhitespace = true`).
+4. **XML and signature with the standard library.** `System.Xml.Schema.XmlSchemaSet` for XSD and `System.Security.Cryptography.Xml.SignedXml` for XMLDSig, behind `XsdValidatorPort` and `SignerPort`. Never reformat the XML after signing (`PreserveWhitespace = true`).
 
-5. **Trabajo en segundo plano y resiliencia.** Reenvíos, resumen diario y consulta de tickets como `BackgroundService` (o Hangfire si se necesita panel). El cliente SOAP de SUNAT con Polly: timeout 30 s (CA-19), reintentos con backoff y circuito abierto; al agotar reintentos → PENDIENTE_REENVIO.
+5. **Background work and resilience.** Resends, daily summary and ticket queries as `BackgroundService` (or Hangfire if a dashboard is needed). The SUNAT SOAP client with Polly: 30 s timeout (AC-19), retries with backoff and circuit breaker; when retries are exhausted → PENDING_RESEND.
 
-6. **Secretos fuera del código.** `dotnet user-secrets` en desarrollo; en producción, variables de entorno cifradas o un almacén de secretos. El .pfx se carga desde ahí (RNF-05).
+6. **Secrets outside the code.** `dotnet user-secrets` in development; in production, encrypted environment variables or a secret store. The .pfx is loaded from there (NFR-05).
 
-7. **Errores RFC 9457.** `AddProblemDetails()` y un mapeo único de excepciones de dominio → `code` estable (`RUC_INVALIDO`, `XSD_INVALIDO`…) igual al de `facturacion-api.yaml`.
+7. **RFC 9457 errors.** `AddProblemDetails()` and a single mapping of domain exceptions → stable `code` (`INVALID_RUC`, `INVALID_XSD`…) matching `invoicing-api.yaml`.

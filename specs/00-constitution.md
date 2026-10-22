@@ -1,29 +1,29 @@
-# Constitución del sistema
+# System constitution
 
-Invariantes que aplican a todo el sistema. Ninguna spec, ADR o tarea puede contradecirlos; cambiarlos exige un ADR nuevo.
+Invariants that apply to the whole system. No spec, ADR or task may contradict them; changing one requires a new ADR.
 
-## Proceso
-1. Ninguna funcionalidad se implementa sin `spec.md` aprobada y sin su fila en `traceability/trazabilidad.md`.
-2. Toda regla tributaria cita su fuente (norma, anexo o catálogo) en `research.md` o en `traceability/matriz-normativa.md`.
-3. Lo que no está en el enunciado ni en una fuente citada se marca `[NEEDS CLARIFICATION]`; nunca se asume.
+## Process
+1. No feature is implemented without an approved `spec.md` and its row in `traceability/traceability.md`.
+2. Every tax rule cites its source (regulation, annex or catalog) in `research.md` or in `traceability/regulatory-matrix.md`.
+3. Anything not in the problem statement or in a cited source is marked `[NEEDS CLARIFICATION]`; it is never assumed.
 
-## Dominio tributario
-4. Ningún comprobante electrónico se envía a SUNAT ni al OSE sin pasar antes, en este orden: validación de negocio, validación contra el XSD UBL 2.1 y firma digital.
-5. Un comprobante emitido (con número asignado) es inmutable. Solo se corrige con nota de crédito, nota de débito o comunicación de baja.
-6. Un correlativo asignado nunca se reutiliza, aunque el comprobante sea rechazado o dado de baja.
-7. Todo importe se calcula y almacena en el dominio con precisión decimal exacta; nunca en coma flotante.
-8. La factura solo se emite a un adquirente identificado con RUC válido.
-9. Los códigos de catálogo usados en el comprobante provienen de la versión vigente de los catálogos del Anexo 8 cargada en el sistema, con fecha de vigencia.
-10. El XML firmado, el CDR y la representación impresa se conservan sin alteración por al menos 5 años.
+## Tax domain
+4. No electronic document is sent to SUNAT or the OSE without first passing, in this order: business validation, validation against the UBL 2.1 XSD, and digital signature.
+5. An issued document (with a number assigned) is immutable. It is only corrected with a credit note, a debit note or a voiding notice.
+6. An assigned sequence number is never reused, even if the document is rejected or voided.
+7. Every amount is calculated and stored in the domain with exact decimal precision; never floating point.
+8. A Factura (invoice) is only issued to a Buyer identified with a valid RUC.
+9. Catalog codes used in a document come from the current version of the Annex 8 catalogs loaded into the system, with an effective date.
+10. The signed XML, the CDR and the printed representation are kept unaltered for at least 5 years.
 
-## Datos y legado
-11. Todo registro migrado conserva el identificador y el contenido de su fila de origen (trazabilidad hacia el legado).
-12. Un movimiento histórico del legado nunca se convierte en comprobante electrónico emitido.
+## Data and legacy
+11. Every migrated record keeps the identifier and the content of its source row (traceability to the legacy system).
+12. A historical legacy movement is never turned into an issued electronic document.
 
-## Arquitectura
-13. El dominio no depende de frameworks, base de datos, interfaz ni del proveedor SUNAT/OSE. Las dependencias apuntan hacia el dominio.
-14. Toda comunicación con sistemas externos pasa por un puerto declarado en `contracts/puertos.md`.
+## Architecture
+13. The domain does not depend on frameworks, database, user interface or the SUNAT/OSE provider. Dependencies point toward the domain.
+14. All communication with external systems goes through a port declared in `contracts/ports.md`.
 
-## Seguridad
-15. Ningún secreto (certificado, contraseña del certificado, clave SOL, token del OSE) se versiona en el repositorio.
-16. Las respuestas de error al usuario nunca exponen trazas internas; sí exponen el código y la descripción de SUNAT/OSE cuando existe.
+## Security
+15. No secret (certificate, certificate password, SOL key, OSE token) is versioned in the repository.
+16. Error responses to the user never expose internal traces; they do expose the SUNAT/OSE code and description when there is one.

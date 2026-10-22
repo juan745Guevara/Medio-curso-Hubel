@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/issue-document-request.schema.json",
+  "title": "IssueDocumentRequest",
+  "description": "Input to issue an invoice (01) or sales receipt (03). FR-01 to FR-15. Idempotency goes in the HTTP header Idempotency-Key (UUID), not in the body.",
+  "type": "object",
+  "required": [
+    "type",
+    "series",
+    "currency",
+    "operationType",
+    "buyer",
+    "paymentTerms",
+    "items"
+  ],
+  "properties": {
+    "type": {
+      "enum": [
+        "01",
+        "03"
+      ]
+    },
+    "series": {
+      "$ref": "common.schema.json#/$defs/Series"
+    },
+    "issueDate": {
+      "$ref": "common.schema.json#/$defs/Date",
+      "description": "Defaults to today"
+    },
+    "currency": {
+      "$ref": "common.schema.json#/$defs/Currency"
+    },
+    "operationType": {
+      "$ref": "common.schema.json#/$defs/OperationType"
+    },
+    "buyer": {
+      "$ref": "common.schema.json#/$defs/Buyer"
+    },
+    "paymentTerms": {
+      "$ref": "common.schema.json#/$defs/PaymentTerms"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "item.schema.json"
+      }
+    },
+    "sendEmail": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "01"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "series": {
+            "pattern": "^F"
+          },
+          "buyer": {
+            "properties": {
+              "document": {
+                "properties": {
+                  "type": {
+                    "const": "6"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "03"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "series": {
+            "pattern": "^B"
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

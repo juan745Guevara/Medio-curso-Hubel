@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/sales-register-row.schema.json",
+  "title": "SalesRegisterRow",
+  "description": "FR-37 to FR-39",
+  "type": "object",
+  "required": [
+    "issueDate",
+    "type",
+    "series",
+    "sequenceNumber",
+    "buyer",
+    "taxedBase",
+    "exempt",
+    "nonTaxable",
+    "igv",
+    "isc",
+    "icbper",
+    "totalAmount",
+    "status"
+  ],
+  "properties": {
+    "issueDate": {
+      "$ref": "common.schema.json#/$defs/Date"
+    },
+    "type": {
+      "$ref": "common.schema.json#/$defs/DocumentType"
+    },
+    "series": {
+      "$ref": "common.schema.json#/$defs/Series"
+    },
+    "sequenceNumber": {
+      "$ref": "common.schema.json#/$defs/SequenceNumber"
+    },
+    "buyer": {
+      "$ref": "common.schema.json#/$defs/IdentityDocument"
+    },
+    "taxedBase": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "exempt": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "nonTaxable": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "igv": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "isc": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "icbper": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "totalAmount": {
+      "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/SunatStatus"
+    },
+    "modifiedDocument": {
+      "$ref": "common.schema.json#/$defs/DocumentNumber"
+    }
+  }
+}

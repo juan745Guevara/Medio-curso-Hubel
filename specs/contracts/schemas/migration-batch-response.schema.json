@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/migration-batch-response.schema.json",
+  "title": "MigrationBatchResponse",
+  "type": "object",
+  "required": [
+    "id",
+    "file",
+    "fileHash",
+    "rowsRead",
+    "migrated",
+    "rejected",
+    "duplicates",
+    "reconciled"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "file": {
+      "type": "string"
+    },
+    "fileHash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "rowsRead": {
+      "type": "integer"
+    },
+    "migrated": {
+      "type": "integer"
+    },
+    "rejected": {
+      "type": "integer"
+    },
+    "duplicates": {
+      "type": "integer"
+    },
+    "reconciled": {
+      "type": "boolean",
+      "description": "rowsRead = migrated + rejected + duplicates and balances match (FR-34)"
+    },
+    "rejections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "row",
+          "reason"
+        ],
+        "properties": {
+          "row": {
+            "type": "integer"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

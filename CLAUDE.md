@@ -1,27 +1,27 @@
-# Instrucciones para agentes — proyecto Facturación ABC (Spec-First)
+# Instructions for agents — ABC Invoicing project (Spec-First)
 
-## Fase actual: especificación. No se escribe código.
-No crees `backend/`, `frontend/`, `src/` ni archivos de código. Solo se editan `specs/`, `.claude/` y los archivos raíz.
+## Current phase: specification. No code is written.
+Do not create `backend/`, `frontend/`, `src/` or code files. Only `specs/`, `.claude/` and the root files are edited.
 
-## Flujo obligatorio
-1. Enunciado → `specs/analisis-enunciado.md`
-2. `spec-writer` → `specs/features/00N-*/spec.md` (skill `redactar-spec`)
-3. `sunat-expert` → `research.md` y `specs/traceability/matriz-normativa.md` con fuentes
-4. `spec-reviewer` → `review.md`; las clarificaciones van al humano
-5. `architect` → ADR, `specs/architecture/`, `specs/domain/`
+## Mandatory flow
+1. Problem statement → `specs/problem-analysis.md`
+2. `spec-writer` → `specs/features/00N-*/spec.md` (skill `write-spec`)
+3. `sunat-expert` → `research.md` and `specs/traceability/regulatory-matrix.md` with sources
+4. `spec-reviewer` → `review.md`; clarifications go to the human
+5. `architect` → ADRs, `specs/architecture/`, `specs/domain/`
 6. `migration-analyst` → `specs/migration/`
-7. `contract-designer` → `specs/contracts/` (valida JSON y YAML)
-8. `qa` → un caso de prueba por CA y `specs/traceability/trazabilidad.md`
+7. `contract-designer` → `specs/contracts/` (validates JSON and YAML)
+8. `qa` → one test case per AC and `specs/traceability/traceability.md`
 
-## Decisiones vigentes
-- Arquitectura: monolito MVC con núcleo hexagonal — [ADR 0001](specs/adr/0001-arquitectura.md).
-- Stack: .NET 10 (ASP.NET Core MVC + MAUI) + PostgreSQL — [ADR 0002](specs/adr/0002-stack-tecnologico.md).
-- XSD antes de firmar — [ADR 0003](specs/adr/0003-validar-xsd-antes-de-firmar.md).
-- MSI + APK — [ADR 0004](specs/adr/0004-empaquetado-msi-apk.md).
+## Current decisions
+- Architecture: MVC monolith with a hexagonal core — [ADR 0001](specs/adr/0001-architecture.md).
+- Stack: .NET 10 (ASP.NET Core MVC + MAUI) + PostgreSQL — [ADR 0002](specs/adr/0002-technology-stack.md).
+- XSD before signing — [ADR 0003](specs/adr/0003-validate-xsd-before-signing.md).
+- MSI + APK — [ADR 0004](specs/adr/0004-msi-apk-packaging.md).
 
-## Reglas para todos
-- Lee `specs/00-constitution.md` y `specs/glossary.md` antes de cualquier tarea.
-- Si algo no está en la spec, no lo inventes: pregunta o marca `[NEEDS CLARIFICATION]`.
-- Todo dato tributario lleva fuente (URL) o la marca "por verificar".
-- Numeración global continua: RF, RNF, CA y HU no se reinician por feature.
-- Al cambiar un RF, actualiza en el mismo cambio: CA, `trazabilidad.md`, matriz normativa (si aplica), schema y OpenAPI.
+## Rules for everyone
+- Read `specs/00-constitution.md` and `specs/glossary.md` before any task.
+- If something is not in the spec, do not invent it: ask or mark `[NEEDS CLARIFICATION]`.
+- Every tax datum carries a source (URL) or the mark "to be verified".
+- Continuous global numbering: FR, NFR, AC and US do not restart per feature.
+- When changing an FR, update in the same change: AC, `traceability.md`, regulatory matrix (if applicable), schema and OpenAPI.

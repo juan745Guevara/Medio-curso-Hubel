@@ -1,18 +1,18 @@
 ---
 id: NNNN
-title: <decisión>
-status: propuesta | aceptada | reemplazada por NNNN
-origen: usuario | enunciado | criterio
+title: <decision>
+status: proposed | accepted | superseded by NNNN
+origin: user | problem statement | criteria
 ---
-# Contexto
-(señales del enunciado y RF/RNF que motivan la decisión)
+# Context
+(signals from the problem statement and FR/NFR motivating the decision)
 
-# Decisión
+# Decision
 
-# Alternativas evaluadas
-| Opción | Ajuste al dominio | RNF | Integraciones | Simplicidad | Resultado |
+# Alternatives evaluated
+| Option | Domain fit | NFR | Integrations | Simplicity | Result |
 |---|---|---|---|---|---|
 
-# Consecuencias
+# Consequences
 + …
 – …

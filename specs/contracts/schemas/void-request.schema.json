@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/void-request.schema.json",
+  "title": "SubmitVoidingRequest",
+  "description": "FR-23, FR-24",
+  "type": "object",
+  "required": [
+    "documents"
+  ],
+  "properties": {
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "number",
+          "reason"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "common.schema.json#/$defs/DocumentType"
+          },
+          "number": {
+            "$ref": "common.schema.json#/$defs/DocumentNumber"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

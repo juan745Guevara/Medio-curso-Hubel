@@ -1,0 +1,10 @@
+# Research 002 — Notes, voids and daily summary
+
+| Topic | What it requires | Source | FR |
+|---|---|---|---|
+| Catalog 09 (CN) | 01 voiding of the operation, 02 voiding due to RUC error, 03 correction of description, 04 global discount, 05 item discount, 06 full return, 07 item return, 08 bonus, 09 value decrease, 10 other, 13 adjustment of amounts/payment dates. | [Trámites Perú](https://tramitesperu.com/sunat/notas-credito-debito-electronicas/), [SUNAT report 057-2025](https://www.sunat.gob.pe/legislacion/oficios/2025/informe-oficios/i000057-2025-7T0000.pdf) | FR-18 |
+| Catalog 10 (DN) | 01 late-payment interest, 02 value increase, 03 penalties/other. | [Annex E RS 245-2017](https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf) | FR-18 |
+| One note, one document | In SEE-OSE a note may modify only one document; SEE-Del contribuyente already applied this. Effective 1/1/2027. | [Sovos](https://sovos.com/es/cambios-regulatorios/iva/peru-boleta-venta-electronica-rs-000048-2026-sunat/) | FR-21 |
+| Voiding deadline | 7 calendar days from the day after generation (unified from 2027). | [Sovos](https://sovos.com/es/cambios-regulatorios/iva/peru-boleta-venta-electronica-rs-000048-2026-sunat/), [SUNAT CPE](https://cpe.sunat.gob.pe/noticias/comprobantes-desde-los-sistemas-del-contribuyente) | FR-24 |
+| Daily summary | Up to the 7th calendar day after; blocks of 500 lines; `sendSummary` → ticket → `getStatus`. | [SUNAT guidance](https://orientacion.sunat.gob.pe/04-resumen-diario-boleta-de-venta-electronica), [Annex 244-2019](https://ww3.sunat.gob.pe/legislacion/superin/2019/anexo-244-2019.pdf) | FR-25 |
+| Summary and voiding format | `SummaryDocuments` and `VoidedDocuments` are not OASIS documents: they are SUNAT's own schemas (namespace `urn:sunat:names:specification:ubl:peru:schema:xsd:SummaryDocuments-1` / `VoidedDocuments-1`, prefix `sac` for their aggregates) built with UBL 2.0 components. | [SUNAT Daily summary XML guide](https://cpe.sunat.gob.pe/sites/default/files/inline-files/GUIA_Resumen_de_Boletas_11-01-2018%20%282%29_2_0%20%281%29_0.pdf) | FR-23, FR-25 |

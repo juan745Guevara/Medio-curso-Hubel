@@ -1,19 +1,19 @@
 ---
 name: dotnet-maui
-description: Buenas prácticas de .NET MAUI (Blazor Hybrid) para el cliente nativo Windows + Android, incluido el empaquetado MSI con WiX y el APK firmado (ADR 0002 y 0004).
+description: .NET MAUI (Blazor Hybrid) best practices for the native Windows + Android client, including MSI packaging with WiX and the signed APK (ADR 0002 and 0004).
 ---
 
-# .NET MAUI en este proyecto
+# .NET MAUI in this project
 
-1. **Un código, dos plataformas, cero reglas.** El cliente solo muestra y captura: usa los DTO de `Abc.Contracts` y llama a la API. Puede pre-validar formato (RUC por módulo 11) para UX, pero la validación que cuenta es la del servidor.
+1. **One codebase, two platforms, zero rules.** The client only displays and captures: it uses the `Abc.Contracts` DTOs and calls the API. It may pre-validate format (RUC modulo 11) for UX, but the validation that counts is the server's.
 
-2. **MSI en Windows (ADR 0004).** MAUI produce MSIX por defecto. Para MSI:
-   - Publicar sin empaquetar: `<WindowsPackageType>None</WindowsPackageType>` y `dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:WindowsAppSDKSelfContained=true`.
-   - Proyecto `Abc.Instalador.Wix` (WiX Toolset v5/v6) que tome la carpeta publicada: `ProductCode` por versión, `UpgradeCode` fijo, acceso directo en el menú Inicio y desinstalación limpia.
-   - Firmar MSI y ejecutable con el certificado de firma de código de ABC.
+2. **MSI on Windows (ADR 0004).** MAUI produces MSIX by default. For MSI:
+   - Publish unpackaged: `<WindowsPackageType>None</WindowsPackageType>` and `dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:WindowsAppSDKSelfContained=true`.
+   - `Abc.Installer.Wix` project (WiX Toolset v5/v6) taking the published folder: `ProductCode` per version, fixed `UpgradeCode`, Start menu shortcut and clean uninstall.
+   - Sign the MSI and executable with ABC's code-signing certificate.
 
-3. **APK en Android.** `dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk` con `AndroidKeyStore=true` y keystore fuera del repositorio (variables del pipeline).
+3. **APK on Android.** `dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk` with `AndroidKeyStore=true` and the keystore outside the repository (pipeline variables).
 
-4. **Sin conexión, sin pérdidas.** SQLite local para cola de solicitudes con `Idempotency-Key` (evita doble emisión al reintentar) y caché de catálogos SUNAT y productos. La cola nunca asigna correlativos: eso solo lo hace el servidor (constitución 6).
+4. **Offline without losses.** Local SQLite for a request queue with `Idempotency-Key` (prevents double issuance on retry) and a cache of SUNAT catalogs and products. The queue never assigns sequence numbers: only the server does (constitution 6).
 
-5. **Impresión y compartir.** Descargar el PDF (A4 o ticket 80 mm) desde la API y usar `Share`/`Launcher` de MAUI; impresión térmica vía driver de Windows o app del fabricante en Android (por clarificar el modelo de impresora).
+5. **Printing and sharing.** Download the PDF (A4 or 80 mm ticket) from the API and use MAUI `Share`/`Launcher`; thermal printing via the Windows driver or the manufacturer's app on Android (printer model to be clarified).

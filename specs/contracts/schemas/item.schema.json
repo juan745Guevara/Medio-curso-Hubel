@@ -2,36 +2,36 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/item.schema.json",
   "title": "ItemDTO",
-  "description": "Línea del documento. Los tributos los calcula el sistema (RF-05); el cliente no los envía.",
+  "description": "Document line. Taxes are calculated by the system (FR-05); the client does not send them.",
   "type": "object",
   "required": [
-    "codigoProducto",
-    "cantidad",
-    "unidad",
-    "valorUnitario"
+    "productCode",
+    "quantity",
+    "unit",
+    "unitValue"
   ],
   "properties": {
-    "codigoProducto": {
+    "productCode": {
       "type": "string",
       "maxLength": 30
     },
-    "descripcion": {
+    "description": {
       "type": "string",
       "maxLength": 500,
-      "description": "Si se omite, se toma del Producto"
+      "description": "Taken from the Product if omitted"
     },
-    "cantidad": {
-      "$ref": "comunes.schema.json#/$defs/Cantidad"
+    "quantity": {
+      "$ref": "common.schema.json#/$defs/Quantity"
     },
-    "unidad": {
-      "$ref": "comunes.schema.json#/$defs/UnidadMedida"
+    "unit": {
+      "$ref": "common.schema.json#/$defs/UnitOfMeasure"
     },
-    "valorUnitario": {
-      "$ref": "comunes.schema.json#/$defs/ImporteUnitario",
-      "description": "Sin tributos"
+    "unitValue": {
+      "$ref": "common.schema.json#/$defs/UnitAmount",
+      "description": "Excluding taxes"
     },
-    "descuento": {
-      "$ref": "comunes.schema.json#/$defs/Importe"
+    "discount": {
+      "$ref": "common.schema.json#/$defs/Amount"
     }
   },
   "additionalProperties": false

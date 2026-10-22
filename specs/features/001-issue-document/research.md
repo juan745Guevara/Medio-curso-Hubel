@@ -1,0 +1,29 @@
+# Research 001 — Regulations and standard for issuing
+
+Verified on 22/10/2026. "To be verified" = the primary source was not opened.
+
+| Topic | What it requires | Source | FR |
+|---|---|---|---|
+| Issuance system | RS 097-2012 creates the SEE-Del contribuyente (taxpayer's own system); RS 117-2017 creates the SEE-OSE. The Issuer generates, signs and sends. | [RS 114-2019 (consolidates)](https://ww3.sunat.gob.pe/legislacion/superin/2019/114-2019.pdf) | FR-07, FR-10 |
+| UBL 2.1 mandatory | Since 1/3/2019 only UBL 2.1 for invoices, sales receipts and notes. | [SNI](https://sni.org.pe/modifican-la-fecha-usar-obligatoriamente-la-version-2-1-del-formato-xml-estandar-ubl-sistema-emision-electronica-operador-servicios-electronicos-sistema-emision-ele/) | FR-07 |
+| OASIS schema | `UBL-Invoice-2.1.xsd`, namespace `urn:oasis:names:specification:ubl:schema:xsd:Invoice-2`, imports cac, cbc, ext. | [OASIS UBL 2.1](https://docs.oasis-open.org/ubl/UBL-2.1.html) | FR-08 |
+| UBL cardinality | The OASIS XSD only makes ID, IssueDate, AccountingSupplierParty, AccountingCustomerParty, LegalMonetaryTotal and InvoiceLine mandatory; SUNAT requires 22 more data items. | [UBL-Invoice-2.1.xsd](https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd) | FR-07, FR-08 |
+| SUNAT mapping | Annex 9-A: UBLVersionID "2.1", CustomizationID "2.0", InvoiceTypeCode with catalog 01, currency catalog 02. | [Annex VII RS 114-2019](https://ww3.sunat.gob.pe/legislacion/superin/2019/anexoVII-114-2019.pdf) | FR-07 |
+| Catalogs | Annex 8: 01 document type, 02 currency, 03 unit, 05 taxes, 06 identity document, 07 IGV treatment, 08 ISC system, 09/10 notes, 16 price type, 51 operation type, 52 legends. | [Annex E RS 245-2017](https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf), [Annex D RS 357-2015](https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf) | FR-05, FR-07 |
+| Catalog 08 | Field `cbc:TierRange`: 01 ad valorem (Appendix IV lit. A), 02 fixed amount (lit. B), 03 retail sale price (lit. C). | [Annex D RS 357-2015](https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf) | FR-05 |
+| ISC calculation | Three systems; in "ad valorem" the base is the sale value and the Appendix IV rate applies. | [SUNAT guidance](https://orientacion.sunat.gob.pe/node/1809) | FR-05 |
+| IGV rate | 18 % total. Since 2026: 15.5 % IGV + 2.5 % IPM (Law 32387); the Document shows 18. | [SUNAT guidance](https://orientacion.sunat.gob.pe/node/1737) | FR-05 |
+| ICBPER | S/ 0.50 per bag since 2023; not part of the IGV base; show the acronym ICBPER and its amount. | [LP Derecho](https://lpderecho.pe/impuesto-consumo-bolsas-plastico/), [RS 150-2019](https://ww3.sunat.gob.pe/legislacion/superin/2019/150-2019.pdf) | FR-05 |
+| ICBPER tax code | 7152 in catalog 05 (international code OTH). Bags in `cac:TaxSubtotal/cbc:BaseUnitMeasure`; rate in `cac:TaxSubtotal/cac:TaxCategory/cbc:PerUnitAmount`. | [Annexes RS 150-2019](https://www.sunat.gob.pe/legislacion/superin/2019/anexos-150-2019.pdf) | FR-05 |
+| RUC validation | 11 digits; weights 5,4,3,2,7,6,5,4,3,2; DV = 11 − (sum mod 11), 10→0, 11→1. | [Oracle docs](https://docs.oracle.com/en/cloud/saas/financials/25d/faitx/peru.html), [laravel-peru-rules](https://packagist.org/packages/aeunius/laravel-peru-rules) | FR-02 |
+| Sales receipt > S/ 700 | The Buyer's document type and number are mandatory. | [SUNAT guidance](https://orientacion.sunat.gob.pe/03-boleta-de-venta), [Annex II RS 114-2019](https://www.sunat.gob.pe/legislacion/superin/2019/anexoII-114-2019.pdf) | FR-04 |
+| Payment terms | Cash/Credit mandatory; if Credit, outstanding amount, installments and dates. | [RS 193-2020](https://www.sunat.gob.pe/legislacion/superin/2020/193-2020.pdf), [Annex IV](https://www.sunat.gob.pe/legislacion/superin/2020/anexo4-193-2020.pdf) | FR-12 |
+| Invoice submission deadline | Up to 3 calendar days counted from the day after issuance. | [RS 000003-2023](https://www.sunat.gob.pe/legislacion/superin/2023/000003-2023.pdf) | FR-11, NFR-03 |
+| Web service | `sendBill` (synchronous, CDR), `sendSummary`/`getStatus` (ticket); WS-Security UsernameToken with SOL user and key. | [Annex 244-2019](https://ww3.sunat.gob.pe/legislacion/superin/2019/anexo-244-2019.pdf) | FR-10 |
+| UUID tickets | SUNAT's newer REST APIs return an asynchronous `numTicket` in UUID format; error code 2803 "ID - No cumple con el formato UUID" exists. The legal number of a Document is still Series-Sequence, not a UUID. | [SUNAT REST services manual](https://orientacion.sunat.gob.pe/sites/default/files/inline-files/Manual%20de%20servicios%20Rest.pdf) | FR-10 |
+| File name | `RUC-TT-SERIES-NUMBER` (01 invoice, 03 sales receipt, 07 CN, 08 DN). | [Annex A RS 113-2018](https://ww3.sunat.gob.pe/legislacion/superin/2018/anexoA-113-2018.pdf) | FR-10 |
+| Signature | XMLDSig enveloped in ExtensionContent; reference libraries use C14N + RSA-SHA1. | [greenter/xmldsig](https://packagist.org/packages/greenter/xmldsig) | FR-09 |
+| Error codes | SUNAT return code catalog (≈1,700 codes); mapped in the regulatory matrix §G. | [Greenter CodeErrors.xml](https://github.com/thegreenter/xcodes/blob/master/src/data/CodeErrors.xml) (check against the current validation Excel) | FR-10 |
+| Contingency | Report paper contingency documents up to the 7th calendar day after issuance. | [SUNAT CPE](https://cpe.sunat.gob.pe/informacion_general/procedimiento_contingencia) | FR-16 |
+| Retention | Keep CPE, CDR and summaries for at least 5 years. | [EDICOM](https://edicomgroup.com/es/blog/como-es-la-factura-electronica-peru) | NFR-06 |
+| 2027 changes | RS 000048-2026 (new validations and catalogs) takes effect on 1/1/2027 per RS 000143-2026. | [Sovos](https://sovos.com/es/cambios-regulatorios/iva/peru-boleta-venta-electronica-rs-000048-2026-sunat/) | All |

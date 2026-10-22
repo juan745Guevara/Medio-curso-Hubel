@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/batch-submission-response.schema.json",
+  "title": "BatchSubmissionResponse",
+  "description": "Daily summary or voiding notice (FR-23 to FR-26)",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "identifier",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "enum": [
+        "DAILY_SUMMARY",
+        "VOIDING_NOTICE"
+      ]
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^R[CA]-[0-9]{8}-[0-9]{1,5}$"
+    },
+    "ticket": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "IN_PROGRESS",
+        "ACCEPTED",
+        "REJECTED"
+      ]
+    },
+    "lines": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500
+    },
+    "cdr": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

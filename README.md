@@ -1,72 +1,72 @@
-# Facturación electrónica ABC Software Corp — Kit Spec-First
+# ABC Software Corp electronic invoicing — Spec-First kit
 
-Examen de medio curso de Arquitectura de Software, Grupo A, UNAS (19/10/2026). Fase 1 **Spec-First**: reglas, contratos de datos, validaciones e interfaces **antes de escribir código**. Por eso el repositorio solo contiene `specs/`, `.claude/agents/` y `.claude/skills/`; no hay carpetas de código.
+Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-First**: rules, data contracts, validations and interfaces **before writing code**. That is why the repository only contains `specs/`, `.claude/agents/` and `.claude/skills/`; there are no code folders.
 
-## Entregable del enunciado → dónde está
+## Problem statement deliverable → where it is
 
-| Ítem pedido (§4) | Archivo(s) |
+| Requested item (§4) | File(s) |
 |---|---|
-| **1. Modelo de Dominio y Contratos (DTOs / Schemas)** | [`specs/domain/modelo-dominio.md`](specs/domain/modelo-dominio.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (11 JSON Schema 2020-12) |
-| **2. Diagramas de Arquitectura MVC con visión a Hexagonal** | [`specs/architecture/arquitectura.md`](specs/architecture/arquitectura.md) (C4 1 y 2, vista MVC, vista hexagonal, equivalencia con Clean Architecture, ruta de migración a microservicios, secuencia) · [ADR 0001](specs/adr/0001-arquitectura.md) |
-| **3. Especificación de Endpoints / Servicios (Contratos API)** | [`specs/contracts/facturacion-api.yaml`](specs/contracts/facturacion-api.yaml) (OpenAPI 3.1) · [`specs/contracts/puertos.md`](specs/contracts/puertos.md) (puertos y contrato SUNAT) |
-| **4. Matriz de Trazabilidad Normativa SUNAT ↔ UBL** | [`specs/traceability/matriz-normativa.md`](specs/traceability/matriz-normativa.md) (49 filas: dato → norma → catálogo → cardinalidad en el XSD → tag UBL → DTO → error SUNAT → CA) · [`specs/traceability/trazabilidad.md`](specs/traceability/trazabilidad.md) (HU → RF → CA → UC → test) |
-| Casos de uso (§3) | [`specs/use-cases/casos-de-uso.md`](specs/use-cases/casos-de-uso.md) |
-| Legado y migración (§2) | [`specs/migration/mapeo-legado.md`](specs/migration/mapeo-legado.md) · [feature 003](specs/features/003-migrar-datos-legado/spec.md) |
-| Catálogo 8 (§2, "punto clave") | Matriz fila 33 · [`modelo-dominio.md`](specs/domain/modelo-dominio.md) (`ConfigIsc`) · CA-09, CA-10 · skill [`facturacion-sunat`](.claude/skills/facturacion-sunat/SKILL.md) §2 |
-| Distribución MSI / APK (§2) | [ADR 0004](specs/adr/0004-empaquetado-msi-apk.md) · RNF-04 |
+| **1. Domain Model and Contracts (DTOs / Schemas)** | [`specs/domain/domain-model.md`](specs/domain/domain-model.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (11 JSON Schema 2020-12) |
+| **2. MVC Architecture Diagrams with a Hexagonal vision** | [`specs/architecture/architecture.md`](specs/architecture/architecture.md) (C4 levels 1 and 2, MVC view, hexagonal view, Clean Architecture equivalence, migration path to microservices, sequence) · [ADR 0001](specs/adr/0001-architecture.md) |
+| **3. Endpoint / Service Specification (API Contracts)** | [`specs/contracts/invoicing-api.yaml`](specs/contracts/invoicing-api.yaml) (OpenAPI 3.1) · [`specs/contracts/ports.md`](specs/contracts/ports.md) (ports and SUNAT contract) |
+| **4. SUNAT ↔ UBL Regulatory Traceability Matrix** | [`specs/traceability/regulatory-matrix.md`](specs/traceability/regulatory-matrix.md) (49 rows: data → regulation → catalog → XSD cardinality → UBL tag → DTO → SUNAT error → AC) · [`specs/traceability/traceability.md`](specs/traceability/traceability.md) (US → FR → AC → UC → test) |
+| Use cases (§3) | [`specs/use-cases/use-cases.md`](specs/use-cases/use-cases.md) |
+| Legacy and migration (§2) | [`specs/migration/legacy-mapping.md`](specs/migration/legacy-mapping.md) · [feature 003](specs/features/003-migrate-legacy-data/spec.md) |
+| Catalog 8 (§2, "key point") | Matrix row 33 · [`domain-model.md`](specs/domain/domain-model.md) (`IscConfig`) · AC-09, AC-10 · skill [`sunat-einvoicing`](.claude/skills/sunat-einvoicing/SKILL.md) §2 |
+| MSI / APK distribution (§2) | [ADR 0004](specs/adr/0004-msi-apk-packaging.md) · NFR-04 |
 
-## Orden de lectura
-1. [`analisis-enunciado.md`](specs/analisis-enunciado.md) — qué dice el examen, sin agregar nada.
-2. [`00-constitution.md`](specs/00-constitution.md) y [`glossary.md`](specs/glossary.md).
-3. Specs: [001 emitir](specs/features/001-emitir-comprobante/spec.md) · [002 notas y bajas](specs/features/002-gestionar-notas-y-bajas/spec.md) · [003 migrar legado](specs/features/003-migrar-datos-legado/spec.md) · [004 registro de ventas](specs/features/004-generar-registro-ventas/spec.md), cada una con su `research.md`.
-4. Entregables 1 a 4 (tabla de arriba).
-5. ADR 0001 a 0004 y `review.md` de cada feature.
+## Reading order
+1. [`problem-analysis.md`](specs/problem-analysis.md) — what the exam says, adding nothing.
+2. [`00-constitution.md`](specs/00-constitution.md) and [`glossary.md`](specs/glossary.md).
+3. Specs: [001 issue](specs/features/001-issue-document/spec.md) · [002 notes and voids](specs/features/002-manage-notes-and-voids/spec.md) · [003 migrate legacy](specs/features/003-migrate-legacy-data/spec.md) · [004 sales register](specs/features/004-generate-sales-register/spec.md), each with its `research.md`.
+4. Deliverables 1 to 4 (table above).
+5. ADR 0001 to 0004 and each feature's `review.md`.
 
-## Números
+## Numbers
 
-| Feature | HU | RF | RNF | CA | Clarificaciones |
+| Feature | US | FR | NFR | AC | Clarifications |
 |---|---|---|---|---|---|
-| 001 Emitir comprobante | 6 | 17 | 7 | 27 | 8 |
-| 002 Notas, bajas, resumen | 5 | 10 | 2 | 11 | 4 |
-| 003 Migrar legado | 3 | 9 | 2 | 9 | 5 |
-| 004 Registro de ventas y kardex | 2 | 5 | 1 | 5 | 3 |
+| 001 Issue document | 6 | 17 | 7 | 27 | 8 |
+| 002 Notes, voids, summary | 5 | 10 | 2 | 11 | 4 |
+| 003 Migrate legacy | 3 | 9 | 2 | 9 | 5 |
+| 004 Sales register and stock card | 2 | 5 | 1 | 5 | 3 |
 | **Total** | **16** | **41** | **12** | **52** | **20** |
 
-## Arquitectura y stack
-- **Arquitectura** (origen: enunciado): monolito MVC cuyo Modelo es un núcleo hexagonal (Domain ← Application ← Infrastructure), con contextos acotados listos para separarse en microservicios. [ADR 0001](specs/adr/0001-arquitectura.md).
-- **Stack** (origen: criterio, propuesta): C# .NET 10 — ASP.NET Core MVC en el servidor, .NET MAUI para Windows (MSI con WiX) y Android (APK), PostgreSQL. Elegido por XSD y XMLDSig nativos y un solo lenguaje cliente–servidor. [ADR 0002](specs/adr/0002-stack-tecnologico.md).
+## Architecture and stack
+- **Architecture** (origin: problem statement): MVC monolith whose Model is a hexagonal core (Domain ← Application ← Infrastructure), with bounded contexts ready to be split into microservices. [ADR 0001](specs/adr/0001-architecture.md).
+- **Stack** (origin: judgment, proposal): C# .NET 10 — ASP.NET Core MVC on the server, .NET MAUI for Windows (MSI with WiX) and Android (APK), PostgreSQL. Chosen for native XSD and XMLDSig and a single client–server language. [ADR 0002](specs/adr/0002-technology-stack.md).
 
-## Supuestos tomados
-- Se envía directo a SUNAT (SEE-Del contribuyente), con un adaptador OSE intercambiable, hasta que se aclare el proveedor.
-- Alcance: factura, boleta, notas, baja y resumen diario en venta interna (catálogo 51 = 0101), soles y dólares.
-- Se adopta ya la regla "una nota modifica un solo comprobante" (vigente en SEE-OSE desde el 1/1/2027).
-- El legado no tiene precios ni clientes; solo se migran movimientos de inventario.
+## Assumptions made
+- Documents are sent directly to SUNAT (SEE-Del contribuyente), with a swappable OSE adapter, until the provider is clarified.
+- Scope: invoice, sales receipt, notes, voiding and daily summary for domestic sales (catalog 51 = 0101), soles and dollars.
+- The rule "a note modifies a single document" is adopted now (in force in SEE-OSE from 1/1/2027).
+- The legacy system has no prices or customers; only inventory movements are migrated.
 
-## Cómo trabajan agentes y skills
+## How agents and skills work
 
 ```mermaid
 flowchart LR
-  E[Enunciado] --> SW[spec-writer<br/>skill redactar-spec]
-  SW --> SX[sunat-expert<br/>skill facturacion-sunat]
+  E[Problem statement] --> SW[spec-writer<br/>skill write-spec]
+  SW --> SX[sunat-expert<br/>skill sunat-einvoicing]
   SX --> SR[spec-reviewer]
-  SR -->|clarificaciones| H((Profesor / gerencia))
+  SR -->|clarifications| H((Professor / management))
   H --> SW
   SR --> AR[architect<br/>skills dotnet-*, postgresql]
   SR --> MA[migration-analyst]
   AR --> CD[contract-designer<br/>skill ubl-21]
   MA --> CD
   CD --> QA[qa]
-  QA --> T[trazabilidad.md]
+  QA --> T[traceability.md]
 ```
 
-| Agente | Produce | Skills |
+| Agent | Produces | Skills |
 |---|---|---|
-| `spec-writer` | `spec.md` | `redactar-spec` |
-| `sunat-expert` | `research.md`, `matriz-normativa.md` | `facturacion-sunat`, `ubl-21` |
+| `spec-writer` | `spec.md` | `write-spec` |
+| `sunat-expert` | `research.md`, `regulatory-matrix.md` | `sunat-einvoicing`, `ubl-21` |
 | `spec-reviewer` | `review.md` | — |
-| `migration-analyst` | `mapeo-legado.md` | — |
-| `architect` | ADR, `arquitectura.md`, `modelo-dominio.md` | `dotnet-aspnetcore`, `dotnet-maui`, `postgresql` |
-| `contract-designer` | `schemas/`, `facturacion-api.yaml`, `puertos.md` | `ubl-21` |
-| `qa` | casos de prueba por CA, columna Test | `facturacion-sunat` |
+| `migration-analyst` | `legacy-mapping.md` | — |
+| `architect` | ADRs, `architecture.md`, `domain-model.md` | `dotnet-aspnetcore`, `dotnet-maui`, `postgresql` |
+| `contract-designer` | `schemas/`, `invoicing-api.yaml`, `ports.md` | `ubl-21` |
+| `qa` | test cases per AC, Test column | `sunat-einvoicing` |
 
-Las **specs** dicen qué reglas de negocio cumplir; las **skills** dicen cómo ejecutarlas técnicamente; los **agentes** tienen un rol y un archivo del que son dueños.
+**Specs** say which business rules to meet; **skills** say how to carry them out technically; **agents** have a role and a file they own.

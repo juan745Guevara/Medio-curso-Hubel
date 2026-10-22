@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://abc-software.pe/schemas/<nombre>.schema.json",
-  "title": "<NombreDTO>",
-  "description": "RF-NN. Campos obligatorios iguales a los del RF.",
+  "$id": "https://abc-software.pe/schemas/<name>.schema.json",
+  "title": "<NameDTO>",
+  "description": "FR-NN. Required fields equal to those of the FR.",
   "type": "object",
   "required": [],
   "properties": {},

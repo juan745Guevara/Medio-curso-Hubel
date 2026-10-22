@@ -1,30 +1,30 @@
 ---
 name: ubl-21
-description: Cómo obtener, leer y validar UBL 2.1 (UBL-Invoice-2.1.xsd y relacionados de OASIS), armar el XML con la personalización SUNAT, firmarlo con XMLDSig y verificarlo. Úsala para la matriz normativa, el generador UBL y las pruebas de XSD y firma.
+description: How to obtain, read and validate UBL 2.1 (OASIS UBL-Invoice-2.1.xsd and related), build the XML with SUNAT's Peruvian customization, sign it with XMLDSig and verify it. Use it for the regulatory matrix, the UBL generator and XSD/signature tests.
 ---
 
-# UBL 2.1 para SUNAT
+# UBL 2.1 for SUNAT
 
-## 1. Obtener los XSD oficiales
-- Especificación: https://docs.oasis-open.org/ubl/UBL-2.1.html
-- Paquete: `os-UBL-2.1.zip` desde https://docs.oasis-open.org/ubl/os-UBL-2.1/
-- Archivos necesarios:
+## 1. Get the official XSDs
+- Specification: https://docs.oasis-open.org/ubl/UBL-2.1.html
+- Package: `UBL-2.1.zip` from https://docs.oasis-open.org/ubl/os-UBL-2.1/
+- Files needed:
   - `xsd/maindoc/UBL-Invoice-2.1.xsd`, `UBL-CreditNote-2.1.xsd`, `UBL-DebitNote-2.1.xsd`
   - `xsd/common/*` (CommonAggregateComponents, CommonBasicComponents, CommonExtensionComponents, xmldsig, UnqualifiedDataTypes…)
-- Mantén la estructura de carpetas: `maindoc` importa `../common/`.
-- Versiona los XSD dentro del proyecto (ADR 0003) con un archivo `VERSION` y su hash.
+- Keep the folder structure: `maindoc` imports `../common/`.
+- Version the XSDs inside the project (ADR 0003) with a `VERSION` file and its hash.
 
-## 1b. Personalización peruana, no europea
-- El XSD de OASIS es genérico; lo peruano lo pone el Anexo 9-A de SUNAT. Usa `cbc:CustomizationID` = `2.0`, nunca el de EN 16931/Peppol.
-- Todo código de catálogo SUNAT lleva `listAgencyName`/`schemeAgencyName="PE:SUNAT"` y `listURI`/`schemeURI` `urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogoNN` (tabla en `specs/traceability/matriz-normativa.md` §0).
-- Resumen diario y baja usan esquemas propios de SUNAT (`urn:sunat:names:specification:ubl:peru:schema:xsd:…-1`), no los de OASIS.
+## 1b. Peruvian customization, not European
+- The OASIS XSD is generic; SUNAT's Annex 9-A adds the Peruvian layer. Use `cbc:CustomizationID` = `2.0`, never the EN 16931/Peppol one.
+- Every SUNAT catalog code carries `listAgencyName`/`schemeAgencyName="PE:SUNAT"` and `listURI`/`schemeURI` `urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogoNN` (table in `specs/traceability/regulatory-matrix.md` §0).
+- Daily summary and voiding use SUNAT's own schemas (`urn:sunat:names:specification:ubl:peru:schema:xsd:…-1`), not OASIS ones.
 
-## 2. Leer el XSD sin perderse
-- Raíz: `xsd:element name="Invoice"` → `InvoiceType`, una secuencia ordenada. **El orden de los elementos importa**: un `cbc:IssueDate` después de `cbc:InvoiceTypeCode` invalida el XML.
-- `minOccurs="0"` en OASIS no significa opcional para SUNAT: la obligatoriedad real sale del Anexo 9-A (columna "Oblig." de la matriz).
-- Orden mínimo para factura SUNAT: `UBLExtensions` → `UBLVersionID` → `CustomizationID` → `ID` → `IssueDate` → `IssueTime` → `DueDate` → `InvoiceTypeCode` → `Note` → `DocumentCurrencyCode` → … → `Signature` → `AccountingSupplierParty` → `AccountingCustomerParty` → … → `PaymentTerms` → `AllowanceCharge` → `TaxTotal` → `LegalMonetaryTotal` → `InvoiceLine`.
+## 2. Reading the XSD without getting lost
+- Root: `xsd:element name="Invoice"` → `InvoiceType`, an ordered sequence. **Element order matters**: a `cbc:IssueDate` after `cbc:InvoiceTypeCode` invalidates the XML.
+- `minOccurs="0"` in OASIS does not mean optional for SUNAT: the real mandatory flag comes from Annex 9-A (column "SUNAT" of the matrix).
+- Minimum order for a SUNAT invoice: `UBLExtensions` → `UBLVersionID` → `CustomizationID` → `ID` → `IssueDate` → `IssueTime` → `DueDate` → `InvoiceTypeCode` → `Note` → `DocumentCurrencyCode` → … → `Signature` → `AccountingSupplierParty` → `AccountingCustomerParty` → … → `PaymentTerms` → `AllowanceCharge` → `TaxTotal` → `LegalMonetaryTotal` → `InvoiceLine`.
 
-## 3. Esqueleto de factura
+## 3. Invoice skeleton
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -42,40 +42,41 @@ description: Cómo obtener, leer y validar UBL 2.1 (UBL-Invoice-2.1.xsd y relaci
     listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01">01</cbc:InvoiceTypeCode>
   <cbc:Note languageLocaleID="1000">SETENTA Y NUEVE CON 00/100 SOLES</cbc:Note>
   <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
-  <!-- cac:Signature, partes, PaymentTerms, TaxTotal, LegalMonetaryTotal, InvoiceLine… -->
+  <!-- cac:Signature, parties, PaymentTerms, TaxTotal, LegalMonetaryTotal, InvoiceLine… -->
 </Invoice>
 ```
 
-## 4. Validar contra el XSD
-- .NET (stack del ADR 0002):
+## 4. Validate against the XSD
+- .NET (ADR 0002 stack):
   ```csharp
   var set = new XmlSchemaSet { XmlResolver = new XmlUrlResolver() };
   set.Add("urn:oasis:names:specification:ubl:schema:xsd:Invoice-2", "xsd/maindoc/UBL-Invoice-2.1.xsd");
   var settings = new XmlReaderSettings { ValidationType = ValidationType.Schema, Schemas = set };
-  settings.ValidationEventHandler += (_, e) => errores.Add($"{e.Severity}: {e.Message} ({e.Exception?.LineNumber})");
+  settings.ValidationEventHandler += (_, e) => errors.Add($"{e.Severity}: {e.Message} ({e.Exception?.LineNumber})");
   using var r = XmlReader.Create(xmlStream, settings); while (r.Read()) { }
   ```
-- Línea de comandos (revisión rápida): `xmllint --noout --schema xsd/maindoc/UBL-Invoice-2.1.xsd factura.xml`
-- Valida **antes** de firmar (ADR 0003). Si falla, el documento vuelve a BORRADOR.
+- Command line (quick check): `xmllint --noout --schema xsd/maindoc/UBL-Invoice-2.1.xsd invoice.xml`
+- Validate **before** signing (ADR 0003). If it fails, the document returns to DRAFT.
 
-## 5. Firmar (XMLDSig enveloped)
-1. Cargar el certificado .pfx con su clave desde el almacén seguro (nunca del repositorio).
-2. Firma enveloped con referencia `URI=""`, transform `enveloped-signature`, canonicalización C14N.
-3. Insertar `ds:Signature` (con `Id`, p. ej. `SignABC`) dentro de `ext:ExtensionContent`.
-4. Incluir `ds:KeyInfo/ds:X509Data/ds:X509Certificate`.
-5. El bloque `cac:Signature` del cuerpo debe referenciar el mismo Id.
-6. Algoritmo: las implementaciones de referencia peruanas usan RSA-SHA1; confirmar con SUNAT/OSE si aceptan RSA-SHA256 antes de cambiarlo.
-7. Verificar la firma después de firmar (`SignedXml.CheckSignature`) y guardar SHA-256 del XML firmado.
+## 5. Sign (XMLDSig enveloped)
+1. Load the .pfx certificate and its password from the secure store (never from the repository).
+2. Enveloped signature with reference `URI=""`, `enveloped-signature` transform, C14N canonicalization.
+3. Insert `ds:Signature` (with an `Id`, e.g. `SignABC`) inside `ext:ExtensionContent`.
+4. Include `ds:KeyInfo/ds:X509Data/ds:X509Certificate`.
+5. The `cac:Signature` block in the body must reference the same Id.
+6. Algorithm: Peruvian reference implementations use RSA-SHA1; confirm with SUNAT/OSE whether RSA-SHA256 is accepted before changing it.
+7. Verify the signature after signing (`SignedXml.CheckSignature`) and store the SHA-256 of the signed XML.
 
-## 6. Empaquetar y enviar
-- ZIP con un único XML; nombre `RUC-TT-SERIE-NUMERO.zip`.
-- `sendBill(fileName, contentFile=base64(zip))` → ZIP con `R-<nombre>.xml` (CDR, `ApplicationResponse`).
-- Leer del CDR: `cac:DocumentResponse/cac:Response/cbc:ResponseCode` (0 = aceptado) y `cbc:Description`; observaciones en `cbc:Note`.
+## 6. Package and send
+- ZIP with a single XML; name `RUC-TT-SERIES-NUMBER.zip`.
+- `sendBill(fileName, contentFile=base64(zip))` → ZIP with `R-<name>.xml` (CDR, `ApplicationResponse`).
+- Read from the CDR: `cac:DocumentResponse/cac:Response/cbc:ResponseCode` (0 = accepted) and `cbc:Description`; observations in `cbc:Note`.
 
-## 7. Errores frecuentes
-| Síntoma | Causa típica |
+## 7. Common errors
+| Symptom | Typical cause |
 |---|---|
-| XSD: elemento inesperado | Orden de la secuencia alterado |
-| Rechazo por totales | Redondeo por línea distinto del total |
-| Firma inválida | XML modificado o reformateado después de firmar (no "pretty-print" tras firmar) |
-| Moneda inconsistente | `@currencyID` distinto de `DocumentCurrencyCode` |
+| XSD: unexpected element | Sequence order changed |
+| Rejection due to totals | Line rounding differs from the total |
+| Invalid signature | XML modified or reformatted after signing (no pretty-print after signing) |
+| Inconsistent currency | `@currencyID` differs from `DocumentCurrencyCode` |
+| CustomizationID rejected (2072) | European (EN 16931/Peppol) example used instead of SUNAT's `2.0` |

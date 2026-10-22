@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/document-response.schema.json",
+  "title": "ElectronicDocumentResponse",
+  "type": "object",
+  "required": [
+    "id",
+    "type",
+    "number",
+    "issueDate",
+    "currency",
+    "status",
+    "totals",
+    "items"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Internal technical identifier (UUID); the legal identifier is `number`"
+    },
+    "type": {
+      "$ref": "common.schema.json#/$defs/DocumentType"
+    },
+    "number": {
+      "$ref": "common.schema.json#/$defs/DocumentNumber"
+    },
+    "issueDate": {
+      "$ref": "common.schema.json#/$defs/Date"
+    },
+    "currency": {
+      "$ref": "common.schema.json#/$defs/Currency"
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/SunatStatus"
+    },
+    "submissionDeadline": {
+      "$ref": "common.schema.json#/$defs/Date"
+    },
+    "totals": {
+      "type": "object",
+      "required": [
+        "taxed",
+        "exempt",
+        "nonTaxable",
+        "igv",
+        "isc",
+        "icbper",
+        "discounts",
+        "totalAmount"
+      ],
+      "properties": {
+        "taxed": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "exempt": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "nonTaxable": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "igv": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "isc": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "icbper": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "discounts": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        },
+        "totalAmount": {
+          "$ref": "common.schema.json#/$defs/Amount"
+        }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "order",
+          "productCode",
+          "quantity",
+          "saleValue",
+          "igv",
+          "isc",
+          "icbper",
+          "amount"
+        ],
+        "properties": {
+          "order": {
+            "type": "integer"
+          },
+          "productCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "$ref": "common.schema.json#/$defs/Quantity"
+          },
+          "igvTreatment": {
+            "$ref": "common.schema.json#/$defs/IgvTreatment"
+          },
+          "iscSystem": {
+            "$ref": "common.schema.json#/$defs/IscSystem"
+          },
+          "saleValue": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          },
+          "igv": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          },
+          "isc": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          },
+          "icbper": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          },
+          "amount": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          }
+        }
+      }
+    },
+    "cdr": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "received": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "xmlHash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "pdf": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "xml": {
+          "type": "string",
+          "format": "uri-reference"
+        },
+        "cdr": {
+          "type": "string",
+          "format": "uri-reference"
+        }
+      }
+    }
+  }
+}

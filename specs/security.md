@@ -1,18 +1,18 @@
-# Seguridad
+# Security
 
-| Activo | Riesgo | Control | Ref. |
+| Asset | Risk | Control | Ref. |
 |---|---|---|---|
-| Certificado digital (.pfx) y su clave | Robo ⇒ emisión fraudulenta a nombre de ABC | Guardado cifrado en el servidor; nunca en clientes ni en el repositorio; solo el Administrador lo carga; alerta 30 días antes de vencer | RNF-05, constitución 15 |
-| Usuario y clave SOL / token OSE | Acceso a SUNAT en nombre de ABC | Gestor de secretos o variable de entorno cifrada; nunca en logs | constitución 15 |
-| XML firmado y CDR | Alteración ⇒ pérdida de validez | Hash SHA-256 guardado; almacenamiento de solo escritura 5 años | RNF-06 |
-| API | Uso no autorizado | JWT con roles Vendedor, Administrador, Contador; HTTPS obligatorio | facturacion-api.yaml |
-| Keystore de Android y certificado de firma de código | Instaladores falsificados | Fuera del repositorio; uso solo en el pipeline de release | ADR 0004 |
-| Datos del Adquirente | Exposición de datos personales (Ley 29733) | Mínimo necesario; correo opcional | por verificar |
+| Digital certificate (.pfx) and its password | Theft ⇒ fraudulent issuance in ABC's name | Stored encrypted on the server; never on clients or in the repository; only the Administrator uploads it; alert 30 days before expiry | NFR-05, constitution 15 |
+| SOL user and key / OSE token | Access to SUNAT on ABC's behalf | Secret manager or encrypted environment variable; never in logs | constitution 15 |
+| Signed XML and CDR | Tampering ⇒ loss of validity | SHA-256 hash stored; write-once storage for 5 years | NFR-06 |
+| API | Unauthorized use | JWT with Salesperson, Administrator, Accountant roles; HTTPS mandatory | invoicing-api.yaml |
+| Android keystore and code-signing certificate | Counterfeit installers | Outside the repository; used only in the release pipeline | ADR 0004 |
+| Buyer data | Personal data exposure (Law 29733) | Minimum necessary; e-mail optional | to be verified |
 
-| Rol | Puede |
+| Role | May |
 |---|---|
-| Vendedor | Emitir comprobantes, consultar, descargar, reenviar |
-| Administrador | Todo lo del Vendedor + notas, bajas, configuración, migración |
-| Contador | Registros y kardex (solo lectura) |
+| Salesperson | Issue documents, look up, download, resend |
+| Administrator | Everything the Salesperson does + notes, voids, configuration, migration |
+| Accountant | Registers and stock card (read-only) |
 
-`[NEEDS CLARIFICATION]` Matriz de roles definitiva (ver clarificaciones de 002).
+`[NEEDS CLARIFICATION]` Final role matrix (see clarifications in 002).

@@ -1,26 +1,26 @@
-# Spec 00N — <Nombre>
+# Spec 00N — <Name>
 
-## Contexto
-(2-4 líneas: problema de negocio y obligación que lo motiva)
+## Context
+(2-4 lines: business problem and the obligation behind it)
 
-## Actores
+## Actors
 
-## Historias de usuario
-- HU-NN: Como <rol>, quiero <acción> para <beneficio>.
+## User stories
+- US-NN: As a <role>, I want <action> so that <benefit>.
 
-## Requisitos funcionales
-- **RF-NN** (Siempre | Evento | Estado | No deseado | Opcional): … deberá …
+## Functional requirements
+- **FR-NN** (Ubiquitous | Event-driven | State-driven | Unwanted behaviour | Optional feature): … shall …
 
-## Requisitos no funcionales
-- **RNF-NN**: <condición medible>
+## Non-functional requirements
+- **NFR-NN**: <measurable condition>
 
-## Criterios de aceptación
-CA-NN (RF-NN) — <título>
-  Dado …
-  Cuando …
-  Entonces …
+## Acceptance criteria
+AC-NN (FR-NN) — <title>
+  Given …
+  When …
+  Then …
 
-## Fuera de alcance
+## Out of scope
 
-## Clarificaciones
+## Clarifications
 - [NEEDS CLARIFICATION] …

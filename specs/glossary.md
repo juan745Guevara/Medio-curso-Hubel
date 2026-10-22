@@ -1,47 +1,48 @@
-# Glosario
+# Glossary
 
-Usa siempre estos términos, con este significado, en todos los archivos.
+Always use these terms, with this meaning, in every file. Peruvian legal terms keep their Spanish name in parentheses because that is how SUNAT, the XML and the professor refer to them.
 
-| Término | Definición |
+| Term | Definition |
 |---|---|
-| **Emisor** | ABC Software Corp como contribuyente que emite comprobantes; se identifica con su RUC. |
-| **Adquirente** | Cliente que recibe el comprobante. Se identifica con un Documento de identidad del catálogo 06. |
-| **RUC** | Registro Único de Contribuyentes: 11 dígitos, prefijo 10, 15, 16, 17 o 20, último dígito verificador por módulo 11. |
-| **Documento de identidad** | Par tipo (catálogo 06) + número del Adquirente: 1 DNI, 4 Carné de extranjería, 6 RUC, 7 Pasaporte, 0 otros. |
-| **Comprobante** | Comprobante de pago electrónico (CPE): Factura (01) o Boleta de venta (03). |
-| **Nota** | Nota de crédito (07) o nota de débito (08) que modifica un Comprobante. |
-| **Documento electrónico** | Comprobante o Nota. |
-| **Serie** | Prefijo de 4 caracteres de un Documento electrónico: F### factura, B### boleta, FC##/BC## notas, etc. |
-| **Correlativo** | Número secuencial de hasta 8 dígitos dentro de una Serie. |
-| **Ítem** | Línea de un Documento electrónico: Producto, cantidad, Unidad de medida, valor unitario y tributos. |
-| **Producto** | Bien que vende el Emisor, con código interno, descripción, Unidad de medida, Afectación IGV y, si aplica, Sistema ISC. |
-| **Unidad de medida** | Código del catálogo 03 (UN/ECE Rec. 20), p. ej. NIU, KGM, LTR. |
-| **Valor unitario** | Precio por unidad sin tributos. |
-| **Precio unitario** | Precio por unidad con tributos incluidos (catálogo 16, código 01). |
-| **Afectación IGV** | Código del catálogo 07 que dice si el Ítem es gravado, exonerado, inafecto o exportación. |
-| **Sistema ISC** | Código del catálogo 08: 01 al valor, 02 monto fijo, 03 precio de venta al público. |
-| **IGV** | Impuesto General a las Ventas. En el Comprobante se consigna la tasa total de 18 % (IGV + IPM). |
-| **ISC** | Impuesto Selectivo al Consumo. Forma parte de la base del IGV. |
-| **ICBPER** | Impuesto al consumo de bolsas de plástico, monto fijo por bolsa, fuera de la base del IGV. |
-| **Tributo** | Código del catálogo 05 (1000 IGV, 2000 ISC, 7152 ICBPER, 9997 exonerado, 9998 inafecto, etc.). |
-| **Tipo de operación** | Código del catálogo 51 (0101 venta interna). |
-| **Forma de pago** | Contado o Crédito; si es Crédito, Monto neto pendiente y Cuotas. |
-| **Cuota** | Monto y fecha de vencimiento de un pago a crédito. |
-| **XML UBL** | Documento electrónico en formato XML conforme a UBL 2.1 de OASIS y al Anexo 9-A de SUNAT. |
-| **XSD** | Esquema XML oficial de OASIS (`UBL-Invoice-2.1.xsd` y relacionados) contra el que se valida la estructura. |
-| **Firma digital** | Firma XMLDSig enveloped del XML UBL con el Certificado digital del Emisor. |
-| **Certificado digital** | Par de claves y certificado X.509 del Emisor usado para la Firma digital. |
-| **Validador SUNAT** | SUNAT u OSE que recibe el XML UBL y devuelve un CDR. |
-| **OSE** | Operador de Servicios Electrónicos autorizado por SUNAT para validar Documentos electrónicos. |
-| **CDR** | Constancia de Recepción: respuesta del Validador SUNAT con estado aceptado, aceptado con observaciones o rechazado, y su código. |
-| **Estado SUNAT** | Ciclo de vida de un Documento electrónico: BORRADOR, VALIDADO, FIRMADO, ENVIADO, ACEPTADO, OBSERVADO, RECHAZADO, PENDIENTE_REENVIO, DADO_DE_BAJA. |
-| **Resumen diario** | Envío por lote que informa Boletas y sus Notas de un mismo día; devuelve un Ticket. |
-| **Comunicación de baja** | Envío por lote que anula Documentos electrónicos ya informados. |
-| **Ticket** | Identificador que devuelve el Validador SUNAT ante un envío por lote, para consultar su CDR. |
-| **Contingencia** | Emisión excepcional en formato físico autorizado cuando no es posible emitir electrónicamente por causa no imputable al Emisor. |
-| **Representación impresa** | PDF o ticket del Documento electrónico para el Adquirente, con código QR. |
-| **Ficha legado** | Fila del software anterior: fecha, ingreso, salida, producto, nro_documento. |
-| **Lote de migración** | Ejecución de migración identificada, con origen, fecha, conteos y hash. |
-| **Movimiento de inventario** | Entrada o salida de Producto con fecha, cantidad y documento de soporte. |
-| **Registro de ventas** | Registro formal de los Documentos electrónicos emitidos en un periodo (RS 234-2006). |
-| **Periodo** | Mes tributario (AAAA-MM). |
+| **Issuer** (Emisor) | ABC Software Corp as the taxpayer that issues documents; identified by its RUC. |
+| **Buyer** (Adquirente) | Customer who receives the document. Identified with an Identity document from catalog 06. |
+| **RUC** | Registro Único de Contribuyentes (Peruvian taxpayer ID): 11 digits, prefix 10, 15, 16, 17 or 20, last digit is a modulo-11 check digit. |
+| **Identity document** | Pair type (catalog 06) + number of the Buyer: 1 DNI, 4 foreigner ID card, 6 RUC, 7 passport, 0 other. |
+| **Document** | Electronic payment document (CPE): Invoice — *Factura* (01) — or Sales receipt — *Boleta de venta* (03). |
+| **Note** | Credit note (07) or debit note (08) that modifies a Document. |
+| **Electronic document** | A Document or a Note. |
+| **Series** (Serie) | 4-character prefix of an Electronic document: F### invoice, B### sales receipt, FC##/BC## notes, etc. |
+| **Sequence number** (Correlativo) | Consecutive number of up to 8 digits within a Series. |
+| **Item** | Line of an Electronic document: Product, quantity, Unit of measure, unit value and taxes. |
+| **Product** | Good sold by the Issuer, with internal code, description, Unit of measure, IGV treatment and, where applicable, ISC system. |
+| **Unit of measure** | Code from catalog 03 (UN/ECE Rec. 20), e.g. NIU, KGM, LTR. |
+| **Unit value** (Valor unitario) | Price per unit excluding taxes. |
+| **Unit price** (Precio unitario) | Price per unit including taxes (catalog 16, code 01). |
+| **IGV treatment** (Afectación IGV) | Catalog 07 code stating whether the Item is taxed, exempt, non-taxable or an export. |
+| **ISC system** | Catalog 08 code: 01 ad valorem, 02 fixed amount, 03 retail sale price. |
+| **IGV** | Impuesto General a las Ventas (Peruvian VAT). The Document shows the total rate of 18 % (IGV + IPM). |
+| **ISC** | Impuesto Selectivo al Consumo (excise tax). Part of the IGV base. |
+| **ICBPER** | Plastic bag consumption tax, fixed amount per bag, outside the IGV base. |
+| **Tax code** (Tributo) | Catalog 05 code (1000 IGV, 2000 ISC, 7152 ICBPER, 9997 exempt, 9998 non-taxable, etc.). |
+| **Operation type** | Catalog 51 code (0101 domestic sale). |
+| **Payment terms** (Forma de pago) | Cash (*Contado*) or Credit (*Crédito*); if Credit, Outstanding amount and Installments. |
+| **Installment** (Cuota) | Amount and due date of a credit payment. |
+| **UBL XML** | Electronic document in XML compliant with OASIS UBL 2.1 and SUNAT Annex 9-A. |
+| **XSD** | Official OASIS XML schema (`UBL-Invoice-2.1.xsd` and related) used to validate structure. |
+| **Digital signature** | XMLDSig enveloped signature of the UBL XML with the Issuer's Digital certificate. |
+| **Digital certificate** | Key pair and X.509 certificate of the Issuer used for the Digital signature. |
+| **SUNAT validator** | SUNAT or an OSE: receives the UBL XML and returns a CDR. |
+| **OSE** | Operador de Servicios Electrónicos: operator authorized by SUNAT to validate Electronic documents. |
+| **CDR** | Constancia de Recepción (receipt certificate): Validator response with status accepted, accepted with observations or rejected, plus its code. |
+| **SUNAT status** | Life cycle of an Electronic document: DRAFT, VALIDATED, SIGNED, SENT, ACCEPTED, OBSERVED, REJECTED, PENDING_RESEND, VOIDED. |
+| **Daily summary** (Resumen diario) | Batch submission reporting Sales receipts and their Notes for one day; returns a Ticket. |
+| **Voiding notice** (Comunicación de baja) | Batch submission that voids Electronic documents already reported. |
+| **Ticket** | Identifier returned by the SUNAT validator for a batch submission, used to query its CDR. |
+| **Contingency** | Exceptional issuance on authorized paper forms when electronic issuance is impossible for reasons not attributable to the Issuer. |
+| **Printed representation** | PDF or ticket of the Electronic document for the Buyer, with a QR code. |
+| **UUID** | 128-bit technical identifier (e.g. `bc2bf589-f4b1-…`). Identifies operations and records inside the system (ids, `Idempotency-Key`); it is **not** the legal number of a Document, which is Series + Sequence number. |
+| **Legacy record** | Row of the previous software: fecha, ingreso, salida, producto, nro_documento (date, inflow, outflow, product, document number). |
+| **Migration batch** | Identified migration run, with source, date, counts and hash. |
+| **Inventory movement** | Inflow or outflow of a Product with date, quantity and supporting document. |
+| **Sales register** | Formal register of the Electronic documents issued in a Period (RS 234-2006). |
+| **Period** | Tax month (YYYY-MM). |

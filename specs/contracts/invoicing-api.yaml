@@ -1,0 +1,359 @@
+openapi: 3.1.0
+info:
+  title: ABC Electronic Invoicing API
+  version: 0.1.0
+  summary: Spec-first contract of the MVC monolith (API controllers) consumed by the Windows and Android apps.
+  description: |
+    Each operation names the FRs/ACs it covers. DTOs live in `schemas/` (JSON Schema 2020-12).
+    Errors use RFC 9457 (`application/problem+json`). Taxes are always calculated by the server.
+servers:
+  - url: https://api.abc.local/v1
+    description: Monolith server (ABC on-premise)
+security:
+  - bearerAuth: []
+tags:
+  - name: Documents
+  - name: Notes
+  - name: Voids and summaries
+  - name: Catalog
+  - name: Migration
+  - name: Registers
+  - name: Configuration
+paths:
+  /documents:
+    post:
+      tags: [Documents]
+      operationId: issueDocument
+      summary: Issues an invoice (01) or sales receipt (03)
+      description: "FR-01 to FR-15. AC-01 to AC-25. Calculates taxes, generates UBL 2.1 XML, validates XSD, signs and queues the submission."
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/issue-document-request.schema.json' }
+      responses:
+        '201':
+          description: Issued. `status` may be ACCEPTED, OBSERVED, REJECTED or PENDING_RESEND.
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: './schemas/document-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+    get:
+      tags: [Documents]
+      operationId: listDocuments
+      summary: Lists electronic documents with filters
+      description: FR-27
+      parameters:
+        - { name: type, in: query, schema: { $ref: './schemas/common.schema.json#/$defs/DocumentType' } }
+        - { name: status, in: query, schema: { $ref: './schemas/common.schema.json#/$defs/SunatStatus' } }
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200':
+          description: Page of results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items: { type: array, items: { $ref: './schemas/document-response.schema.json' } }
+                  total: { type: integer }
+  /documents/{id}:
+    get:
+      tags: [Documents]
+      operationId: getDocument
+      summary: Gets SUNAT status and CDR
+      description: FR-27, AC-38
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Document
+          content:
+            application/json:
+              schema: { $ref: './schemas/document-response.schema.json' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /documents/{id}/resend:
+    post:
+      tags: [Documents]
+      operationId: resendDocument
+      summary: Resends a document in PENDING_RESEND
+      description: FR-11, FR-27, AC-38
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '202': { description: Resend queued }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /documents/{id}/xml:
+    get:
+      tags: [Documents]
+      operationId: downloadXml
+      description: FR-13, AC-23
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: Signed XML, content: { application/xml: { schema: { type: string } } } }
+  /documents/{id}/cdr:
+    get:
+      tags: [Documents]
+      operationId: downloadCdr
+      description: FR-13, AC-23
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200': { description: CDR ZIP, content: { application/zip: { schema: { type: string, contentEncoding: base64 } } } }
+  /documents/{id}/pdf:
+    get:
+      tags: [Documents]
+      operationId: downloadPdf
+      description: Printed representation with QR. FR-13, AC-23
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - { name: format, in: query, schema: { enum: [A4, TICKET_80MM], default: A4 } }
+      responses:
+        '200': { description: PDF, content: { application/pdf: { schema: { type: string, contentEncoding: base64 } } } }
+  /documents/{id}/send-email:
+    post:
+      tags: [Documents]
+      operationId: sendEmail
+      description: FR-14, AC-24
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { email: { type: string, format: email } } }
+      responses:
+        '202': { description: Delivery queued }
+  /notes:
+    post:
+      tags: [Notes]
+      operationId: issueNote
+      summary: Issues a credit note (07) or debit note (08)
+      description: FR-18 to FR-22. AC-28 to AC-33.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/note-request.schema.json' }
+      responses:
+        '201':
+          description: Note issued
+          content:
+            application/json:
+              schema: { $ref: './schemas/document-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /voids:
+    post:
+      tags: [Voids and summaries]
+      operationId: submitVoiding
+      description: FR-23, FR-24. AC-34, AC-35.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/void-request.schema.json' }
+      responses:
+        '202':
+          description: Notice sent, ticket pending
+          content:
+            application/json:
+              schema: { $ref: './schemas/batch-submission-response.schema.json' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /daily-summaries:
+    post:
+      tags: [Voids and summaries]
+      operationId: generateDailySummary
+      description: FR-25. AC-36. Normally triggered by the scheduler at the end of the day.
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, required: [date], properties: { date: { type: string, format: date } } }
+      responses:
+        '202':
+          description: One or more submissions of up to 500 lines
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/batch-submission-response.schema.json' } }
+  /batch-submissions/{id}:
+    get:
+      tags: [Voids and summaries]
+      operationId: getBatchSubmission
+      description: Ticket status. FR-26, AC-37.
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema: { $ref: './schemas/batch-submission-response.schema.json' }
+  /buyers/validate-document:
+    post:
+      tags: [Catalog]
+      operationId: validateDocument
+      description: Validates RUC format and check digit. FR-02, AC-03, AC-04.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/common.schema.json#/$defs/IdentityDocument' }
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema: { type: object, required: [valid], properties: { valid: { type: boolean }, reason: { type: string } } }
+  /products:
+    get:
+      tags: [Catalog]
+      operationId: listProducts
+      responses: { '200': { description: Product list } }
+    post:
+      tags: [Catalog]
+      operationId: createProduct
+      description: IGV treatment (cat. 07), ISC system (cat. 08), ICBPER bag. FR-05, FR-36.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code, description, unit, igvTreatment]
+              properties:
+                code: { type: string, maxLength: 30 }
+                description: { type: string, maxLength: 500 }
+                unit: { $ref: './schemas/common.schema.json#/$defs/UnitOfMeasure' }
+                igvTreatment: { $ref: './schemas/common.schema.json#/$defs/IgvTreatment' }
+                isc:
+                  type: object
+                  required: [system]
+                  properties:
+                    system: { $ref: './schemas/common.schema.json#/$defs/IscSystem' }
+                    rate: { type: string, description: "Percentage, for systems 01 and 03" }
+                    fixedAmount: { type: string, description: "Per unit, for system 02" }
+                isPlasticBag: { type: boolean, default: false }
+      responses:
+        '201': { description: Created }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+  /migrations:
+    post:
+      tags: [Migration]
+      operationId: uploadMigrationBatch
+      description: FR-28 to FR-35. AC-39 to AC-46.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file: { type: string, contentMediaType: application/octet-stream }
+      responses:
+        '202':
+          description: Batch created and in progress
+          content:
+            application/json:
+              schema: { $ref: './schemas/migration-batch-response.schema.json' }
+  /migrations/{id}:
+    get:
+      tags: [Migration]
+      operationId: getMigrationBatch
+      description: Reconciliation report. FR-34, AC-45.
+      parameters: [ { $ref: '#/components/parameters/Id' } ]
+      responses:
+        '200':
+          description: Batch
+          content:
+            application/json:
+              schema: { $ref: './schemas/migration-batch-response.schema.json' }
+  /registers/sales/{period}:
+    get:
+      tags: [Registers]
+      operationId: getSalesRegister
+      description: FR-37 to FR-39, FR-41. AC-48 to AC-50, AC-52.
+      parameters:
+        - { name: period, in: path, required: true, schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' } }
+      responses:
+        '200':
+          description: Period register
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/sales-register-row.schema.json' } }
+            text/csv:
+              schema: { type: string }
+  /products/{code}/stock-card:
+    get:
+      tags: [Registers]
+      operationId: getStockCard
+      description: FR-40. AC-51.
+      parameters:
+        - { name: code, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Movements and balance }
+  /configuration/issuer:
+    put:
+      tags: [Configuration]
+      operationId: configureIssuer
+      description: "RUC, business name, address, validator (SUNAT or OSE), environment (beta/production). NFR-07. Administrator role."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ruc, businessName, validator, environment]
+              properties:
+                ruc: { $ref: './schemas/common.schema.json#/$defs/Ruc' }
+                businessName: { type: string }
+                validator: { enum: [SUNAT, OSE] }
+                environment: { enum: [BETA, PRODUCTION] }
+      responses:
+        '204': { description: Saved }
+  /configuration/certificate:
+    put:
+      tags: [Configuration]
+      operationId: uploadCertificate
+      description: Uploads the .pfx; stored encrypted and never returned. NFR-05.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, password]
+              properties:
+                file: { type: string, contentMediaType: application/x-pkcs12 }
+                password: { type: string, format: password }
+      responses:
+        '204': { description: Valid certificate loaded }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: "UUID generated by the client for each issuance attempt. If it arrives again, the server returns the same document and does not assign a new sequence number (prevents double issuance on retries)."
+      schema: { type: string, format: uuid }
+  responses:
+    BadRequest:
+      description: The JSON does not match the schema
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    NotFound:
+      description: Not found
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Conflict:
+      description: "State conflict (sequence number, note on a non-accepted document, resend of an already accepted document). AC-02, AC-30."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Unprocessable:
+      description: "Business rule violated: INVALID_RUC, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
