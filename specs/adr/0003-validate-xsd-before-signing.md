@@ -8,7 +8,7 @@ origin: problem statement
 The problem statement asks to study `UBL-Invoice-2.1.xsd` and to comply "strictly" with SUNAT. A malformed XML is rejected by SUNAT/OSE and consumes the sequence number (constitution 6).
 
 # Decision
-Fixed pipeline: business rules → generate XML → **validate against the local OASIS 2.1 XSD** → sign → send. If the XSD fails, the document returns to DRAFT and is not sent (FR-08). The XSDs are versioned with the system and downloaded from the official OASIS package.
+Fixed pipeline: business rules → generate XML from the XSD-derived classes ([ADR 0005](0005-ubl-from-xsd-generated-classes.md)) → **validate against the local OASIS 2.1 XSD** → sign → send. If the XSD fails, the document returns to DRAFT and is not sent (FR-08). The XSDs are versioned with the system and downloaded from the official OASIS package.
 
 # Alternatives evaluated
 | Option | Result |

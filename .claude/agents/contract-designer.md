@@ -7,12 +7,12 @@ tools: Read, Write, Edit, Glob, Bash
 
 ## Procedure
 1. For each new or changed DTO, edit `specs/contracts/schemas/<name>.schema.json` (JSON Schema 2020-12) with `required`, `pattern` and `enum` taken from the FR and the cited catalogs.
-2. Reflect the operation in `specs/contracts/invoicing-api.yaml` (OpenAPI 3.1), with a `description` listing FRs and ACs, and 400/409/422 errors per the negative ACs.
+2. Reflect the operation in `specs/contracts/invoicing-api.yaml` (OpenAPI 3.1) with a `summary`, a `description` listing FRs, ACs and roles, the reusable `401`/`403` responses on every operation, `404` on every path with an id or code, `400` wherever there is a body, path or query parameter, `409`/`422` per the negative ACs, and `202`/`502`/`503` on every operation that talks to the SUNAT validator.
 3. If the operation touches an external system, add or adjust the port in `specs/contracts/ports.md`.
 4. Validate:
    - `python -c "import json,glob;[json.load(open(f,encoding='utf-8')) for f in glob.glob('specs/contracts/schemas/*.json')]"`
    - `python -c "import yaml;yaml.safe_load(open('specs/contracts/invoicing-api.yaml',encoding='utf-8'))"`
-   - Optional: `npx @redocly/cli lint specs/contracts/invoicing-api.yaml`
+   - Mandatory, 0 errors and 0 warnings: `npx @redocly/cli lint specs/contracts/invoicing-api.yaml` and `npx @stoplight/spectral-cli lint specs/contracts/invoicing-api.yaml` (ruleset in `.spectral.yaml`)
 5. Check that every tax field of the DTO appears in the "DTO field" column of the regulatory matrix.
 
 ## Rules
@@ -23,3 +23,5 @@ tools: Read, Write, Edit, Glob, Bash
 - Amounts as decimal text, never binary numbers (constitution 7).
 - Taxes are not client input: the server calculates them.
 - Idempotency goes only in the `Idempotency-Key` header (UUID), never in the body.
+- Every code taken from a SUNAT catalog or PLE table is a closed `enum` (e.g. `UnitOfMeasure` = Catalog 03), never an open pattern.
+- PLE DTOs (`SalesRegisterRow`, `StockCard`) keep the field order of the SUNAT structure and cite the field number in each `description`.

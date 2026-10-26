@@ -120,8 +120,71 @@
     },
     "UnitOfMeasure": {
       "type": "string",
-      "pattern": "^[A-Z0-9]{2,3}$",
-      "description": "Catalog 03, UN/ECE Rec 20 (NIU, KGM, LTR, ZZ…)"
+      "enum": [
+        "4A",
+        "BJ",
+        "BLL",
+        "BG",
+        "BO",
+        "BX",
+        "CT",
+        "CMK",
+        "CMQ",
+        "CMT",
+        "CEN",
+        "CY",
+        "CJ",
+        "DZN",
+        "DZP",
+        "BE",
+        "GLI",
+        "GRM",
+        "GRO",
+        "HLT",
+        "LEF",
+        "SET",
+        "KGM",
+        "KTM",
+        "KWH",
+        "KT",
+        "CA",
+        "LBR",
+        "LTR",
+        "MWH",
+        "MTR",
+        "MTK",
+        "MTQ",
+        "MGM",
+        "MLT",
+        "MMT",
+        "MMK",
+        "MMQ",
+        "MLL",
+        "UM",
+        "ONZ",
+        "PF",
+        "PK",
+        "PR",
+        "FOT",
+        "FTK",
+        "FTQ",
+        "C62",
+        "PG",
+        "ST",
+        "INH",
+        "RM",
+        "DR",
+        "STN",
+        "LTN",
+        "TNE",
+        "TU",
+        "NIU",
+        "ZZ",
+        "GLL",
+        "YRD",
+        "YDK"
+      ],
+      "description": "Catalog 03 (UN/ECE Rec 20) commercial units accepted by ABC. Closed to the codes that also exist in PLE Table 6, so every movement can be reported in format 12.1 with the same code (equivalence in regulatory-matrix.md §K). Values: 4A Bobbins; BJ Bucket; BLL Barrels; BG Bag; BO Bottles; BX Box; CT Cartons; CMK Square centimetre; CMQ Cubic centimetre; CMT Centimetre; CEN Hundred units; CY Cylinder; CJ Cones; DZN Dozen; DZP Dozen pack; BE Bundle; GLI Imperial gallon; GRM Gram; GRO Gross; HLT Hectolitre; LEF Leaf; SET Set; KGM Kilogram; KTM Kilometre; KWH Kilowatt hour; KT Kit; CA Cans; LBR Pounds; LTR Litre; MWH Megawatt hour; MTR Metre; MTK Square metre; MTQ Cubic metre; MGM Milligrams; MLT Millilitre; MMT Millimetre; MMK Square millimetre; MMQ Cubic millimetre; MLL Thousands; UM Million units; ONZ Ounces; PF Pallets; PK Package; PR Pair; FOT Feet; FTK Square feet; FTQ Cubic feet; C62 Pieces; PG Plates; ST Sheet; INH Inches; RM Ream; DR Drum; STN Short ton; LTN Long ton; TNE Tonnes; TU Tubes; NIU Unit (goods); ZZ Unit (services); GLL US gallon; YRD Yard; YDK Square yard."
     },
     "IgvTreatment": {
       "type": "string",
@@ -266,6 +329,167 @@
         }
       },
       "additionalProperties": false
+    },
+    "PlePeriod": {
+      "type": "string",
+      "pattern": "^[0-9]{4}(0[1-9]|1[0-2])00$",
+      "description": "PLE period AAAAMM00 (field 1 of formats 14.1 and 12.1)."
+    },
+    "Cuo": {
+      "type": "string",
+      "pattern": "^[^&|]{1,40}$",
+      "description": "Código Único de Operación, up to 40 characters, no '&' or '|'. ABC uses the internal UUID of the document or movement (36 characters)."
+    },
+    "EntryNumber": {
+      "type": "string",
+      "pattern": "^[AMC][A-Za-z0-9]{1,9}$",
+      "description": "Accounting entry sequence number: first character A (opening), M (movement) or C (closing)."
+    },
+    "EstablishmentCode": {
+      "type": "string",
+      "pattern": "^[0-9]{4,7}$",
+      "description": "Annex establishment code registered in the RUC (4 digits, '0000' = tax address; '9999' = warehouse of a third party). Same value as cac:RegistrationAddress/cbc:AddressTypeCode in the UBL."
+    },
+    "Table2IdentityType": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "4",
+        "6",
+        "7",
+        "A"
+      ],
+      "description": "PLE Table 2 identity document type. Same codes as SUNAT Catalog 06 within ABC's scope: 0 other, 1 DNI, 4 foreigner ID, 6 RUC, 7 passport, A diplomatic ID."
+    },
+    "Table5ExistenceType": {
+      "type": "string",
+      "enum": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99"
+      ],
+      "description": "PLE Table 5 type of stock item: 01 goods for resale (mercaderías, ABC's default), 02 finished products, 03 raw materials, 04 containers, 05 auxiliary materials, 06 supplies, 07 spare parts, 08 packaging, 09 by-products, 10 waste, 91–98 others 1–8, 99 others."
+    },
+    "Table10DocumentType": {
+      "type": "string",
+      "enum": [
+        "00",
+        "01",
+        "03",
+        "07",
+        "08",
+        "09"
+      ],
+      "description": "PLE Table 10 document types used by ABC: 00 other (legacy and internal documents), 01 invoice, 03 sales receipt, 07 credit note, 08 debit note, 09 dispatch guide (sender). 01/03/07/08 are the same codes as Catalog 01."
+    },
+    "Table12OperationType": {
+      "type": "string",
+      "enum": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "91",
+        "92",
+        "93",
+        "94",
+        "95",
+        "96",
+        "97",
+        "98",
+        "99"
+      ],
+      "description": "PLE Table 12 inventory operation type. Used by ABC: 01 domestic sale, 02 domestic purchase, 05 return received, 06 return delivered, 13 shrinkage, 16 opening balance, 24 inflow from customer return, 25 outflow from return to supplier, 28 inventory difference adjustment, 99 other (legacy rows until classified)."
+    },
+    "Table13Catalog": {
+      "type": "string",
+      "enum": [
+        "1",
+        "3",
+        "9"
+      ],
+      "description": "PLE Table 13 stock catalog: 1 United Nations (UNSPSC), 3 GS1 (EAN-UCC), 9 other (own codes)."
+    },
+    "PleAmount": {
+      "type": "string",
+      "pattern": "^-?[0-9]{1,12}\\.[0-9]{2}$",
+      "description": "PLE amount: up to 12 integers and exactly 2 decimals, no thousands separator; negative allowed where the format allows it."
+    },
+    "ExchangeRate": {
+      "type": "string",
+      "pattern": "^[0-9]\\.[0-9]{3}$",
+      "description": "Exchange rate #.### (PLE 14.1 field 27). 1.000 for PEN."
+    },
+    "EntryStatus141": {
+      "type": "string",
+      "enum": [
+        "0",
+        "1",
+        "2",
+        "8",
+        "9"
+      ],
+      "description": "PLE 14.1 field 35: 0 optional entry without IGV effect, 1 operation of the period, 2 document voided before delivery, 8 previous period not recorded then, 9 previous period already recorded."
+    },
+    "EntryStatus121": {
+      "type": "string",
+      "enum": [
+        "1",
+        "8",
+        "9"
+      ],
+      "description": "PLE 12.1 field 19: 1 operation of the period, 8 previous period not recorded then, 9 previous period already recorded."
     }
   }
 }

@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/stock-card.schema.json",
+  "title": "StockCard",
+  "description": "Stock card of one Product in one Period and establishment, in SUNAT PLE format 12.1 (Registro del Inventario Permanente en Unidades Físicas, book code 120100), structure of RS 042-2018/SUNAT Annex 2, fields 1–19 in order, plus the running balance of the printed format. FR-40, FR-42. Origin of every field in regulatory-matrix.md §J.",
+  "type": "object",
+  "required": [
+    "header",
+    "rows",
+    "finalBalance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "header": {
+      "type": "object",
+      "description": "Header of the printed format 12.1.",
+      "required": [
+        "period",
+        "ruc",
+        "businessName",
+        "establishmentCode",
+        "productCode",
+        "existenceType",
+        "productDescription",
+        "unitOfMeasure"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "period": {
+          "$ref": "common.schema.json#/$defs/PlePeriod"
+        },
+        "ruc": {
+          "$ref": "common.schema.json#/$defs/Ruc"
+        },
+        "businessName": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "establishmentCode": {
+          "$ref": "common.schema.json#/$defs/EstablishmentCode"
+        },
+        "productCode": {
+          "type": "string",
+          "maxLength": 24
+        },
+        "existenceType": {
+          "$ref": "common.schema.json#/$defs/Table5ExistenceType"
+        },
+        "productDescription": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "unitOfMeasure": {
+          "$ref": "common.schema.json#/$defs/UnitOfMeasure"
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/StockCardRow"
+      }
+    },
+    "finalBalance": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "Balance at the end of the period = Σ inflow + Σ outflow."
+    }
+  },
+  "$defs": {
+    "StockCardRow": {
+      "type": "object",
+      "required": [
+        "period",
+        "cuo",
+        "entryNumber",
+        "establishmentCode",
+        "catalogCode",
+        "existenceType",
+        "productCode",
+        "documentDate",
+        "documentType",
+        "documentSeries",
+        "documentNumber",
+        "operationType",
+        "productDescription",
+        "unitOfMeasure",
+        "inflow",
+        "outflow",
+        "finalBalance",
+        "status",
+        "movementId"
+      ],
+      "properties": {
+        "period": {
+          "$ref": "common.schema.json#/$defs/PlePeriod",
+          "description": "PLE 12.1 field 1. From the movement date."
+        },
+        "cuo": {
+          "$ref": "common.schema.json#/$defs/Cuo",
+          "description": "PLE 12.1 field 2. InventoryMovement.id."
+        },
+        "entryNumber": {
+          "$ref": "common.schema.json#/$defs/EntryNumber",
+          "description": "PLE 12.1 field 3. 'A' for the opening balance (migration), 'M' + sequence for the rest."
+        },
+        "establishmentCode": {
+          "$ref": "common.schema.json#/$defs/EstablishmentCode",
+          "description": "PLE 12.1 field 4. Warehouse where the movement happens."
+        },
+        "catalogCode": {
+          "$ref": "common.schema.json#/$defs/Table13Catalog",
+          "description": "PLE 12.1 field 5. '9' (ABC's own codes)."
+        },
+        "existenceType": {
+          "$ref": "common.schema.json#/$defs/Table5ExistenceType",
+          "description": "PLE 12.1 field 6. Product.existenceType."
+        },
+        "productCode": {
+          "type": "string",
+          "maxLength": 24,
+          "description": "PLE 12.1 field 7. Product.code (= cac:Item/cac:SellersItemIdentification/cbc:ID)."
+        },
+        "standardCatalogCode": {
+          "type": "string",
+          "enum": [
+            "1",
+            "3"
+          ],
+          "description": "PLE 12.1 field 8. '1' United Nations (UNSPSC) or '3' GS1; value 9 is not allowed."
+        },
+        "standardProductCode": {
+          "type": "string",
+          "pattern": "^[0-9]{8,16}$",
+          "description": "PLE 12.1 field 9. UNSPSC code (cac:CommodityClassification/cbc:ItemClassificationCode) padded with 8 zeros to 16 digits, or GTIN. Mandatory when the electronic document carries it."
+        },
+        "documentDate": {
+          "$ref": "common.schema.json#/$defs/Date",
+          "description": "PLE 12.1 field 10. Issue date of the supporting document (legacy: fecha). Exported as DD/MM/AAAA."
+        },
+        "documentType": {
+          "$ref": "common.schema.json#/$defs/Table10DocumentType",
+          "description": "PLE 12.1 field 11. Type of the supporting document; '00' for legacy rows."
+        },
+        "documentSeries": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "PLE 12.1 field 12. Series of the supporting document; '0' when it has none (legacy)."
+        },
+        "documentNumber": {
+          "type": "string",
+          "maxLength": 20,
+          "description": "PLE 12.1 field 13. Number of the supporting document; legacy nro_documento without the LEG: prefix."
+        },
+        "operationType": {
+          "$ref": "common.schema.json#/$defs/Table12OperationType",
+          "description": "PLE 12.1 field 14. InventoryMovement.operationType."
+        },
+        "productDescription": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "PLE 12.1 field 15. Product.description."
+        },
+        "unitOfMeasure": {
+          "$ref": "common.schema.json#/$defs/UnitOfMeasure",
+          "description": "PLE 12.1 field 16. Table 6 code; equal to the Catalog 03 code of the Product (matrix §K)."
+        },
+        "inflow": {
+          "$ref": "common.schema.json#/$defs/PleAmount",
+          "description": "PLE 12.1 field 17. Units in; '0.00' when the row is an outflow. The first row of the period is the opening balance."
+        },
+        "outflow": {
+          "$ref": "common.schema.json#/$defs/PleAmount",
+          "description": "PLE 12.1 field 18. Units out, negative as PLE requires; '0.00' when the row is an inflow."
+        },
+        "finalBalance": {
+          "$ref": "common.schema.json#/$defs/PleAmount",
+          "description": "Running balance after this movement (column 'Saldo final' of the printed format 12.1; not part of the TXT)."
+        },
+        "status": {
+          "$ref": "common.schema.json#/$defs/EntryStatus121",
+          "description": "PLE 12.1 field 19."
+        },
+        "movementId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Internal traceability to InventoryMovement (and to MigrationOrigin for legacy rows)."
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "standardProductCode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "standardProductCode"
+            ]
+          },
+          "then": {
+            "required": [
+              "standardCatalogCode"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

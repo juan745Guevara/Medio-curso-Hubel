@@ -2,7 +2,7 @@
 
 | Asset | Risk | Control | Ref. |
 |---|---|---|---|
-| Digital certificate (.pfx) and its password | Theft ⇒ fraudulent issuance in ABC's name | Stored encrypted on the server; never on clients or in the repository; only the Administrator uploads it; alert 30 days before expiry | NFR-05, constitution 15 |
+| Digital certificate (.pfx) and its password | Theft ⇒ fraudulent issuance in ABC's name | Stored encrypted on the server; never on clients or in the repository; only the Administrator uploads it; alert 30 days before expiry; rotation and compromise procedure | NFR-05, constitution 15, [ADR 0006](adr/0006-certificate-custody.md) |
 | SOL user and key / OSE token | Access to SUNAT on ABC's behalf | Secret manager or encrypted environment variable; never in logs | constitution 15 |
 | Signed XML and CDR | Tampering ⇒ loss of validity | SHA-256 hash stored; write-once storage for 5 years | NFR-06 |
 | API | Unauthorized use | JWT with Salesperson, Administrator, Accountant roles; HTTPS mandatory | invoicing-api.yaml |

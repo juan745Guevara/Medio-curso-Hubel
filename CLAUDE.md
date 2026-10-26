@@ -18,6 +18,8 @@ Do not create `backend/`, `frontend/`, `src/` or code files. Only `specs/`, `.cl
 - Stack: .NET 10 (ASP.NET Core MVC + MAUI) + PostgreSQL — [ADR 0002](specs/adr/0002-technology-stack.md).
 - XSD before signing — [ADR 0003](specs/adr/0003-validate-xsd-before-signing.md).
 - MSI + APK — [ADR 0004](specs/adr/0004-msi-apk-packaging.md).
+- UBL XML from classes generated from the XSD, never templates — [ADR 0005](specs/adr/0005-ubl-from-xsd-generated-classes.md).
+- Certificate only on the server, encrypted, with rotation — [ADR 0006](specs/adr/0006-certificate-custody.md).
 
 ## Rules for everyone
 - Read `specs/00-constitution.md` and `specs/glossary.md` before any task.

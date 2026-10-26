@@ -1,6 +1,6 @@
 # Regulatory traceability matrix: SUNAT data ↔ UBL 2.1 ↔ DTO
 
-Deliverable 4 of the exam. Each row crosses a data item required by SUNAT with its catalog, its cardinality in the official OASIS XSD, its XML tag (Annex 9-A mapping), the DTO field that feeds it, the rule, the error code SUNAT or the OSE rejects with if it fails, and the AC that tests it.
+Deliverable 4 of the exam. Blocks A–H cross the UBL document with SUNAT; blocks I–K cross the PLE books (formats 14.1 and 12.1) with their UBL origin. Each row crosses a data item required by SUNAT with its catalog, its cardinality in the official OASIS XSD, its XML tag (Annex 9-A mapping), the DTO field that feeds it, the rule, the error code SUNAT or the OSE rejects with if it fails, and the AC that tests it.
 
 **Scope:** UBL 2.1 in its Peruvian SUNAT customization (see §0).
 
@@ -150,6 +150,145 @@ Each rule is validated **before** sending, with the API's internal code (`error.
 | A, B, C, D, E | 001 | `UblGeneratorPort` (data), `SignerPort` (rows 1–2) |
 | F | 002 | `UblGeneratorPort` |
 | Sending the `RUC-TT-SERIES-NUM.zip` file | 001, 002 | `SunatValidatorPort` |
+| I, J, K | 004 | `GenerateSalesRegister`, `GenerateInventoryRegister` (read views over `DocumentRepository` and `MovementRepository`) |
+
+## I. PLE format 14.1 (Registro de Ventas e Ingresos) ← UBL
+
+Structure of [RS 108-2020/SUNAT Annex IV](https://www.sunat.gob.pe/legislacion/superin/2020/anexos-108-2020.pdf). DTO: [`sales-register-row.schema.json`](../contracts/schemas/sales-register-row.schema.json). The TXT writes the 35 fields in this order separated by `|` (FR-41).
+
+| Field | Data | PLE table | UBL origin (or internal) | DTO | Rule | AC |
+|---|---|---|---|---|---|---|
+| 1 | Period | — | `cbc:IssueDate` → AAAAMM00 | `period` | Month of the entry; later Periods use status 8 | AC-53 |
+| 2 | CUO | — | Internal: `ElectronicDocument.id` (UUID) | `cuo` | ≤ 40 characters | AC-53 |
+| 3 | Entry number | — | Internal: `M` + monthly sequence | `entryNumber` | Starts with A, M or C | AC-53 |
+| 4 | Issue date | — | `cbc:IssueDate` | `issueDate` | DD/MM/AAAA in the TXT | AC-53 |
+| 5 | Due or payment date | — | `cbc:DueDate` or last `cac:PaymentTerms/cbc:PaymentDueDate` | `dueDate` | Mandatory only for type 14 | — |
+| 6 | Document type | 10 | `cbc:InvoiceTypeCode`; 07 for `CreditNote`, 08 for `DebitNote` | `documentType` | Same codes as Catalog 01 | AC-53, AC-54 |
+| 7 | Series | — | `cbc:ID` before the hyphen | `series` | F/B + 3 | AC-53 |
+| 8 | Number | — | `cbc:ID` after the hyphen | `number` | 1–8 digits | AC-53 |
+| 9 | Final number | — | Not used (individual entries) | `finalNumber` | Empty | — |
+| 10 | Customer document type | 2 | `cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID` | `customerDocumentType` | Same codes as Catalog 06 | AC-53 |
+| 11 | Customer document number | — | `…/cac:PartyIdentification/cbc:ID` | `customerDocumentNumber` | ≤ 15 | AC-53 |
+| 12 | Customer name | — | `…/cac:PartyLegalEntity/cbc:RegistrationName` | `customerName` | ≤ 100 | AC-53 |
+| 13 | Export value | — | `cac:TaxSubtotal[TaxScheme/ID=9995]/cbc:TaxableAmount` | `exportValue` | 0.00 in scope | — |
+| 14 | Taxed base | — | `cac:TaxSubtotal[TaxScheme/ID=1000]/cbc:TaxableAmount` | `taxedBase` | Without ISC | AC-53 |
+| 15 | Base discount | — | `cac:AllowanceCharge[ChargeIndicator=false][AllowanceChargeReasonCode=02]/cbc:Amount` | `taxedBaseDiscount` | Negative or 0.00 | — |
+| 16 | IGV + IPM | — | `cac:TaxSubtotal[TaxScheme/ID=1000]/cbc:TaxAmount` | `igv` | 18 % (15.5 + 2.5) | AC-53 |
+| 17 | IGV discount | — | Internal: IGV of field 15 | `igvDiscount` | — | — |
+| 18 | Exempt | — | `cac:TaxSubtotal[TaxScheme/ID=9997]/cbc:TaxableAmount` | `exempt` | — | AC-48 |
+| 19 | Non-taxable | — | `cac:TaxSubtotal[TaxScheme/ID=9998]/cbc:TaxableAmount` | `nonTaxable` | — | AC-48 |
+| 20 | ISC | — | `cac:TaxSubtotal[TaxScheme/ID=2000]/cbc:TaxAmount` | `isc` | Catalog 08 system (matrix row 33) | AC-48 |
+| 21 | IVAP base | — | `cac:TaxSubtotal[TaxScheme/ID=1016]/cbc:TaxableAmount` | `ivapBase` | 0.00 in scope | — |
+| 22 | IVAP | — | `cac:TaxSubtotal[TaxScheme/ID=1016]/cbc:TaxAmount` | `ivap` | 0.00 in scope | — |
+| 23 | ICBPER | — | `cac:TaxSubtotal[TaxScheme/ID=7152]/cbc:TaxAmount` | `icbper` | S/ 0.50 per bag | AC-48 |
+| 24 | Other charges and taxes | — | `cac:TaxSubtotal[TaxScheme/ID=9999]/cbc:TaxAmount` + `cac:LegalMonetaryTotal/cbc:ChargeTotalAmount` | `otherCharges` | Outside the base | — |
+| 25 | Total | — | `cac:LegalMonetaryTotal/cbc:PayableAmount` | `totalAmount` | Negative for credit notes | AC-49, AC-53, AC-54 |
+| 26 | Currency | 4 | `cbc:DocumentCurrencyCode` | `currency` | Same codes as Catalog 02 | AC-55 |
+| 27 | Exchange rate | — | Internal: SUNAT exchange rate of `cbc:IssueDate` | `exchangeRate` | #.###; 1.000 for PEN | AC-53, AC-55 |
+| 28 | Modified document date | — | Internal: issue date of the document in `cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID` | `modifiedDocument.issueDate` | Types 07/08 | AC-54 |
+| 29 | Modified document type | 10 | `cac:BillingReference/cac:InvoiceDocumentReference/cbc:DocumentTypeCode` | `modifiedDocument.documentType` | Types 07/08 | AC-54 |
+| 30 | Modified document series | — | `cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID` before the hyphen | `modifiedDocument.series` | Types 07/08 | AC-54 |
+| 31 | Modified document number | — | `cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID` after the hyphen | `modifiedDocument.number` | Types 07/08 | AC-54 |
+| 32 | Contract or project | — | Not used | `contractId` | Consortia only | — |
+| 33 | Exchange-rate error | — | Internal | `exchangeRateError` | '1' or empty | — |
+| 34 | Paid with payment means | 1 | Internal (payment record) | `paidWithPaymentMeans` | '1' or empty | — |
+| 35 | Status | — | Internal: `SunatStatus` + Period (FR-44) | `entryStatus` | ACCEPTED/OBSERVED → 1; VOIDED → 2 with 0.00; late → 8; REJECTED/PENDING_RESEND not exported | AC-50, AC-60 |
+
+## J. PLE format 12.1 (Inventario Permanente en Unidades Físicas) ← UBL and legacy
+
+Structure of [RS 042-2018/SUNAT Annex 2](https://www.sunat.gob.pe/legislacion/superin/2018/anexo-042-2018.pdf). DTO: [`stock-card.schema.json`](../contracts/schemas/stock-card.schema.json). The TXT writes fields 1–19 (FR-42); the final balance is only shown on the stock card (FR-40).
+
+| Field | Data | PLE table | UBL origin (or internal / legacy) | DTO | Rule | AC |
+|---|---|---|---|---|---|---|
+| 1 | Period | — | Movement date → AAAAMM00 | `period` | — | AC-56 |
+| 2 | CUO | — | Internal: `InventoryMovement.id` (UUID) | `cuo` | ≤ 40 | AC-56 |
+| 3 | Entry number | — | Internal: `A` opening balance, `M` + sequence | `entryNumber` | A/M/C | AC-56 |
+| 4 | Establishment code | — | `InventoryMovement.establishment` (= `cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cac:RegistrationAddress/cbc:AddressTypeCode` of the document) | `establishmentCode` | 4 digits; 9999 third party | AC-56 |
+| 5 | Catalog used | 13 | Fixed `9` (own codes) | `catalogCode` | — | AC-58 |
+| 6 | Stock type | 5 | `Product.existenceType` | `existenceType` | Mandatory (FR-43) | AC-56, AC-59 |
+| 7 | Own code | — | `cac:InvoiceLine/cac:Item/cac:SellersItemIdentification/cbc:ID` = `Product.code` | `productCode` | ≤ 24 | AC-56 |
+| 8 | Standard catalog | 13 | Fixed `1` (UNSPSC) when field 9 exists | `standardCatalogCode` | Not 9 | — |
+| 9 | UNSPSC / GTIN code | — | `cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode` (padded to 16 digits) | `standardProductCode` | When the document carries it | — |
+| 10 | Document date | — | `cbc:IssueDate` of the document; legacy `fecha` | `documentDate` | DD/MM/AAAA | AC-56, AC-58 |
+| 11 | Document type | 10 | `cbc:InvoiceTypeCode` (01/03), 07/08 for notes; legacy `00` | `documentType` | Not 00 for operations 01–06 | AC-56 |
+| 12 | Document series | — | `cbc:ID` before the hyphen; legacy `0` | `documentSeries` | — | AC-56 |
+| 13 | Document number | — | `cbc:ID` after the hyphen; legacy `nro_documento` | `documentNumber` | ≤ 20 | AC-56 |
+| 14 | Operation type | 12 | Internal: 01 sale (invoice/receipt), 24 customer return (credit note reasons 06/07), 16 opening balance, 99 legacy | `operationType` | — | AC-56 |
+| 15 | Description | — | `cac:InvoiceLine/cac:Item/cbc:Description` = `Product.description` | `productDescription` | ≤ 80 | AC-56 |
+| 16 | Unit | 6 | `cac:InvoiceLine/cbc:InvoicedQuantity/@unitCode` (Catalog 03) → Table 6 (§K) | `unitOfMeasure` | Must have Table 6 code (FR-43) | AC-56, AC-59 |
+| 17 | Inflows | — | `InventoryMovement.quantity` when type INFLOW; credit note `cac:CreditNoteLine/cbc:CreditedQuantity` | `inflow` | Positive or 0.00 | AC-56 |
+| 18 | Outflows | — | `cac:InvoiceLine/cbc:InvoicedQuantity`; legacy `salida` | `outflow` | Negative or 0.00 | AC-56 |
+| — | Final balance (printed format) | — | Internal: previous balance + inflow + outflow | `finalBalance` | Not in the TXT | AC-51, AC-56 |
+| 19 | Status | — | Internal: 1 Period, 8/9 previous Period | `status` | — | AC-58 |
+
+## K. Catalog 03 (UBL `@unitCode`) ↔ PLE Table 6
+
+`UnitOfMeasure` is a closed enum of the Catalog 03 codes that also exist in Table 6 ([RS 169-2015 Annex 3](https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)), so the equivalence is 1:1 for every accepted value and the 12.1 export never needs a conversion. A unit outside this list is rejected by the contract (400) before reaching the domain.
+
+| Catalog 03 (UBL) | Table 6 (PLE 12.1) | Unit |
+|---|---|---|
+| `4A` | `4A` | Bobbins |
+| `BJ` | `BJ` | Bucket |
+| `BLL` | `BLL` | Barrels |
+| `BG` | `BG` | Bag |
+| `BO` | `BO` | Bottles |
+| `BX` | `BX` | Box |
+| `CT` | `CT` | Cartons |
+| `CMK` | `CMK` | Square centimetre |
+| `CMQ` | `CMQ` | Cubic centimetre |
+| `CMT` | `CMT` | Centimetre |
+| `CEN` | `CEN` | Hundred units |
+| `CY` | `CY` | Cylinder |
+| `CJ` | `CJ` | Cones |
+| `DZN` | `DZN` | Dozen |
+| `DZP` | `DZP` | Dozen pack |
+| `BE` | `BE` | Bundle |
+| `GLI` | `GLI` | Imperial gallon |
+| `GRM` | `GRM` | Gram |
+| `GRO` | `GRO` | Gross |
+| `HLT` | `HLT` | Hectolitre |
+| `LEF` | `LEF` | Leaf |
+| `SET` | `SET` | Set |
+| `KGM` | `KGM` | Kilogram |
+| `KTM` | `KTM` | Kilometre |
+| `KWH` | `KWH` | Kilowatt hour |
+| `KT` | `KT` | Kit |
+| `CA` | `CA` | Cans |
+| `LBR` | `LBR` | Pounds |
+| `LTR` | `LTR` | Litre |
+| `MWH` | `MWH` | Megawatt hour |
+| `MTR` | `MTR` | Metre |
+| `MTK` | `MTK` | Square metre |
+| `MTQ` | `MTQ` | Cubic metre |
+| `MGM` | `MGM` | Milligrams |
+| `MLT` | `MLT` | Millilitre |
+| `MMT` | `MMT` | Millimetre |
+| `MMK` | `MMK` | Square millimetre |
+| `MMQ` | `MMQ` | Cubic millimetre |
+| `MLL` | `MLL` | Thousands |
+| `UM` | `UM` | Million units |
+| `ONZ` | `ONZ` | Ounces |
+| `PF` | `PF` | Pallets |
+| `PK` | `PK` | Package |
+| `PR` | `PR` | Pair |
+| `FOT` | `FOT` | Feet |
+| `FTK` | `FTK` | Square feet |
+| `FTQ` | `FTQ` | Cubic feet |
+| `C62` | `C62` | Pieces |
+| `PG` | `PG` | Plates |
+| `ST` | `ST` | Sheet |
+| `INH` | `INH` | Inches |
+| `RM` | `RM` | Ream |
+| `DR` | `DR` | Drum |
+| `STN` | `STN` | Short ton |
+| `LTN` | `LTN` | Long ton |
+| `TNE` | `TNE` | Tonnes |
+| `TU` | `TU` | Tubes |
+| `NIU` | `NIU` | Unit (goods) |
+| `ZZ` | `ZZ` | Unit (services) |
+| `GLL` | `GLL` | US gallon |
+| `YRD` | `YRD` | Yard |
+| `YDK` | `YDK` | Square yard |
 
 ## Gaps in the matrix
 - Maximum decimal precision of unit values and rounding tolerance of totals (error 4314): confirm in the current validation Excel.

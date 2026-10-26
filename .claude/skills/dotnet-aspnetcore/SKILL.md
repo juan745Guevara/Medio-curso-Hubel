@@ -11,10 +11,10 @@ description: C# / .NET 10 and ASP.NET Core MVC best practices applied to the inv
 
 3. **Enforced dependency rule.** `Architecture.Tests` project with NetArchTest or ArchUnitNET: "Domain does not depend on Microsoft.EntityFrameworkCore, Microsoft.AspNetCore or Infrastructure". The build fails if it breaks.
 
-4. **XML and signature with the standard library.** `System.Xml.Schema.XmlSchemaSet` for XSD and `System.Security.Cryptography.Xml.SignedXml` for XMLDSig, behind `XsdValidatorPort` and `SignerPort`. Never reformat the XML after signing (`PreserveWhitespace = true`).
+4. **XML from XSD classes, signature with the standard library.** UBL classes generated from the official XSDs (XmlSchemaClassGenerator) and serialized with `XmlSerializer` (ADR 0005), never templates; `System.Xml.Schema.XmlSchemaSet` for XSD and `System.Security.Cryptography.Xml.SignedXml` for XMLDSig, behind `UblGeneratorPort`, `XsdValidatorPort` and `SignerPort`. Never reformat the XML after signing (`PreserveWhitespace = true`).
 
 5. **Background work and resilience.** Resends, daily summary and ticket queries as `BackgroundService` (or Hangfire if a dashboard is needed). The SUNAT SOAP client with Polly: 30 s timeout (AC-19), retries with backoff and circuit breaker; when retries are exhausted → PENDING_RESEND.
 
-6. **Secrets outside the code.** `dotnet user-secrets` in development; in production, encrypted environment variables or a secret store. The .pfx is loaded from there (NFR-05).
+6. **Secrets outside the code.** `dotnet user-secrets` in development; in production, encrypted environment variables or a secret store. The .pfx is loaded from there (NFR-05, ADR 0006).
 
 7. **RFC 9457 errors.** `AddProblemDetails()` and a single mapping of domain exceptions → stable `code` (`INVALID_RUC`, `INVALID_XSD`…) matching `invoicing-api.yaml`.

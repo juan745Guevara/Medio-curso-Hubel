@@ -1,6 +1,6 @@
 # Architecture: MVC with a Hexagonal vision
 
-Deliverable 2 of the exam. Decisions in [ADR 0001](../adr/0001-architecture.md), [ADR 0002](../adr/0002-technology-stack.md), [ADR 0003](../adr/0003-validate-xsd-before-signing.md) and [ADR 0004](../adr/0004-msi-apk-packaging.md).
+Deliverable 2 of the exam. Decisions in [ADR 0001](../adr/0001-architecture.md), [ADR 0002](../adr/0002-technology-stack.md), [ADR 0003](../adr/0003-validate-xsd-before-signing.md), [ADR 0004](../adr/0004-msi-apk-packaging.md), [ADR 0005](../adr/0005-ubl-from-xsd-generated-classes.md) and [ADR 0006](../adr/0006-certificate-custody.md).
 
 The idea in one line: **today it is an MVC monolith; its "M" is already built as a hexagon**, so the future migration does not rewrite rules, it only relocates adapters.
 
@@ -131,7 +131,7 @@ flowchart LR
   end
   subgraph IA[Interface Adapters]
     CTRL[MVC Controllers]
-    GW[Repositories · SUNAT/OSE client · UBL generator · Signer]
+    GW[Repositories · SUNAT/OSE client · UBL mapper + XSD classes · Signer]
   end
   subgraph UC[Use Cases]
     UCS[IssueDocument · IssueNote · SubmitVoiding · MigrateBatch]
@@ -210,7 +210,8 @@ sequenceDiagram
 src/
   Abc.Invoicing.Domain/          # entities, value objects, domain services — no dependencies
   Abc.Invoicing.Application/     # use cases (input ports) and output port interfaces
-  Abc.Invoicing.Infrastructure/  # EF Core/PostgreSQL, UBL, XSD, XMLDSig, SUNAT/OSE client, PDF, SMTP
+  Abc.Invoicing.Infrastructure/  # EF Core/PostgreSQL, UblMapper, XSD, XMLDSig, SUNAT/OSE client, PDF, SMTP
+  Abc.Ubl/                       # classes generated from the OASIS UBL 2.1 and SUNAT XSDs (ADR 0005), never edited
   Abc.Invoicing.Web/             # ASP.NET Core MVC: Controllers, Views (admin), DI composition
   Abc.Contracts/                 # DTOs generated from specs/contracts/schemas (shared)
   Abc.Client.Maui/               # Windows (MSI) and Android (APK) app
@@ -228,11 +229,11 @@ tests/
 | TaxCalculator | FR-05, FR-06 |
 | RucValidator, IssuancePolicy | FR-02, FR-03, FR-04, FR-12, FR-36 |
 | SeriesRepository | FR-01 |
-| UblGenerator + AmountInWordsConverter | FR-07, FR-15 |
+| UblMapper + generated UBL classes (ADR 0005) + AmountInWordsConverter | FR-07, FR-15 |
 | XsdValidator | FR-08 |
 | Signer | FR-09 |
 | SunatValidator + Scheduled jobs | FR-10, FR-11, FR-23, FR-25, FR-26 |
 | NotePolicy | FR-18 to FR-22 |
 | PrintedRepresentation + Notifier | FR-13, FR-14 |
 | Migration | FR-28 to FR-35 |
-| Registers | FR-37 to FR-41 |
+| Registers (PLE 14.1 and 12.1 writers) | FR-37 to FR-44 |

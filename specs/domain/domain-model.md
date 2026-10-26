@@ -12,7 +12,7 @@ Separated from the start so that moving to microservices is just cutting along t
 | **Catalog** | Products, customers, SUNAT catalogs | Product, Buyer, SunatCatalog |
 | **Inventory** | Movements and stock card | InventoryMovement |
 | **Migration** | Batches and traceability to legacy data | MigrationBatch |
-| **Registers** | Sales register | (read view) |
+| **Registers** | Sales register (PLE 14.1) and stock card (PLE 12.1) | (read views: SalesRegisterRow, StockCard) |
 
 ## Class diagram
 
@@ -85,6 +85,8 @@ classDiagram
     +IgvTreatment igvTreatment
     +IscConfig isc
     +Boolean isPlasticBag
+    +Table5ExistenceType existenceType
+    +Text unspscCode
     +ProductStatus status
   }
   class PaymentTerms {
@@ -125,11 +127,20 @@ classDiagram
     <<aggregate root>>
     +Id id
     +ProductCode product
+    +EstablishmentCode establishment
     +Date date
     +MovementType type
+    +Table12OperationType operationType
     +Decimal quantity
-    +Text supportingDocument
+    +SupportingDocument supportingDocument
     +MigrationOrigin origin
+  }
+  class SupportingDocument {
+    <<value object>>
+    +Table10DocumentType type
+    +Text series
+    +Text number
+    +Date issueDate
   }
   class MigrationOrigin {
     <<value object>>
@@ -159,6 +170,7 @@ classDiagram
   PaymentTerms *-- Installment
   Item ..> Product
   InventoryMovement *-- "0..1" MigrationOrigin
+  InventoryMovement *-- "1" SupportingDocument
   MigrationOrigin ..> MigrationBatch
   InventoryMovement ..> ElectronicDocument : supports
 ```
@@ -172,10 +184,15 @@ classDiagram
 | `DocumentNumber` | Series (4) + Sequence (1..99,999,999) | Series F### / B### by type; notes use the letter of the modified document | FR-01, FR-20 |
 | `Money` | Exact decimal + Currency | Never floating point; half-up rounding to 2 decimals in totals | Constitution 7 |
 | `Currency` | ISO 4217 code (cat. 02) | PEN or USD | FR-07 |
-| `UnitOfMeasure` | UN/ECE Rec 20 code (cat. 03) | Must exist in the catalog | FR-07 |
+| `UnitOfMeasure` | Closed enum of Catalog 03 (UN/ECE Rec 20) codes, 62 values in `common.schema.json` | Must be one of the enum values; each one has the same code in PLE Table 6 (matrix §K) | FR-07, FR-40 |
 | `IgvTreatment` | Cat. 07 code | 10–17 taxed, 20–21 exempt, 30–37 non-taxable, 40 export | FR-05 |
 | `IscConfig` / `IscLine` | System (cat. 08) + rate or fixed amount | 01 → rate %; 02 → amount per unit; 03 → rate on (suggested retail price × 0.847) | FR-05 |
 | `OperationType` | Cat. 51 code | 0101 in this scope | FR-07 |
+| `Table5ExistenceType` | PLE Table 5 code | 01 goods for resale by default; required before the Product is used in format 12.1 | FR-40 |
+| `Table12OperationType` | PLE Table 12 code | 01 sale, 24 customer return, 16 opening balance, 99 other (legacy until classified) | FR-40, FR-42 |
+| `SupportingDocument` | Table 10 type + series + number + date | Type 00 with series "0" for legacy rows; 01/03/07/08 for Electronic documents | FR-35, FR-40 |
+| `EstablishmentCode` | 4-digit annex code of the RUC | Exists in the Issuer's establishments; same as `cbc:AddressTypeCode` | FR-40 |
+| `PlePeriod` | AAAAMM00 | Month 01–12 | FR-37, FR-40 |
 | `PaymentTerms` | Cash / Credit | Credit ⇒ ≥ 1 Installment and Σ installments = outstandingAmount | FR-12 |
 
 ## Electronic document life cycle

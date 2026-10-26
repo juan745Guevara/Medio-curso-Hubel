@@ -44,5 +44,10 @@ Always use these terms, with this meaning, in every file. Peruvian legal terms k
 | **Legacy record** | Row of the previous software: fecha, ingreso, salida, producto, nro_documento (date, inflow, outflow, product, document number). |
 | **Migration batch** | Identified migration run, with source, date, counts and hash. |
 | **Inventory movement** | Inflow or outflow of a Product with date, quantity and supporting document. |
-| **Sales register** | Formal register of the Electronic documents issued in a Period (RS 234-2006). |
+| **Sales register** | Formal register of the Electronic documents issued in a Period (RS 234-2006), in PLE format 14.1. |
+| **Stock card** (kardex) | Movements of one Product in a Period and establishment in PLE format 12.1, with the balance after each movement. |
+| **PLE** | Programa de Libros Electrónicos: SUNAT's electronic books (RS 286-2009); each book is a pipe-separated TXT with a fixed name `LE<RUC><AAAAMM00><book>…txt`. |
+| **PLE table** | Code tables of the electronic books: 2 identity documents, 4 currencies, 5 stock types, 6 units, 10 document types, 12 operation types, 13 stock catalogs. |
+| **CUO** | Código Único de Operación: identifier of the operation in the books (up to 40 characters); in this system, the internal UUID. |
+| **Establishment** | Annex establishment registered in the RUC (4-digit code, 0000 = tax address). |
 | **Period** | Tax month (YYYY-MM). |

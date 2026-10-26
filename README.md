@@ -6,13 +6,14 @@ Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-
 
 | Requested item (§4) | File(s) |
 |---|---|
-| **1. Domain Model and Contracts (DTOs / Schemas)** | [`specs/domain/domain-model.md`](specs/domain/domain-model.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (11 JSON Schema 2020-12) |
-| **2. MVC Architecture Diagrams with a Hexagonal vision** | [`specs/architecture/architecture.md`](specs/architecture/architecture.md) (C4 levels 1 and 2, MVC view, hexagonal view, Clean Architecture equivalence, migration path to microservices, sequence) · [ADR 0001](specs/adr/0001-architecture.md) |
-| **3. Endpoint / Service Specification (API Contracts)** | [`specs/contracts/invoicing-api.yaml`](specs/contracts/invoicing-api.yaml) (OpenAPI 3.1) · [`specs/contracts/ports.md`](specs/contracts/ports.md) (ports and SUNAT contract) |
-| **4. SUNAT ↔ UBL Regulatory Traceability Matrix** | [`specs/traceability/regulatory-matrix.md`](specs/traceability/regulatory-matrix.md) (49 rows: data → regulation → catalog → XSD cardinality → UBL tag → DTO → SUNAT error → AC) · [`specs/traceability/traceability.md`](specs/traceability/traceability.md) (US → FR → AC → UC → test) |
+| **1. Domain Model and Contracts (DTOs / Schemas)** | [`specs/domain/domain-model.md`](specs/domain/domain-model.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (13 JSON Schema 2020-12; `UnitOfMeasure` closed to the Catalog 03 enum) |
+| **2. MVC Architecture Diagrams with a Hexagonal vision** | [`specs/architecture/architecture.md`](specs/architecture/architecture.md) (C4 levels 1 and 2, MVC view, hexagonal view, Clean Architecture equivalence, migration path to microservices, sequence) · [ADR 0001](specs/adr/0001-architecture.md) · [ADR 0005](specs/adr/0005-ubl-from-xsd-generated-classes.md) (UBL from XSD-generated classes) · [ADR 0006](specs/adr/0006-certificate-custody.md) (certificate custody) |
+| **3. Endpoint / Service Specification (API Contracts)** | [`specs/contracts/invoicing-api.yaml`](specs/contracts/invoicing-api.yaml) (OpenAPI 3.1, 22 operations, 401/403/404/400/202/502/503 declared; Redocly and Spectral lint: 0 errors, 0 warnings) · [`specs/contracts/ports.md`](specs/contracts/ports.md) (ports and SUNAT contract) |
+| **4. SUNAT ↔ UBL Regulatory Traceability Matrix** | [`specs/traceability/regulatory-matrix.md`](specs/traceability/regulatory-matrix.md) (§A–H, 49 rows: data → regulation → catalog → XSD cardinality → UBL tag → DTO → SUNAT error → AC; §I PLE 14.1 and §J PLE 12.1 with the UBL origin of every field; §K Catalog 03 ↔ Table 6) · [`specs/traceability/traceability.md`](specs/traceability/traceability.md) (US → FR → AC → UC → test) |
 | Use cases (§3) | [`specs/use-cases/use-cases.md`](specs/use-cases/use-cases.md) |
 | Legacy and migration (§2) | [`specs/migration/legacy-mapping.md`](specs/migration/legacy-mapping.md) · [feature 003](specs/features/003-migrate-legacy-data/spec.md) |
 | Catalog 8 (§2, "key point") | Matrix row 33 · [`domain-model.md`](specs/domain/domain-model.md) (`IscConfig`) · AC-09, AC-10 · skill [`sunat-einvoicing`](.claude/skills/sunat-einvoicing/SKILL.md) §2 |
+| PLE books 14.1 and 12.1 | [feature 004](specs/features/004-generate-sales-register/spec.md) · [`sales-register-row.schema.json`](specs/contracts/schemas/sales-register-row.schema.json) · [`stock-card.schema.json`](specs/contracts/schemas/stock-card.schema.json) · matrix §I–K |
 | MSI / APK distribution (§2) | [ADR 0004](specs/adr/0004-msi-apk-packaging.md) · NFR-04 |
 
 ## Reading order
@@ -20,7 +21,7 @@ Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-
 2. [`00-constitution.md`](specs/00-constitution.md) and [`glossary.md`](specs/glossary.md).
 3. Specs: [001 issue](specs/features/001-issue-document/spec.md) · [002 notes and voids](specs/features/002-manage-notes-and-voids/spec.md) · [003 migrate legacy](specs/features/003-migrate-legacy-data/spec.md) · [004 sales register](specs/features/004-generate-sales-register/spec.md), each with its `research.md`.
 4. Deliverables 1 to 4 (table above).
-5. ADR 0001 to 0004 and each feature's `review.md`.
+5. ADR 0001 to 0006 and each feature's `review.md`.
 
 ## Numbers
 
@@ -29,12 +30,12 @@ Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-
 | 001 Issue document | 6 | 17 | 7 | 27 | 8 |
 | 002 Notes, voids, summary | 5 | 10 | 2 | 11 | 4 |
 | 003 Migrate legacy | 3 | 9 | 2 | 9 | 5 |
-| 004 Sales register and stock card | 2 | 5 | 1 | 5 | 3 |
-| **Total** | **16** | **41** | **12** | **52** | **20** |
+| 004 Sales register (PLE 14.1) and stock card (PLE 12.1) | 2 | 8 | 1 | 13 | 3 |
+| **Total** | **16** | **44** | **12** | **60** | **20** |
 
 ## Architecture and stack
 - **Architecture** (origin: problem statement): MVC monolith whose Model is a hexagonal core (Domain ← Application ← Infrastructure), with bounded contexts ready to be split into microservices. [ADR 0001](specs/adr/0001-architecture.md).
-- **Stack** (origin: judgment, proposal): C# .NET 10 — ASP.NET Core MVC on the server, .NET MAUI for Windows (MSI with WiX) and Android (APK), PostgreSQL. Chosen for native XSD and XMLDSig and a single client–server language. [ADR 0002](specs/adr/0002-technology-stack.md).
+- **Stack** (origin: judgment, proposal): C# .NET 10 — ASP.NET Core MVC on the server, .NET MAUI for Windows (MSI with WiX) and Android (APK), PostgreSQL. Chosen for native XSD and XMLDSig and a single client–server language. The UBL XML is serialized from classes generated from the official XSDs ([ADR 0005](specs/adr/0005-ubl-from-xsd-generated-classes.md)). [ADR 0002](specs/adr/0002-technology-stack.md).
 
 ## Assumptions made
 - Documents are sent directly to SUNAT (SEE-Del contribuyente), with a swappable OSE adapter, until the provider is clarified.

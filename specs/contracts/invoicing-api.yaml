@@ -1,11 +1,24 @@
 openapi: 3.1.0
 info:
   title: ABC Electronic Invoicing API
-  version: 0.1.0
+  version: 0.2.0
   summary: Spec-first contract of the MVC monolith (API controllers) consumed by the Windows and Android apps.
   description: |
     Each operation names the FRs/ACs it covers. DTOs live in `schemas/` (JSON Schema 2020-12).
     Errors use RFC 9457 (`application/problem+json`). Taxes are always calculated by the server.
+
+    **Security:** every operation requires a JWT (`bearerAuth`) and answers `401` without a valid token
+    and `403` when the role is not allowed (roles in `specs/security.md`).
+
+    **Issuance outcomes:** `201` with the CDR result; `202` when the SUNAT validator does not answer in 30 s
+    (document stored as PENDING_RESEND and retried, FR-11, AC-19); `502` when the validator answers with a
+    service error or an unreadable CDR (also PENDING_RESEND); `503` when issuing is suspended (no valid
+    certificate, ADR 0006) and nothing is numbered.
+  contact:
+    name: ABC Software Corp — Architecture
+  license:
+    name: Proprietary — ABC Software Corp
+    url: https://abc-software.pe/license
 servers:
   - url: https://api.abc.local/v1
     description: Monolith server (ABC on-premise)
@@ -13,19 +26,26 @@ security:
   - bearerAuth: []
 tags:
   - name: Documents
+    description: Invoices (01) and sales receipts (03), their status, files and resend. Feature 001.
   - name: Notes
+    description: Credit notes (07) and debit notes (08). Feature 002.
   - name: Voids and summaries
+    description: Voiding notices, daily summaries of sales receipts and their tickets. Feature 002.
   - name: Catalog
+    description: Products and buyer document validation. Features 001 and 003.
   - name: Migration
+    description: Upload and reconciliation of legacy data batches. Feature 003.
   - name: Registers
+    description: PLE format 14.1 sales register and format 12.1 inventory register / stock card. Feature 004.
   - name: Configuration
+    description: Issuer, validator and digital certificate. Administrator only.
 paths:
   /documents:
     post:
       tags: [Documents]
       operationId: issueDocument
-      summary: Issues an invoice (01) or sales receipt (03)
-      description: "FR-01 to FR-15. AC-01 to AC-25. Calculates taxes, generates UBL 2.1 XML, validates XSD, signs and queues the submission."
+      summary: Issue an invoice (01) or sales receipt (03)
+      description: "FR-01 to FR-15. AC-01 to AC-25. Calculates taxes, generates the UBL 2.1 XML from the XSD-derived classes (ADR 0005), validates XSD, signs and sends. Roles: Salesperson, Administrator."
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -35,26 +55,31 @@ paths:
             schema: { $ref: './schemas/issue-document-request.schema.json' }
       responses:
         '201':
-          description: Issued. `status` may be ACCEPTED, OBSERVED, REJECTED or PENDING_RESEND.
+          description: Issued and answered by the validator. `status` is ACCEPTED, OBSERVED or REJECTED.
           headers:
-            Location: { schema: { type: string } }
+            Location: { $ref: '#/components/headers/Location' }
           content:
             application/json:
               schema: { $ref: './schemas/document-response.schema.json' }
+        '202': { $ref: '#/components/responses/AcceptedPendingResend' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
     get:
       tags: [Documents]
       operationId: listDocuments
-      summary: Lists electronic documents with filters
-      description: FR-27
+      summary: List electronic documents with filters
+      description: "FR-27. Roles: Salesperson, Administrator, Accountant."
       parameters:
-        - { name: type, in: query, schema: { $ref: './schemas/common.schema.json#/$defs/DocumentType' } }
-        - { name: status, in: query, schema: { $ref: './schemas/common.schema.json#/$defs/SunatStatus' } }
-        - { name: from, in: query, schema: { type: string, format: date } }
-        - { name: to, in: query, schema: { type: string, format: date } }
-        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+        - { name: type, in: query, description: Catalog 01 document type, schema: { $ref: './schemas/common.schema.json#/$defs/DocumentType' } }
+        - { name: status, in: query, description: SUNAT status, schema: { $ref: './schemas/common.schema.json#/$defs/SunatStatus' } }
+        - { name: from, in: query, description: Issue date from (inclusive), schema: { type: string, format: date } }
+        - { name: to, in: query, description: Issue date to (inclusive), schema: { type: string, format: date } }
+        - $ref: '#/components/parameters/Page'
       responses:
         '200':
           description: Page of results
@@ -62,15 +87,19 @@ paths:
             application/json:
               schema:
                 type: object
+                required: [items, total]
                 properties:
                   items: { type: array, items: { $ref: './schemas/document-response.schema.json' } }
-                  total: { type: integer }
+                  total: { type: integer, minimum: 0 }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /documents/{id}:
     get:
       tags: [Documents]
       operationId: getDocument
-      summary: Gets SUNAT status and CDR
-      description: FR-27, AC-38
+      summary: Get a document with its SUNAT status and CDR
+      description: "FR-27, AC-38. Roles: Salesperson, Administrator, Accountant."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '200':
@@ -78,61 +107,86 @@ paths:
           content:
             application/json:
               schema: { $ref: './schemas/document-response.schema.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
   /documents/{id}/resend:
     post:
       tags: [Documents]
       operationId: resendDocument
-      summary: Resends a document in PENDING_RESEND
-      description: FR-11, FR-27, AC-38
+      summary: Resend a document in PENDING_RESEND
+      description: "FR-11, FR-27, AC-38. Roles: Salesperson, Administrator."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '202': { description: Resend queued }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
         '409': { $ref: '#/components/responses/Conflict' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /documents/{id}/xml:
     get:
       tags: [Documents]
       operationId: downloadXml
-      description: FR-13, AC-23
+      summary: Download the signed UBL XML
+      description: "FR-13, AC-23. Roles: Salesperson, Administrator, Accountant."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '200': { description: Signed XML, content: { application/xml: { schema: { type: string } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /documents/{id}/cdr:
     get:
       tags: [Documents]
       operationId: downloadCdr
-      description: FR-13, AC-23
+      summary: Download the CDR (SUNAT receipt) ZIP
+      description: "FR-13, AC-23. 404 also when the document has no CDR yet (PENDING_RESEND). Roles: Salesperson, Administrator, Accountant."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '200': { description: CDR ZIP, content: { application/zip: { schema: { type: string, contentEncoding: base64 } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /documents/{id}/pdf:
     get:
       tags: [Documents]
       operationId: downloadPdf
-      description: Printed representation with QR. FR-13, AC-23
+      summary: Download the printed representation (PDF with QR)
+      description: "FR-13, AC-23. Roles: Salesperson, Administrator, Accountant."
       parameters:
         - $ref: '#/components/parameters/Id'
-        - { name: format, in: query, schema: { enum: [A4, TICKET_80MM], default: A4 } }
+        - { name: format, in: query, description: Paper format, schema: { type: string, enum: [A4, TICKET_80MM], default: A4 } }
       responses:
         '200': { description: PDF, content: { application/pdf: { schema: { type: string, contentEncoding: base64 } } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /documents/{id}/send-email:
     post:
       tags: [Documents]
       operationId: sendEmail
-      description: FR-14, AC-24
+      summary: Send the PDF and XML to the buyer by e-mail
+      description: "FR-14, AC-24. Roles: Salesperson, Administrator."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       requestBody:
+        required: true
         content:
           application/json:
-            schema: { type: object, properties: { email: { type: string, format: email } } }
+            schema: { type: object, required: [email], properties: { email: { type: string, format: email } } }
       responses:
         '202': { description: Delivery queued }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /notes:
     post:
       tags: [Notes]
       operationId: issueNote
-      summary: Issues a credit note (07) or debit note (08)
-      description: FR-18 to FR-22. AC-28 to AC-33.
+      summary: Issue a credit note (07) or debit note (08)
+      description: "FR-18 to FR-22. AC-28 to AC-33. Same outcomes as issueDocument. Role: Administrator."
       parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
       requestBody:
         required: true
@@ -141,18 +195,26 @@ paths:
             schema: { $ref: './schemas/note-request.schema.json' }
       responses:
         '201':
-          description: Note issued
+          description: Note issued and answered by the validator
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
           content:
             application/json:
               schema: { $ref: './schemas/document-response.schema.json' }
+        '202': { $ref: '#/components/responses/AcceptedPendingResend' }
         '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /voids:
     post:
       tags: [Voids and summaries]
       operationId: submitVoiding
-      description: FR-23, FR-24. AC-34, AC-35.
+      summary: Send a voiding notice (RA) for accepted documents
+      description: "FR-23, FR-24. AC-34, AC-35. Role: Administrator."
       requestBody:
         required: true
         content:
@@ -164,13 +226,20 @@ paths:
           content:
             application/json:
               schema: { $ref: './schemas/batch-submission-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /daily-summaries:
     post:
       tags: [Voids and summaries]
       operationId: generateDailySummary
-      description: FR-25. AC-36. Normally triggered by the scheduler at the end of the day.
+      summary: Generate and send the daily summary (RC) of a date
+      description: "FR-25. AC-36. Normally triggered by the scheduler at the end of the day. Role: Administrator."
       requestBody:
+        required: true
         content:
           application/json:
             schema: { type: object, required: [date], properties: { date: { type: string, format: date } } }
@@ -180,11 +249,17 @@ paths:
           content:
             application/json:
               schema: { type: array, items: { $ref: './schemas/batch-submission-response.schema.json' } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
   /batch-submissions/{id}:
     get:
       tags: [Voids and summaries]
       operationId: getBatchSubmission
-      description: Ticket status. FR-26, AC-37.
+      summary: Get the ticket status of a summary or voiding notice
+      description: "FR-26, AC-37. Role: Administrator."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '200':
@@ -192,11 +267,15 @@ paths:
           content:
             application/json:
               schema: { $ref: './schemas/batch-submission-response.schema.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /buyers/validate-document:
     post:
       tags: [Catalog]
       operationId: validateDocument
-      description: Validates RUC format and check digit. FR-02, AC-03, AC-04.
+      summary: Validate a buyer identity document (RUC check digit)
+      description: "FR-02, AC-03, AC-04. Roles: Salesperson, Administrator."
       requestBody:
         required: true
         content:
@@ -208,43 +287,61 @@ paths:
           content:
             application/json:
               schema: { type: object, required: [valid], properties: { valid: { type: boolean }, reason: { type: string } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /products:
     get:
       tags: [Catalog]
       operationId: listProducts
-      responses: { '200': { description: Product list } }
+      summary: List products
+      description: "FR-36. Roles: Salesperson, Administrator, Accountant."
+      parameters:
+        - { name: status, in: query, description: Product status, schema: { type: string, enum: [ACTIVE, PENDING_CLASSIFICATION] } }
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: Page of products
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items: { type: array, items: { $ref: './schemas/product.schema.json' } }
+                  total: { type: integer, minimum: 0 }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
     post:
       tags: [Catalog]
       operationId: createProduct
-      description: IGV treatment (cat. 07), ISC system (cat. 08), ICBPER bag. FR-05, FR-36.
+      summary: Create a product with its tax and PLE classification
+      description: "IGV treatment (cat. 07), ISC system (cat. 08), ICBPER bag, Table 5 stock type and UNSPSC. FR-05, FR-36, FR-43. Role: Administrator."
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              required: [code, description, unit, igvTreatment]
-              properties:
-                code: { type: string, maxLength: 30 }
-                description: { type: string, maxLength: 500 }
-                unit: { $ref: './schemas/common.schema.json#/$defs/UnitOfMeasure' }
-                igvTreatment: { $ref: './schemas/common.schema.json#/$defs/IgvTreatment' }
-                isc:
-                  type: object
-                  required: [system]
-                  properties:
-                    system: { $ref: './schemas/common.schema.json#/$defs/IscSystem' }
-                    rate: { type: string, description: "Percentage, for systems 01 and 03" }
-                    fixedAmount: { type: string, description: "Per unit, for system 02" }
-                isPlasticBag: { type: boolean, default: false }
+            schema: { $ref: './schemas/product.schema.json' }
       responses:
-        '201': { description: Created }
+        '201':
+          description: Created
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: './schemas/product.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/Unprocessable' }
   /migrations:
     post:
       tags: [Migration]
       operationId: uploadMigrationBatch
-      description: FR-28 to FR-35. AC-39 to AC-46.
+      summary: Upload a legacy data file as a migration batch
+      description: "FR-28 to FR-35. AC-39 to AC-46. Role: Administrator."
       requestBody:
         required: true
         content:
@@ -254,17 +351,25 @@ paths:
               required: [file]
               properties:
                 file: { type: string, contentMediaType: application/octet-stream }
+                establishmentCode: { $ref: './schemas/common.schema.json#/$defs/EstablishmentCode' }
       responses:
         '202':
           description: Batch created and in progress
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
           content:
             application/json:
               schema: { $ref: './schemas/migration-batch-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /migrations/{id}:
     get:
       tags: [Migration]
       operationId: getMigrationBatch
-      description: Reconciliation report. FR-34, AC-45.
+      summary: Get a migration batch and its reconciliation
+      description: "FR-34, AC-45. Role: Administrator."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
         '200':
@@ -272,54 +377,108 @@ paths:
           content:
             application/json:
               schema: { $ref: './schemas/migration-batch-response.schema.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /registers/sales/{period}:
     get:
       tags: [Registers]
       operationId: getSalesRegister
-      description: FR-37 to FR-39, FR-41. AC-48 to AC-50, AC-52.
+      summary: Get or export the PLE 14.1 sales register of a period
+      description: "FR-37 to FR-39, FR-41, FR-44. AC-48 to AC-50, AC-52 to AC-55, AC-57, AC-60. `Accept: application/json` returns the rows; `Accept: text/plain` returns the PLE TXT file (fields 1–35 separated by `|`). Roles: Accountant, Administrator."
       parameters:
-        - { name: period, in: path, required: true, schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' } }
+        - $ref: '#/components/parameters/Period'
       responses:
         '200':
-          description: Period register
+          description: Register of the period
+          headers:
+            Content-Disposition:
+              description: "For text/plain: attachment; filename=LE<RUC><AAAAMM00>140100001<content><currency>1.txt"
+              schema: { type: string }
           content:
             application/json:
               schema: { type: array, items: { $ref: './schemas/sales-register-row.schema.json' } }
-            text/csv:
+            text/plain:
               schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /registers/inventory/{period}:
+    get:
+      tags: [Registers]
+      operationId: getInventoryRegister
+      summary: Get or export the PLE 12.1 inventory register of a period
+      description: "FR-42, FR-43. AC-58, AC-59. `Accept: application/json` returns one stock card per product and establishment; `Accept: text/plain` returns the PLE TXT file (fields 1–19). Roles: Accountant, Administrator."
+      parameters:
+        - $ref: '#/components/parameters/Period'
+        - $ref: '#/components/parameters/Establishment'
+      responses:
+        '200':
+          description: Inventory register of the period
+          headers:
+            Content-Disposition:
+              description: "For text/plain: attachment; filename=LE<RUC><AAAAMM00>120100001<content><currency>1.txt"
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/stock-card.schema.json' } }
+            text/plain:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
   /products/{code}/stock-card:
     get:
       tags: [Registers]
       operationId: getStockCard
-      description: FR-40. AC-51.
+      summary: Get a product's stock card (PLE 12.1 with running balance)
+      description: "FR-40. AC-51, AC-56. Roles: Accountant, Administrator."
       parameters:
-        - { name: code, in: path, required: true, schema: { type: string } }
+        - { name: code, in: path, required: true, description: Product code, schema: { type: string, maxLength: 24 } }
+        - $ref: '#/components/parameters/PeriodQuery'
+        - $ref: '#/components/parameters/Establishment'
       responses:
-        '200': { description: Movements and balance }
+        '200':
+          description: Stock card with the 12.1 fields and the balance after each movement
+          content:
+            application/json:
+              schema: { $ref: './schemas/stock-card.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /configuration/issuer:
     put:
       tags: [Configuration]
       operationId: configureIssuer
-      description: "RUC, business name, address, validator (SUNAT or OSE), environment (beta/production). NFR-07. Administrator role."
+      summary: Configure the issuer, validator and environment
+      description: "RUC, business name, establishment, validator (SUNAT or OSE), environment (beta/production). NFR-07. Role: Administrator."
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [ruc, businessName, validator, environment]
+              required: [ruc, businessName, establishmentCode, validator, environment]
               properties:
                 ruc: { $ref: './schemas/common.schema.json#/$defs/Ruc' }
-                businessName: { type: string }
-                validator: { enum: [SUNAT, OSE] }
-                environment: { enum: [BETA, PRODUCTION] }
+                businessName: { type: string, maxLength: 100 }
+                establishmentCode: { $ref: './schemas/common.schema.json#/$defs/EstablishmentCode' }
+                validator: { type: string, enum: [SUNAT, OSE] }
+                environment: { type: string, enum: [BETA, PRODUCTION] }
       responses:
         '204': { description: Saved }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
   /configuration/certificate:
     put:
       tags: [Configuration]
       operationId: uploadCertificate
-      description: Uploads the .pfx; stored encrypted and never returned. NFR-05.
+      summary: Upload or replace the digital certificate (.pfx)
+      description: "Stored encrypted on the server and never returned (ADR 0006). NFR-05. Role: Administrator. 422 INVALID_CERTIFICATE when it does not open, has no private key, its RUC differs from the issuer's or it is expired."
       requestBody:
         required: true
         content:
@@ -332,28 +491,80 @@ paths:
                 password: { type: string, format: password }
       responses:
         '204': { description: Valid certificate loaded }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/Unprocessable' }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   parameters:
-    Id: { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+    Id: { name: id, in: path, required: true, description: Internal UUID of the resource, schema: { type: string, format: uuid } }
+    Page: { name: page, in: query, description: Page number (1-based), schema: { type: integer, minimum: 1, default: 1 } }
+    Period:
+      name: period
+      in: path
+      required: true
+      description: Period as YYYY-MM (exported as AAAAMM00 in the PLE)
+      schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' }
+    PeriodQuery:
+      name: period
+      in: query
+      required: true
+      description: Period as YYYY-MM
+      schema: { type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$' }
+    Establishment:
+      name: establishment
+      in: query
+      required: false
+      description: Annex establishment code of the RUC; default 0000 (tax address)
+      schema: { $ref: './schemas/common.schema.json#/$defs/EstablishmentCode' }
     IdempotencyKey:
       name: Idempotency-Key
       in: header
       required: false
       description: "UUID generated by the client for each issuance attempt. If it arrives again, the server returns the same document and does not assign a new sequence number (prevents double issuance on retries)."
       schema: { type: string, format: uuid }
+  headers:
+    Location:
+      description: URL of the created resource
+      schema: { type: string, format: uri-reference }
+    RetryAfter:
+      description: Seconds after which the client may retry
+      schema: { type: integer, minimum: 1 }
   responses:
+    AcceptedPendingResend:
+      description: "The SUNAT validator did not answer in 30 s. The document is numbered, signed and stored as PENDING_RESEND; it is retried automatically (FR-11, AC-19)."
+      headers:
+        Location: { $ref: '#/components/headers/Location' }
+      content:
+        application/json:
+          schema: { $ref: './schemas/document-response.schema.json' }
     BadRequest:
-      description: The JSON does not match the schema
+      description: The request does not match the schema (body, path or query)
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Unauthorized:
+      description: Missing, expired or invalid JWT
+      headers:
+        WWW-Authenticate: { description: Bearer challenge, schema: { type: string } }
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    Forbidden:
+      description: The user's role is not allowed to perform this operation
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     NotFound:
-      description: Not found
+      description: The resource does not exist (or, for downloads, the file is not available yet)
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     Conflict:
-      description: "State conflict (sequence number, note on a non-accepted document, resend of an already accepted document). AC-02, AC-30."
+      description: "State conflict (sequence number, note on a non-accepted document, resend of an already accepted document, duplicate product or batch). AC-02, AC-30, AC-44."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     Unprocessable:
-      description: "Business rule violated: INVALID_RUC, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
+      description: "Business rule violated: INVALID_RUC, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT, INVALID_CERTIFICATE, PLE_INCOMPLETE_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    BadGateway:
+      description: "The SUNAT validator or OSE answered with a service error (SUNAT codes 0100–0199) or an unreadable CDR. The document, if any, stays PENDING_RESEND; `detail` carries its id and `sunatCode` the validator's code."
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
+    ServiceUnavailable:
+      description: "Issuing is suspended (no valid digital certificate, ADR 0006, or validator in maintenance). Nothing is numbered; retry after `Retry-After`."
+      headers:
+        Retry-After: { $ref: '#/components/headers/RetryAfter' }
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }

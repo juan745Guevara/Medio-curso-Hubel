@@ -50,8 +50,8 @@ flowchart LR
 | UC-11 | Configure issuer | Administrator | Go-live | RUC, business name, address, Series, Certificate, SUNAT/OSE, beta/production | Expired certificate | NFR-05, NFR-07 |
 | UC-12 | Manage products | Administrator | Create or change | Code, description, unit (cat. 03), IGV treatment (cat. 07), ISC system (cat. 08), ICBPER bag | Product PENDING_CLASSIFICATION | FR-05, FR-36 |
 | UC-13 | Migrate legacy data | Administrator | Implementation | Upload file → Batch → validate rows → migrate → reconcile | Rejected rows; duplicates | FR-28 to FR-36 |
-| UC-14 | Sales register | Accountant | Month-end | Choose Period → list → export | Pending documents | FR-37 to FR-39, FR-41 |
-| UC-15 | View stock card | Accountant / Administrator | Stock control | Choose Product → movements and balance | — | FR-40 |
+| UC-14 | Sales register and inventory register | Accountant | Month-end | Choose Period → list in format 14.1 / 12.1 → export PLE TXT | Pending documents; Product without Table 5 stock type | FR-37 to FR-39, FR-41 to FR-44 |
+| UC-15 | View stock card | Accountant / Administrator | Stock control | Choose Product, Period and establishment → format 12.1 movements and running balance | — | FR-40 |
 
 ## What users report (and how the design covers it)
 

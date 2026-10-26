@@ -2,65 +2,229 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/sales-register-row.schema.json",
   "title": "SalesRegisterRow",
-  "description": "FR-37 to FR-39",
+  "description": "One row of the Sales register in SUNAT PLE format 14.1 (Registro de Ventas e Ingresos, book code 140100), structure of RS 108-2020/SUNAT Annex IV, 35 fields in order. FR-37 to FR-39, FR-41. Each property cites its PLE field number; the UBL origin of every field is in regulatory-matrix.md §I. The TXT export writes the fields in this order separated by '|'.",
   "type": "object",
   "required": [
+    "period",
+    "cuo",
+    "entryNumber",
     "issueDate",
-    "type",
+    "documentType",
     "series",
-    "sequenceNumber",
-    "buyer",
+    "number",
+    "customerDocumentType",
+    "customerDocumentNumber",
+    "customerName",
+    "exportValue",
     "taxedBase",
+    "taxedBaseDiscount",
+    "igv",
+    "igvDiscount",
     "exempt",
     "nonTaxable",
-    "igv",
     "isc",
+    "ivapBase",
+    "ivap",
     "icbper",
+    "otherCharges",
     "totalAmount",
-    "status"
+    "currency",
+    "exchangeRate",
+    "entryStatus",
+    "sunatStatus"
   ],
   "properties": {
-    "issueDate": {
-      "$ref": "common.schema.json#/$defs/Date"
+    "period": {
+      "$ref": "common.schema.json#/$defs/PlePeriod",
+      "description": "PLE 14.1 field 1. Period of the entry, from cbc:IssueDate."
     },
-    "type": {
-      "$ref": "common.schema.json#/$defs/DocumentType"
+    "cuo": {
+      "$ref": "common.schema.json#/$defs/Cuo",
+      "description": "PLE 14.1 field 2. ElectronicDocument.id."
+    },
+    "entryNumber": {
+      "$ref": "common.schema.json#/$defs/EntryNumber",
+      "description": "PLE 14.1 field 3. 'M' + monthly sequence."
+    },
+    "issueDate": {
+      "$ref": "common.schema.json#/$defs/Date",
+      "description": "PLE 14.1 field 4. cbc:IssueDate. Exported as DD/MM/AAAA."
+    },
+    "dueDate": {
+      "$ref": "common.schema.json#/$defs/Date",
+      "description": "PLE 14.1 field 5. cbc:DueDate or the last cac:PaymentTerms/cbc:PaymentDueDate. Mandatory in PLE only for document type 14; filled when it exists."
+    },
+    "documentType": {
+      "$ref": "common.schema.json#/$defs/DocumentType",
+      "description": "PLE 14.1 field 6. Table 10 (same codes as Catalog 01 for 01, 03, 07, 08)."
     },
     "series": {
-      "$ref": "common.schema.json#/$defs/Series"
+      "$ref": "common.schema.json#/$defs/Series",
+      "description": "PLE 14.1 field 7. Prefix of cbc:ID."
     },
-    "sequenceNumber": {
-      "$ref": "common.schema.json#/$defs/SequenceNumber"
+    "number": {
+      "type": "string",
+      "pattern": "^[0-9]{1,8}$",
+      "description": "PLE 14.1 field 8. Number of cbc:ID, without leading zeros required."
     },
-    "buyer": {
-      "$ref": "common.schema.json#/$defs/IdentityDocument"
+    "finalNumber": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "PLE 14.1 field 9. Only for daily consolidation of sales receipts; ABC registers every document individually, so it is empty."
+    },
+    "customerDocumentType": {
+      "$ref": "common.schema.json#/$defs/Table2IdentityType",
+      "description": "PLE 14.1 field 10. cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID."
+    },
+    "customerDocumentNumber": {
+      "type": "string",
+      "maxLength": 15,
+      "description": "PLE 14.1 field 11. cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID."
+    },
+    "customerName": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "PLE 14.1 field 12. cac:PartyLegalEntity/cbc:RegistrationName."
+    },
+    "exportValue": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 13. TaxSubtotal with tax 9995 (export). 0.00 in ABC's scope."
     },
     "taxedBase": {
-      "$ref": "common.schema.json#/$defs/Amount"
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 14. TaxSubtotal tax 1000 cbc:TaxableAmount (does not include ISC)."
     },
-    "exempt": {
-      "$ref": "common.schema.json#/$defs/Amount"
-    },
-    "nonTaxable": {
-      "$ref": "common.schema.json#/$defs/Amount"
+    "taxedBaseDiscount": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 15. cac:AllowanceCharge with reason 02 (global discount affecting the base)."
     },
     "igv": {
-      "$ref": "common.schema.json#/$defs/Amount"
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 16. TaxSubtotal tax 1000 cbc:TaxAmount (IGV + IPM)."
+    },
+    "igvDiscount": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 17. IGV of field 15."
+    },
+    "exempt": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 18. TaxSubtotal tax 9997 cbc:TaxableAmount."
+    },
+    "nonTaxable": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 19. TaxSubtotal tax 9998 cbc:TaxableAmount."
     },
     "isc": {
-      "$ref": "common.schema.json#/$defs/Amount"
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 20. TaxSubtotal tax 2000 cbc:TaxAmount."
+    },
+    "ivapBase": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 21. Rice (IVAP, tax 1016); out of ABC's scope, 0.00."
+    },
+    "ivap": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 22. Rice (IVAP); out of ABC's scope, 0.00."
     },
     "icbper": {
-      "$ref": "common.schema.json#/$defs/Amount"
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 23. TaxSubtotal tax 7152 cbc:TaxAmount."
+    },
+    "otherCharges": {
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 24. TaxSubtotal tax 9999 + cbc:ChargeTotalAmount (outside the taxable base)."
     },
     "totalAmount": {
-      "$ref": "common.schema.json#/$defs/Amount"
+      "$ref": "common.schema.json#/$defs/PleAmount",
+      "description": "PLE 14.1 field 25. cac:LegalMonetaryTotal/cbc:PayableAmount; negative for credit notes."
     },
-    "status": {
-      "$ref": "common.schema.json#/$defs/SunatStatus"
+    "currency": {
+      "$ref": "common.schema.json#/$defs/Currency",
+      "description": "PLE 14.1 field 26. cbc:DocumentCurrencyCode (Table 4 = ISO 4217, same as Catalog 02)."
+    },
+    "exchangeRate": {
+      "$ref": "common.schema.json#/$defs/ExchangeRate",
+      "description": "PLE 14.1 field 27. SUNAT exchange rate of the issue date; 1.000 for PEN."
     },
     "modifiedDocument": {
-      "$ref": "common.schema.json#/$defs/DocumentNumber"
+      "type": "object",
+      "description": "PLE 14.1 fields 28 to 31. Mandatory when documentType is 07 or 08. Source: cac:BillingReference/cac:InvoiceDocumentReference.",
+      "required": [
+        "issueDate",
+        "documentType",
+        "series",
+        "number"
+      ],
+      "properties": {
+        "issueDate": {
+          "$ref": "common.schema.json#/$defs/Date",
+          "description": "Field 28. Issue date of the modified document."
+        },
+        "documentType": {
+          "$ref": "common.schema.json#/$defs/DocumentType",
+          "description": "Field 29. cbc:DocumentTypeCode (Table 10)."
+        },
+        "series": {
+          "$ref": "common.schema.json#/$defs/Series",
+          "description": "Field 30. Prefix of cbc:ID."
+        },
+        "number": {
+          "type": "string",
+          "pattern": "^[0-9]{1,8}$",
+          "description": "Field 31. Number of cbc:ID."
+        }
+      },
+      "additionalProperties": false
+    },
+    "contractId": {
+      "type": "string",
+      "maxLength": 12,
+      "description": "PLE 14.1 field 32. Only for consortia/joint ventures; empty for ABC."
+    },
+    "exchangeRateError": {
+      "type": "string",
+      "enum": [
+        "1"
+      ],
+      "description": "PLE 14.1 field 33. '1' if the exchange rate differs from SUNAT's for the date; otherwise empty."
+    },
+    "paidWithPaymentMeans": {
+      "type": "string",
+      "enum": [
+        "1"
+      ],
+      "description": "PLE 14.1 field 34. '1' if the document was paid with a payment means of Table 1; otherwise empty."
+    },
+    "entryStatus": {
+      "$ref": "common.schema.json#/$defs/EntryStatus141",
+      "description": "PLE 14.1 field 35. Derived from the SUNAT status and the period (regulatory-matrix.md §I)."
+    },
+    "sunatStatus": {
+      "$ref": "common.schema.json#/$defs/SunatStatus",
+      "description": "Internal, not exported to the TXT: used by FR-39 to flag and exclude documents."
     }
-  }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "documentType": {
+            "enum": [
+              "07",
+              "08"
+            ]
+          }
+        },
+        "required": [
+          "documentType"
+        ]
+      },
+      "then": {
+        "required": [
+          "modifiedDocument"
+        ]
+      }
+    }
+  ]
 }

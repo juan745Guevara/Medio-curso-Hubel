@@ -1,6 +1,6 @@
 ---
 name: ubl-21
-description: How to obtain, read and validate UBL 2.1 (OASIS UBL-Invoice-2.1.xsd and related), build the XML with SUNAT's Peruvian customization, sign it with XMLDSig and verify it. Use it for the regulatory matrix, the UBL generator and XSD/signature tests.
+description: How to obtain, read and validate UBL 2.1 (OASIS UBL-Invoice-2.1.xsd and related), build the XML with SUNAT's Peruvian customization, sign it with XMLDSig and verify it. Use it for the regulatory matrix, the UBL mapper over XSD-generated classes (ADR 0005) and XSD/signature tests.
 ---
 
 # UBL 2.1 for SUNAT
@@ -24,7 +24,27 @@ description: How to obtain, read and validate UBL 2.1 (OASIS UBL-Invoice-2.1.xsd
 - `minOccurs="0"` in OASIS does not mean optional for SUNAT: the real mandatory flag comes from Annex 9-A (column "SUNAT" of the matrix).
 - Minimum order for a SUNAT invoice: `UBLExtensions` → `UBLVersionID` → `CustomizationID` → `ID` → `IssueDate` → `IssueTime` → `DueDate` → `InvoiceTypeCode` → `Note` → `DocumentCurrencyCode` → … → `Signature` → `AccountingSupplierParty` → `AccountingCustomerParty` → … → `PaymentTerms` → `AllowanceCharge` → `TaxTotal` → `LegalMonetaryTotal` → `InvoiceLine`.
 
-## 3. Invoice skeleton
+## 3. Generate the XML from XSD-derived classes (ADR 0005)
+Never write the XML with templates or string concatenation.
+1. Generate the classes from the versioned XSDs with XmlSchemaClassGenerator (command in [ADR 0005](../../../specs/adr/0005-ubl-from-xsd-generated-classes.md)); `xsd.exe` is the fallback.
+2. `UblMapper` fills the generated objects from `ElectronicDocument`, row by row of the regulatory matrix:
+   ```csharp
+   // Illustrative: exact class/property names depend on the generator's naming option
+   var invoice = new InvoiceType {
+       UblVersionId = new UblVersionIdType { Value = "2.1" },
+       CustomizationId = new CustomizationIdType { Value = "2.0" },
+       Id = new IdType { Value = doc.Number.ToString() },
+       InvoiceTypeCode = new InvoiceTypeCodeType {
+           Value = "01", ListId = "0101", ListAgencyName = "PE:SUNAT",
+           ListName = "Tipo de Documento", ListUri = "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" },
+       // ... parties, TaxTotal, LegalMonetaryTotal, InvoiceLine
+   };
+   ```
+3. Serialize with `XmlSerializer` and the `cac`/`cbc`/`ext`/`ds` prefixes in an `XmlSerializerNamespaces`; `XmlWriterSettings { Encoding = new UTF8Encoding(false), Indent = false }`.
+4. The `ext:ExtensionContent` stays empty: the `SignerPort` inserts `ds:Signature` there afterwards.
+5. Validate the result against the same XSD (§4) before signing.
+
+Expected result (excerpt):
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -75,7 +95,7 @@ description: How to obtain, read and validate UBL 2.1 (OASIS UBL-Invoice-2.1.xsd
 ## 7. Common errors
 | Symptom | Typical cause |
 |---|---|
-| XSD: unexpected element | Sequence order changed |
+| XSD: unexpected element | XML written by hand or with a template instead of the generated classes (ADR 0005) |
 | Rejection due to totals | Line rounding differs from the total |
 | Invalid signature | XML modified or reformatted after signing (no pretty-print after signing) |
 | Inconsistent currency | `@currencyID` differs from `DocumentCurrencyCode` |

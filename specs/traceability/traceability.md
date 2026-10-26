@@ -56,5 +56,13 @@ One row per acceptance criterion across all features. Test names follow the C# (
 | 004 | US-15 | FR-39 | AC-50 | UC-14 | `Ac50_RejectedExcluded()` |
 | 004 | US-16 | FR-40 | AC-51 | UC-15 | `Ac51_StockCardWithMigratedData()` |
 | 004 | US-15 | FR-41 | AC-52 | UC-14 | `Ac52_Export()` |
+| 004 | US-15 | FR-37 | AC-53 | UC-14 | `Ac53_Format141FieldsOfAnInvoice()` |
+| 004 | US-15 | FR-38 | AC-54 | UC-14 | `Ac54_ModifiedDocumentOfACreditNote()` |
+| 004 | US-15 | FR-37 | AC-55 | UC-14 | `Ac55_DocumentInDollars()` |
+| 004 | US-16 | FR-40 | AC-56 | UC-15 | `Ac56_Format121FieldsWithRunningBalance()` |
+| 004 | US-15 | FR-41 | AC-57 | UC-14 | `Ac57_PleFileNameOfTheSalesRegister()` |
+| 004 | US-16 | FR-42 | AC-58 | UC-14 | `Ac58_InventoryRegisterExport()` |
+| 004 | US-16 | FR-43 | AC-59 | UC-14 | `Ac59_ProductWithoutStockType()` |
+| 004 | US-15 | FR-44 | AC-60 | UC-14 | `Ac60_VoidedDocumentInTheRegister()` |
 
-Total: 52 AC.
+Total: 60 AC.
