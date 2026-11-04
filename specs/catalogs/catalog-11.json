@@ -1,0 +1,27 @@
+{
+  "title": "Catálogo 11 — Códigos del tipo de valor de venta (resumen diario)",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "01",
+      "description": "Gravado"
+    },
+    {
+      "code": "02",
+      "description": "Exonerado"
+    },
+    {
+      "code": "03",
+      "description": "Inafecto"
+    },
+    {
+      "code": "04",
+      "description": "Exportación"
+    },
+    {
+      "code": "05",
+      "description": "Gratuitas"
+    }
+  ]
+}

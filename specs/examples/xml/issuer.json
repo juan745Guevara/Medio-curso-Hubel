@@ -1,0 +1,13 @@
+{
+  "ruc": "20131312955",
+  "name": "ABC SOFTWARE CORP S.A.C.",
+  "tradeName": "ABC ABARROTES",
+  "establishmentCode": "0000",
+  "address": {
+    "ubigeo": "150101",
+    "department": "LIMA",
+    "province": "LIMA",
+    "district": "LIMA",
+    "line": "AV. LOS PROCERES 123"
+  }
+}

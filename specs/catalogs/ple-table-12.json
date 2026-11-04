@@ -1,0 +1,195 @@
+{
+  "title": "PLE Tabla 12 — Tipo de operación",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "01",
+      "description": "VENTA"
+    },
+    {
+      "code": "02",
+      "description": "COMPRA"
+    },
+    {
+      "code": "03",
+      "description": "CONSIGNACIÓN RECIBIDA"
+    },
+    {
+      "code": "04",
+      "description": "CONSIGNACIÓN ENTREGADA"
+    },
+    {
+      "code": "05",
+      "description": "DEVOLUCIÓN RECIBIDA"
+    },
+    {
+      "code": "06",
+      "description": "DEVOLUCIÓN ENTREGADA"
+    },
+    {
+      "code": "07",
+      "description": "PROMOCIÓN"
+    },
+    {
+      "code": "08",
+      "description": "PREMIO"
+    },
+    {
+      "code": "09",
+      "description": "DONACIÓN"
+    },
+    {
+      "code": "10",
+      "description": "SALIDA A PRODUCCIÓN"
+    },
+    {
+      "code": "11",
+      "description": "TRANSFERENCIA ENTRE ALMACENES"
+    },
+    {
+      "code": "12",
+      "description": "RETIRO"
+    },
+    {
+      "code": "13",
+      "description": "MERMAS"
+    },
+    {
+      "code": "14",
+      "description": "DESMEDROS"
+    },
+    {
+      "code": "15",
+      "description": "DESTRUCCIÓN"
+    },
+    {
+      "code": "16",
+      "description": "SALDO INICIAL"
+    },
+    {
+      "code": "17",
+      "description": "EXPORTACIÓN"
+    },
+    {
+      "code": "18",
+      "description": "IMPORTACIÓN"
+    },
+    {
+      "code": "19",
+      "description": "ENTRADA DE PRODUCCIÓN"
+    },
+    {
+      "code": "20",
+      "description": "ENTRADA POR DEVOLUCIÓN DE PRODUCCIÓN"
+    },
+    {
+      "code": "21",
+      "description": "ENTRADA POR TRANSFERENCIA ENTRE ALMACENES"
+    },
+    {
+      "code": "22",
+      "description": "ENTRADA POR IDENTIFICACIÓN ERRÓNEA"
+    },
+    {
+      "code": "23",
+      "description": "SALIDA POR IDENTIFICACIÓN ERRÓNEA"
+    },
+    {
+      "code": "24",
+      "description": "ENTRADA POR DEVOLUCIÓN DEL CLIENTE"
+    },
+    {
+      "code": "25",
+      "description": "SALIDA POR DEVOLUCIÓN AL PROVEEDOR"
+    },
+    {
+      "code": "26",
+      "description": "ENTRADA DE SERVICIO DE PRODUCCIÓN"
+    },
+    {
+      "code": "27",
+      "description": "SALIDA POR SERVICIO DE PRODUCCIÓN"
+    },
+    {
+      "code": "28",
+      "description": "AJUSTE POR DIFERENCIA DE INVENTARIO"
+    },
+    {
+      "code": "29",
+      "description": "ENTRADA DE BIENES EN PRÉSTAMO"
+    },
+    {
+      "code": "30",
+      "description": "SALIDA DE BIENES EN PRÉSTAMO"
+    },
+    {
+      "code": "31",
+      "description": "ENTRADA DE BIENES EN CUSTODIA"
+    },
+    {
+      "code": "32",
+      "description": "SALIDA DE BIENES EN CUSTODIA"
+    },
+    {
+      "code": "33",
+      "description": "MUESTRAS MÉDICAS"
+    },
+    {
+      "code": "34",
+      "description": "PUBLICIDAD"
+    },
+    {
+      "code": "35",
+      "description": "GASTOS DE REPRESENTACIÓN"
+    },
+    {
+      "code": "36",
+      "description": "RETIRO PARA ENTREGA A TRABAJADORES"
+    },
+    {
+      "code": "37",
+      "description": "RETIRO POR CONVENIO COLECTIVO"
+    },
+    {
+      "code": "38",
+      "description": "RETIRO POR SUSTITUCIÓN DE BIEN SINIESTRADO"
+    },
+    {
+      "code": "91",
+      "description": "OTROS 1"
+    },
+    {
+      "code": "92",
+      "description": "OTROS 2"
+    },
+    {
+      "code": "93",
+      "description": "OTROS 3"
+    },
+    {
+      "code": "94",
+      "description": "OTROS 4"
+    },
+    {
+      "code": "95",
+      "description": "OTROS 5"
+    },
+    {
+      "code": "96",
+      "description": "OTROS 6"
+    },
+    {
+      "code": "97",
+      "description": "OTROS 7"
+    },
+    {
+      "code": "98",
+      "description": "OTROS 8"
+    },
+    {
+      "code": "99",
+      "description": "OTROS 9"
+    }
+  ]
+}

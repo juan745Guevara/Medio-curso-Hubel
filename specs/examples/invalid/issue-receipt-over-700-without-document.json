@@ -1,0 +1,25 @@
+{
+  "type": "03",
+  "series": "B001",
+  "issueDate": "2026-10-20",
+  "currency": "PEN",
+  "operationType": "0101",
+  "buyer": {
+    "document": {
+      "type": "0",
+      "number": "-"
+    },
+    "name": "CLIENTES VARIOS"
+  },
+  "paymentTerms": {
+    "type": "CASH"
+  },
+  "items": [
+    {
+      "productCode": "P-021",
+      "quantity": "30",
+      "unit": "NIU",
+      "unitValue": "25.00"
+    }
+  ]
+}

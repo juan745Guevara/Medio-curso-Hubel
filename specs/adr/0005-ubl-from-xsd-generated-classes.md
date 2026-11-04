@@ -20,8 +20,10 @@ The problem statement asks to study `UBL-Invoice-2.1.xsd` and to comply "strictl
    ```
    `xsd.exe` (Windows SDK) is the fallback if the generator is not accepted.
 3. **Serialization.** `XmlSerializer` with explicit namespaces (`cac`, `cbc`, `ext`, `ds`), UTF-8 without BOM and no indentation (a signed XML is never reformatted).
-4. **SUNAT customization in the mapper, not in the class.** `UblMapper` (Infrastructure) fills the generated classes from `ElectronicDocument` following the [regulatory matrix](../traceability/regulatory-matrix.md): `CustomizationID = 2.0`, catalog codes with `listAgencyName="PE:SUNAT"` and `listURI` (attributes that already exist in the UBL `CodeType`/`IdentifierType`). The `ext:ExtensionContent` (`xsd:any`) is left empty for the `SignerPort`.
+4. **SUNAT customization in the mapper, not in the class.** `UblMapper` (Infrastructure) fills the generated classes from `ElectronicDocument` following the [regulatory matrix](../traceability/regulatory-matrix.md): `CustomizationID = 2.0`, catalog codes with `listAgencyName="PE:SUNAT"` and `listURI` (attributes that already exist in the UBL `CodeType`/`IdentifierType`). The `ext:ExtensionContent` (`xsd:any`) carries a neutral placeholder that the `SignerPort` replaces with the `ds:Signature` ([ADR 0003](0003-validate-xsd-before-signing.md)).
 5. **Pipeline unchanged.** Mapper → `XmlSerializer` → `XsdValidatorPort` (ADR 0003) → `SignerPort` → `SunatValidatorPort`.
+6. **Port and adapter, named.** Port `UblGeneratorPort` ([ports.md](../contracts/ports.md)); adapter `Ubl21ClassesGenerator` in `Abc.Invoicing.Infrastructure/Ubl/`, the only class that references `Abc.Ubl`. There is no template folder anywhere in the solution.
+7. **Proof in this phase.** [`tools/ubl_build.py`](../../tools/ubl_build.py) applies the same technique in Python (classes generated with [xsdata](https://xsdata.readthedocs.io/) from the same XSDs, serializer, XSD validation, XMLDSig): the nine signed files of [`specs/examples/xml/`](../examples/xml/) (invoice, sales receipt, credit and debit note, daily summary and voiding notice) are produced that way and validate against the official schemas.
 
 # Alternatives evaluated
 | Option | Structure guaranteed by | Result |

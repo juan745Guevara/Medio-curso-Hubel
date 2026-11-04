@@ -28,6 +28,12 @@ Always use these terms, with this meaning, in every file. Peruvian legal terms k
 | **Payment terms** (Forma de pago) | Cash (*Contado*) or Credit (*Crédito*); if Credit, Outstanding amount and Installments. |
 | **Installment** (Cuota) | Amount and due date of a credit payment. |
 | **UBL XML** | Electronic document in XML compliant with OASIS UBL 2.1 and SUNAT Annex 9-A. |
+| **Point of issue** (Punto de emisión) | Till or terminal of an establishment; owns one Series per document type (ADR 0008). |
+| **Free-of-charge line** (Operación gratuita) | Item transferred without charge (catalog 07 codes 11–16, 21, 31–37): unit value 0.00, reference value (catalog 16 code 02), tax 9996, legend 1002. |
+| **Exchange rate** (Tipo de cambio) | SUNAT's published selling rate of the issue date; mandatory for USD documents (FR-46). |
+| **Return code** | Code SUNAT or the OSE answers with: 0 accepted, 0100–1999 exception (not processed), 2000–3999 rejection, 4000+ observation (FR-45). |
+| **Outbox** | Table written in the same transaction as the signed document; a dispatcher sends its entries to SUNAT afterwards (ADR 0007). |
+| **Reference XML** | Signed example file in `specs/examples/xml/`, generated from the XSD classes and validated against the official XSD. |
 | **XSD** | Official OASIS XML schema (`UBL-Invoice-2.1.xsd` and related) used to validate structure. |
 | **Digital signature** | XMLDSig enveloped signature of the UBL XML with the Issuer's Digital certificate. |
 | **Digital certificate** | Key pair and X.509 certificate of the Issuer used for the Digital signature. |

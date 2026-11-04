@@ -1,0 +1,10 @@
+# classes generated from the XSDs by tools/ubl_build.py (regenerated on demand)
+tools/.generated/
+__pycache__/
+*.pyc
+node_modules/
+# never version certificates or keys (constitution 15)
+*.pfx
+*.p12
+*.key
+*.jks

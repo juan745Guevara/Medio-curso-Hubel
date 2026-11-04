@@ -14,14 +14,16 @@ tools: Read, Write, Edit, Glob, Bash
    - `python -c "import yaml;yaml.safe_load(open('specs/contracts/invoicing-api.yaml',encoding='utf-8'))"`
    - Mandatory, 0 errors and 0 warnings: `npx @redocly/cli lint specs/contracts/invoicing-api.yaml` and `npx @stoplight/spectral-cli lint specs/contracts/invoicing-api.yaml` (ruleset in `.spectral.yaml`)
 5. Check that every tax field of the DTO appears in the "DTO field" column of the regulatory matrix.
+6. Add at least one example to `specs/examples/valid/` and one per negative AC to `specs/examples/invalid/` (with its line in `invalid/expected.json`); if the DTO feeds an XML, rebuild the reference XML with `python tools/ubl_build.py`.
+7. Run `python tools/validate_specs.py --lint`: it must end with 0 failed. It already includes the JSON/YAML parsing, Redocly and Spectral of step 4.
 
 ## Rules
 - If something is not in the spec, do not invent it: ask or mark `[NEEDS CLARIFICATION]`.
-- Do not create code folders or files in this phase (spec-first): only `specs/`.
+- Do not create product code in this phase (spec-first): only `specs/`; verification scripts go in `tools/`.
 - Use the terms in `specs/glossary.md` without synonyms.
 - Respect `specs/00-constitution.md`; if a task contradicts it, stop and report it.
 - Amounts as decimal text, never binary numbers (constitution 7).
 - Taxes are not client input: the server calculates them.
 - Idempotency goes only in the `Idempotency-Key` header (UUID), never in the body.
-- Every code taken from a SUNAT catalog or PLE table is a closed `enum` (e.g. `UnitOfMeasure` = Catalog 03), never an open pattern.
+- Every code taken from a SUNAT catalog or PLE table is a closed `enum` (e.g. `UnitOfMeasure` = Catalog 03), never an open pattern, and a subset of its file in `specs/catalogs/`.
 - PLE DTOs (`SalesRegisterRow`, `StockCard`) keep the field order of the SUNAT structure and cite the field number in each `description`.

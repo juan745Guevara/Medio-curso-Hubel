@@ -8,7 +8,8 @@ Separated from the start so that moving to microservices is just cutting along t
 
 | Context | Responsibility | Aggregates |
 |---|---|---|
-| **Invoicing** | Issue Electronic documents, calculate taxes, SUNAT status | ElectronicDocument, Series |
+| **Invoicing** | Issue Electronic documents, calculate taxes, SUNAT status, daily summaries and voiding notices | ElectronicDocument, Series, DailySummary, VoidingNotice, OutboxEntry |
+| **Configuration** | Issuer, establishments, points of issue, certificate | Issuer, Establishment, PointOfIssue |
 | **Catalog** | Products, customers, SUNAT catalogs | Product, Buyer, SunatCatalog |
 | **Inventory** | Movements and stock card | InventoryMovement |
 | **Migration** | Batches and traceability to legacy data | MigrationBatch |
@@ -27,7 +28,9 @@ classDiagram
     +Date issueDate
     +Time issueTime
     +Currency currency
+    +ExchangeRate exchangeRate
     +OperationType operationType
+    +PointOfIssueId pointOfIssue
     +SunatStatus status
     +PaymentTerms paymentTerms
     +Totals totals
@@ -52,12 +55,14 @@ classDiagram
     +UnitOfMeasure unit
     +Money unitValue
     +Money unitPrice
+    +Money referenceUnitValue
     +IgvTreatment igvTreatment
     +IscLine isc
     +Integer icbperBags
     +Taxes taxes
   }
   class Issuer {
+    <<aggregate root>>
     +Ruc ruc
     +Text businessName
     +Address taxAddress
@@ -65,6 +70,7 @@ classDiagram
     +Text establishmentCode
   }
   class Buyer {
+    <<aggregate root>>
     +IdentityDocument document
     +Text name
     +Address address
@@ -84,6 +90,7 @@ classDiagram
     +UnitOfMeasure unit
     +IgvTreatment igvTreatment
     +IscConfig isc
+    +Decimal iscUnitsPerItem
     +Boolean isPlasticBag
     +Table5ExistenceType existenceType
     +Text unspscCode
@@ -158,6 +165,58 @@ classDiagram
     +Integer rejected
     +Integer duplicates
   }
+  class Establishment {
+    <<entity>>
+    +EstablishmentCode code
+    +Ubigeo ubigeo
+    +Boolean amazoniaLaw27037
+  }
+  class PointOfIssue {
+    <<entity>>
+    +Id id
+    +Text name
+    +List~SeriesCode~ series
+  }
+  class DailySummary {
+    <<aggregate root>>
+    +Text id
+    +Date referenceDate
+    +Date issueDate
+    +List~SummaryLine~ lines
+    +Text ticket
+    +SunatStatus status
+  }
+  class SummaryLine {
+    <<value object>>
+    +DocumentType type
+    +DocumentNumber number
+    +Text conditionCode
+    +Totals totals
+  }
+  class VoidingNotice {
+    <<aggregate root>>
+    +Text id
+    +Date referenceDate
+    +Date issueDate
+    +List~VoidedLine~ lines
+    +Text ticket
+    +SunatStatus status
+  }
+  class VoidedLine {
+    <<value object>>
+    +DocumentType type
+    +DocumentNumber number
+    +Text reason
+  }
+  class OutboxEntry {
+    <<entity>>
+    +Id id
+    +Id documentId
+    +Text fileName
+    +Integer attempts
+    +DateTime nextAttempt
+    +OutboxStatus status
+  }
   ElectronicDocument "1" *-- "1..*" Item
   ElectronicDocument "1" *-- "0..1" NoteReference
   ElectronicDocument "1" *-- "1" PaymentTerms
@@ -173,6 +232,14 @@ classDiagram
   InventoryMovement *-- "1" SupportingDocument
   MigrationOrigin ..> MigrationBatch
   InventoryMovement ..> ElectronicDocument : supports
+  Issuer *-- "1..*" Establishment
+  Establishment *-- "1..*" PointOfIssue
+  PointOfIssue ..> Series : issues in
+  DailySummary *-- "1..500" SummaryLine
+  VoidingNotice *-- "1..*" VoidedLine
+  SummaryLine ..> ElectronicDocument : reports
+  VoidedLine ..> ElectronicDocument : voids
+  OutboxEntry ..> ElectronicDocument : sends
 ```
 
 ## Value objects and their rules
@@ -194,6 +261,11 @@ classDiagram
 | `EstablishmentCode` | 4-digit annex code of the RUC | Exists in the Issuer's establishments; same as `cbc:AddressTypeCode` | FR-40 |
 | `PlePeriod` | AAAAMM00 | Month 01–12 | FR-37, FR-40 |
 | `PaymentTerms` | Cash / Credit | Credit ⇒ ≥ 1 Installment and Σ installments = outstandingAmount | FR-12 |
+| `ExchangeRate` | Decimal with 3 decimals + date | Required when currency = USD; > 0 | FR-46 |
+| `referenceUnitValue` (Item) | `Money` | Required and > 0 when the IGV treatment is free of charge (11–16, 21, 31–37); then `unitValue` = 0 | FR-47 |
+| `iscUnitsPerItem` (Product) | Decimal > 0 | Units of the ISC fixed amount contained in one sale unit (litres per bottle); default 1 | FR-48 |
+| `SeriesCode` | 4 characters | `^F[A-Z0-9]{3}$` for 01, `^B[A-Z0-9]{3}$` for 03; belongs to one PointOfIssue; `lastSequence` never decreases | FR-49, FR-51 |
+| `SummaryLine.conditionCode` | Catalog 19 | 1 add, 2 modify, 3 void | FR-25 |
 
 ## Electronic document life cycle
 
@@ -204,16 +276,18 @@ stateDiagram-v2
   VALIDATED --> DRAFT : XSD fails (FR-08)
   VALIDATED --> SIGNED : XMLDSig signature
   SIGNED --> SENT : sendBill / summary
-  SENT --> ACCEPTED : CDR code 0
-  SENT --> OBSERVED : CDR with observations
-  SENT --> REJECTED : rejection CDR
-  SENT --> PENDING_RESEND : no response
-  PENDING_RESEND --> SENT : retry
+  SENT --> ACCEPTED : code 0
+  SENT --> OBSERVED : code 0 + notes 4000+
+  SENT --> REJECTED : code 2000–3999
+  SENT --> PENDING_RESEND : code 0100–1999 / no response
+  PENDING_RESEND --> SENT : retry, same signed file
   ACCEPTED --> VOIDED : voiding notice accepted
   OBSERVED --> VOIDED : voiding notice accepted
   REJECTED --> [*]
   VOIDED --> [*]
 ```
+
+Transitions after SIGNED are applied by the outbox dispatcher ([ADR 0007](../adr/0007-two-step-issuance-outbox.md)) according to the return-code range ([`sunat-return-codes.json`](../catalogs/sunat-return-codes.json)). DailySummary and VoidingNotice follow `DRAFT → SIGNED → SENT (ticket) → ACCEPTED | REJECTED`; an accepted VoidingNotice moves each voided Document to VOIDED.
 
 ## Domain services
 
@@ -225,6 +299,8 @@ stateDiagram-v2
 | `NotePolicy` | One note one document, accepted document, credit cap | FR-19, FR-21, FR-22 |
 | `SunatDeadlines` | Deadlines for submission, voiding, summary and contingency | FR-11, FR-16, FR-24, FR-25 |
 | `AmountInWordsConverter` | Legend 1000 (in Spanish) | FR-15 |
+| `ResponseCodeClassifier` | Maps a SUNAT return code to ACCEPTED / OBSERVED / PENDING_RESEND / REJECTED by range | FR-45 |
+| `IgvTreatmentResolver` | Product treatment, free-of-charge lines (FR-47) and the Amazonía rule of the establishment ([ADR 0009](../adr/0009-amazonia-igv-exemption.md)) | FR-05, FR-47 |
 
 ## Domain events
-`DocumentConfirmed`, `DocumentSigned`, `CdrReceived`, `DocumentAccepted`, `DocumentRejected`, `DocumentVoided`, `BatchMigrated`. Published in memory today; they are the cut line for future microservices.
+`DocumentConfirmed`, `DocumentSigned`, `CdrReceived`, `DocumentAccepted`, `DocumentRejected`, `DocumentVoided`, `BatchMigrated`. Written to the outbox in the same transaction as the change ([ADR 0007](../adr/0007-two-step-issuance-outbox.md)) and published in memory today; they are the cut line for future microservices. Their message contract is [`contracts/events.asyncapi.yaml`](../contracts/events.asyncapi.yaml).

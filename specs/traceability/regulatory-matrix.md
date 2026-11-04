@@ -56,6 +56,7 @@ General pattern: every code from a SUNAT-specific catalog carries `listAgencyNam
 | 10 | Amount-in-words legend | Annex 1 | 52 | M | 0..n | `cbc:Note[@languageLocaleID='1000']` | `AmountInWordsConverter(totalAmount)` | Matches the total amount (in Spanish); code not repeated | 3006, 3014 | AC-25 |
 | 11 | Currency | Annex 1 | 02 (ISO 4217) | M | 0..1 | `cbc:DocumentCurrencyCode` and `@currencyID` of every amount | `currency` | PEN or USD; same currency throughout | 2069, 2070, 3088, 2071 | — |
 | 12 | Due date | Annex 1 | — | C | 0..1 | `cbc:DueDate` | Last installment if Credit | ≥ issue date | — | AC-21 |
+| 50 | Exchange rate (USD documents) | RS 108-2020 Annex IV field 27 | 02 | C | `PaymentExchangeRate` 0..1 · `SourceCurrencyCode` 1..1 · `TargetCurrencyCode` 1..1 · `CalculationRate` 0..1 | `cac:PaymentExchangeRate` (`cbc:SourceCurrencyCode`=USD, `cbc:TargetCurrencyCode`=PEN, `cbc:CalculationRate`, `cbc:Date`) | `exchangeRate` | Required if `currency` = USD; > 0; 3 decimals (FR-46) | 2714, 2716, 2719, 2721 | AC-64, AC-65 |
 
 ## B. Issuer and Buyer
 
@@ -97,6 +98,8 @@ In the XML, SUNAT requires the literal values `Contado` (cash), `Credito` (credi
 | 34 | Item ISC amount | Annex 1 | 05 (`2000`, EXC) | C | `TaxSubtotal` 0..n | `cac:TaxSubtotal` with `cac:TaxScheme/cbc:ID=2000`, `cbc:TaxableAmount`, `cbc:TaxAmount`, `cbc:Percent` | Calculated | System 01: rate × sale value; 02: amount × quantity; 03: per Appendix IV lit. C | 3104, 3108 | AC-09, AC-10 |
 | 35 | Item ICBPER | [Annexes RS 150-2019](https://www.sunat.gob.pe/legislacion/superin/2019/anexos-150-2019.pdf) | 05 (`7152`, OTH) | C | `BaseUnitMeasure` 0..1 · `PerUnitAmount` 0..1 | `cac:TaxSubtotal/cbc:BaseUnitMeasure` (bags) and `cac:TaxSubtotal/cac:TaxCategory/cbc:PerUnitAmount` (rate), `cac:TaxScheme/cbc:ID=7152` | Product.isPlasticBag, quantity | S/ 0.50 × bags; outside the IGV base | 2949, 3236, 3237, 3238 | AC-11 |
 | 36 | Exempt / non-taxable item | Annex 1 | 05 (`9997` EXO, `9998` INA) | C | `TaxSubtotal` 0..n | `cac:TaxSubtotal` with `cac:TaxScheme/cbc:ID=9997` or `9998`, `cbc:TaxAmount=0` | Calculated | TaxAmount 0 | 3101, 3110 | AC-12 |
+| 51 | Free-of-charge item: reference value | Annex 1 | **16** (`02`) | C | `PricingReference` 0..1 · `AlternativeConditionPrice` 0..n | `cac:PricingReference/cac:AlternativeConditionPrice` with `cbc:PriceTypeCode=02` and `cbc:PriceAmount` = reference unit value; `cac:Price/cbc:PriceAmount` = 0.00 | `items[].referenceUnitValue`, `items[].unitValue`=0.00 | Treatments 11–16, 21, 31–37 only; reference > 0 (FR-47) | 2425, 2640, 2410 | AC-66, AC-67 |
+| 52 | Free-of-charge item: tax | Annex 1 | 05 (`9996` GRA, FRE) · 07 | C | `TaxSubtotal` 0..n | `cac:TaxSubtotal` with `cac:TaxScheme/cbc:ID=9996`, `cbc:TaxableAmount` = quantity × reference value, `cbc:TaxAmount` = IGV of the reference value for 11–16, 0.00 for 21 and 31–37, `cbc:TaxExemptionReasonCode` = the treatment | Calculated | Not part of `LineExtensionAmount` totals nor `PayableAmount` | 3101, 3110, 2641 | AC-67 |
 
 ## E. Totals
 
@@ -111,6 +114,8 @@ In the XML, SUNAT requires the literal values `Contado` (cash), `Credito` (credi
 | 43 | Total sale price | Annex 1 | — | M | `TaxInclusiveAmount` 0..1 | `cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount` | Σ sale value + taxes | Equal to calculated | 2592, 3019, 4211 | AC-13 |
 | 44 | Global discounts | Annex 1 | 53 | C | `AllowanceTotalAmount` 0..1 | `cac:AllowanceCharge` + `cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount` | `totals.discounts` | Pending clarification | 2065, 2419 | — |
 | 45 | Total amount | Annex 1 | — | M | `PayableAmount` **1..1** | `cac:LegalMonetaryTotal/cbc:PayableAmount` | `totals.totalAmount` | = 43 − 44; rounding within the allowed limit | 2043, 2044, 4314 | AC-13 |
+| 53 | Total free-of-charge value | Annex 1 | 05 (`9996`) | C | `TaxSubtotal` 0..n | `/Invoice/cac:TaxTotal/cac:TaxSubtotal[cac:TaxCategory/cac:TaxScheme/cbc:ID=9996]/cbc:TaxableAmount` | Σ free lines | > 0 when there is a free line; not added to `PayableAmount` | 2641, 3057 | AC-67 |
+| 54 | Free-of-charge legend | Annex 1 | 52 (`1002`) | C | `Note` 0..n | `cbc:Note[@languageLocaleID='1002']` = "TRANSFERENCIA GRATUITA DE UN BIEN Y/O SERVICIO PRESTADO GRATUITAMENTE" | Generated | Mandatory when row 53 > 0 | 2416 | AC-67 |
 
 ## F. Notes (CreditNote / DebitNote)
 
@@ -122,6 +127,40 @@ In `UBL-CreditNote-2.1.xsd`: `ID`, `IssueDate`, `AccountingSupplierParty`, `Acco
 | 47 | Debit note type | Annex 4 | **10** | M | `DiscrepancyResponse` 0..n · `ResponseCode` 0..1 | `/DebitNote/cac:DiscrepancyResponse/cbc:ResponseCode` | `reason.code` | 01–03 | 2172, 2173 | AC-28 |
 | 48 | Justification | Annex 3/4 | — | M | `Description` 0..n | `cac:DiscrepancyResponse/cbc:Description` | `reason.description` | Not empty | 2135, 2136 | AC-28 |
 | 49 | Modified document | Annex 3/4 | 01 | M | `BillingReference` 0..n · `InvoiceDocumentReference` 0..1 · `ID` 1..1 · `DocumentTypeCode` 0..1 | `cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID` and `cbc:DocumentTypeCode` | `modifiedDocument` | Only one; exists; not voided or rejected | 2116, 2117, 2119, 2120, 2121, 2412 | AC-30, AC-32 |
+| 55 | Debit note total | Annex 4 | — | M | `RequestedMonetaryTotal` **1..1** · `PayableAmount` **1..1** | `/DebitNote/cac:RequestedMonetaryTotal/cbc:PayableAmount` (a DebitNote has no `LegalMonetaryTotal`) | `totals.totalAmount` | Same rules as row 45 | 2062, 2149 | AC-75 |
+| 56 | Note line quantity | Annex 3/4 | 03 | M | `CreditNoteLine` **1..n** · `CreditedQuantity` 0..1 / `DebitNoteLine` **1..n** · `DebitedQuantity` 0..1 | `/CreditNote/cac:CreditNoteLine/cbc:CreditedQuantity/@unitCode`, `/DebitNote/cac:DebitNoteLine/cbc:DebitedQuantity/@unitCode` (never `InvoiceLine` inside a note) | `items[].quantity`, `items[].unit` | Unit in catalog 03 | 2138, 2139, 2188, 2189 | AC-29 |
+
+A Note is its own UBL root document (`CreditNote`, `DebitNote`), a sibling of `Invoice`, not a subclass of it; in the domain it is the same `ElectronicDocument` aggregate with type 07/08 and a `NoteReference`.
+
+## F2. Daily summary (RC) — SUNAT schema `SummaryDocuments-1`
+
+Not an OASIS document: SUNAT's own XSD ([`xsd/sunat/maindoc/UBL-SummaryDocuments-2.0.xsd`](../../xsd/sunat/maindoc/UBL-SummaryDocuments-2.0.xsd)) built with UBL **2.0** components and the `sac:` prefix (`urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1`). Reference file: [`examples/xml/20131312955-RC-20261020-1.xml`](../examples/xml/20131312955-RC-20261020-1.xml).
+
+| # | SUNAT data | Regulation / annex | Catalog | SUNAT | SUNAT XSD (min..max) | Tag | Source | Rule | SUNAT error | AC |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 57 | Versions | RS 097-2012 † | — | M | `UBLVersionID` 0..1 · `CustomizationID` **1..1** | `cbc:UBLVersionID`=2.0, `cbc:CustomizationID`=1.1 | Constants | Exact values | 2212, 2214 | AC-36 |
+| 58 | Summary identifier | RS 097-2012 † | — | M | `ID` **1..1** | `cbc:ID` = `RC-YYYYMMDD-n` | `DailySummary.id` | Date = generation date; n correlative per day; equal to the file name | 2210, 2346 | AC-36 |
+| 59 | Date of the documents / of generation | RS 097-2012 † | — | M | `ReferenceDate` **1..1** · `IssueDate` **1..1** | `cbc:ReferenceDate`, `cbc:IssueDate` | `referenceDate`, clock | ReferenceDate ≤ IssueDate ≤ today | 2233, 2234, 2237 | AC-36 |
+| 60 | Issuer | RS 097-2012 † | 06 | M | `AccountingSupplierParty` **1..1** | `cac:AccountingSupplierParty/cbc:CustomerAssignedAccountID` (RUC), `cbc:AdditionalAccountID`=6, `cac:Party/cac:PartyLegalEntity/cbc:RegistrationName` | Issuer | Same RUC as the file name | 1034 | — |
+| 61 | Line, document and number | RS 097-2012 † | 01 | M | `SummaryDocumentsLine` **1..n** · `LineID` **1..1** · `DocumentTypeCode` **1..1** · `ID` 0..1 | `sac:SummaryDocumentsLine/cbc:LineID`, `cbc:DocumentTypeCode` (03, 07, 08), `cbc:ID` (B001-10) | `SummaryLine` | ≤ 500 lines per summary; LineID 1..n | 2238, 2239, 2240 | AC-36 |
+| 62 | Buyer | RS 097-2012 † | 06 | C | `AccountingCustomerParty` 0..1 | `cac:AccountingCustomerParty/cbc:CustomerAssignedAccountID`, `cbc:AdditionalAccountID` | Buyer | Mandatory when the receipt > S/ 700 | 2014 | AC-06 |
+| 63 | Modified document (notes) | RS 097-2012 † | 01 | C | `BillingReference` 0..1 | `cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID`, `cbc:DocumentTypeCode` | `NoteReference` | Only for lines 07/08 | 2116 | AC-30 |
+| 64 | Line status | RS 097-2012 † | **19** | M | `Status` 0..1 | `cac:Status/cbc:ConditionCode` (1 add, 2 modify, 3 void) | `SummaryLine.conditionCode` | 3 voids a receipt already reported (FR-23 for receipts) | 2280 | AC-34 |
+| 65 | Total and amounts by treatment | RS 097-2012 † | **11** | M | `TotalAmount` **1..1** · `BillingPayment` 0..n | `sac:TotalAmount`, `sac:BillingPayment/cbc:PaidAmount` + `cbc:InstructionID` (01 taxed, 02 exempt, 03 non-taxable, 05 free) | Totals | Same as the receipt | 2251, 2252, 2256, 2257 | AC-36 |
+| 66 | Taxes of the line | RS 097-2012 † | 05 | M | `TaxTotal` 0..n | `cac:TaxTotal/cbc:TaxAmount` + `cac:TaxSubtotal/cac:TaxCategory/cac:TaxScheme` (1000, 2000, 7152) | Totals | Same as the receipt | 2048 | AC-36 |
+
+## F3. Voiding notice (RA) — SUNAT schema `VoidedDocuments-1`
+
+XSD [`xsd/sunat/maindoc/UBL-VoidedDocuments-2.0.xsd`](../../xsd/sunat/maindoc/UBL-VoidedDocuments-2.0.xsd); reference file [`examples/xml/20131312955-RA-20261021-1.xml`](../examples/xml/20131312955-RA-20261021-1.xml).
+
+| # | SUNAT data | Regulation / annex | Catalog | SUNAT | SUNAT XSD (min..max) | Tag | Source | Rule | SUNAT error | AC |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 67 | Versions and identifier | RS 097-2012 † | — | M | `CustomizationID` **1..1** · `ID` **1..1** | `cbc:UBLVersionID`=2.0, `cbc:CustomizationID`=1.0, `cbc:ID` = `RA-YYYYMMDD-n` | `VoidingNotice.id` | Equal to the file name | 2283 | AC-76 |
+| 68 | Date of the voided documents / of the notice | RS 097-2012 † | — | M | `ReferenceDate` **1..1** · `IssueDate` **1..1** | `cbc:ReferenceDate`, `cbc:IssueDate` | `referenceDate`, clock | IssueDate − ReferenceDate ≤ 7 calendar days (FR-24) | 2302, 2303, 2374 | AC-35 |
+| 69 | Voided document | RS 097-2012 † | 01 | M | `VoidedDocumentsLine` **1..n** · `DocumentTypeCode`, `DocumentSerialID`, `DocumentNumberID` **1..1** | `sac:VoidedDocumentsLine/cbc:LineID`, `cbc:DocumentTypeCode`, `sac:DocumentSerialID`, `sac:DocumentNumberID` | `VoidedLine` | Document ACCEPTED/OBSERVED and not already voided | 2105, 2106, 2244, 2323 | AC-34 |
+| 70 | Reason | RS 097-2012 † | — | M | `VoidReasonDescription` **1..1** | `sac:VoidReasonDescription` | `reason` | Not empty, ≤ 100 | 2314, 2315 | AC-34 |
+
+† Annex of RS 097-2012 (as amended) for the daily summary and the voiding notice; the annex number is to be verified. The structure, order and cardinality of every tag above were checked against SUNAT's own XSD, and the reference files validate against it.
 
 ## G. From SUNAT error to API error
 
@@ -143,12 +182,25 @@ Each rule is validated **before** sending, with the API's internal code (`error.
 | `SUBMISSION_PAST_DEADLINE` (alert) | Submission deadline | 2108, 2600 | AC-20 |
 | `INVALID_SIGNATURE` | Verify signature after signing; do not reformat | 1059, 2335, 2336 | AC-16 |
 
+## G2. CDR return code ranges → SUNAT status (FR-45, ADR 0007)
+
+The 1,710 codes are versioned in [`catalogs/sunat-return-codes.json`](../catalogs/sunat-return-codes.json) with their class; `tools/validate_specs.py` checks that every code in this matrix exists there.
+
+| Code in the answer | Class | Example | SUNAT status | Sequence number | AC |
+|---|---|---|---|---|---|
+| `ResponseCode` = 0, no notes | Accepted | — | ACCEPTED | Issued | AC-17 |
+| `ResponseCode` = 0 with `cbc:Note` coded 4000+ | Observation | 4287 unit price differs | OBSERVED (valid document) | Issued | AC-63 |
+| SOAP fault 0100–1999 | Exception: not processed | 0109 authentication service down; 0130 no ticket | PENDING_RESEND; resend the same signed file | Kept | AC-61 |
+| `ResponseCode` 2000–3999 | Rejection | 2800 buyer document type | REJECTED | Consumed, never reused | AC-62, AC-18 |
+| No answer in 30 s | Unknown | timeout | PENDING_RESEND; query `getStatusCdr` before resending | Kept | AC-19 |
+
 ## H. Cross-reference with feature and port
 
 | Block | Feature | Output port that generates the tag |
 |---|---|---|
 | A, B, C, D, E | 001 | `UblGeneratorPort` (data), `SignerPort` (rows 1–2) |
-| F | 002 | `UblGeneratorPort` |
+| F, F2, F3 | 002 | `UblGeneratorPort` (CreditNote/DebitNote classes from OASIS XSD; RC/RA classes from SUNAT XSD) |
+| G2 | 001, 002 | `SunatValidatorPort` + `ResponseCodeClassifier` |
 | Sending the `RUC-TT-SERIES-NUM.zip` file | 001, 002 | `SunatValidatorPort` |
 | I, J, K | 004 | `GenerateSalesRegister`, `GenerateInventoryRegister` (read views over `DocumentRepository` and `MovementRepository`) |
 
@@ -291,5 +343,6 @@ Structure of [RS 042-2018/SUNAT Annex 2](https://www.sunat.gob.pe/legislacion/su
 | `YDK` | `YDK` | Square yard |
 
 ## Gaps in the matrix
+- Every SUNAT code cited here exists in the versioned return-code list (checked by `tools/validate_specs.py`); the official validation Excel of the CPE microsite could not be opened from the build environment, so the *rule text* of each code is the one in that list.
 - Maximum decimal precision of unit values and rounding tolerance of totals (error 4314): confirm in the current validation Excel.
 - Error codes are those of the Invoice group; sales receipts and notes have equivalents with other numbers (e.g. 2110/2111 instead of 2074/2075).

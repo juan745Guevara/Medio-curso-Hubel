@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: ABC Electronic Invoicing API
-  version: 0.2.0
+  version: 0.3.0
   summary: Spec-first contract of the MVC monolith (API controllers) consumed by the Windows and Android apps.
   description: |
     Each operation names the FRs/ACs it covers. DTOs live in `schemas/` (JSON Schema 2020-12).
@@ -10,10 +10,16 @@ info:
     **Security:** every operation requires a JWT (`bearerAuth`) and answers `401` without a valid token
     and `403` when the role is not allowed (roles in `specs/security.md`).
 
-    **Issuance outcomes:** `201` with the CDR result; `202` when the SUNAT validator does not answer in 30 s
-    (document stored as PENDING_RESEND and retried, FR-11, AC-19); `502` when the validator answers with a
-    service error or an unreadable CDR (also PENDING_RESEND); `503` when issuing is suspended (no valid
-    certificate, ADR 0006) and nothing is numbered.
+    **Issuance outcomes** (two transactions with an outbox, ADR 0007): `201` with the CDR result
+    (ACCEPTED, OBSERVED or REJECTED — a SUNAT rejection is a resource in state REJECTED, not an HTTP error);
+    `200` when the same `Idempotency-Key` is repeated (same document, no new number); `202` when the SUNAT
+    validator does not answer in 30 s (document stored as PENDING_RESEND and retried, FR-11, AC-19); `502`
+    when the validator answers with an exception code 0100–1999 or an unreadable CDR (also PENDING_RESEND,
+    FR-45); `503` when issuing is suspended (no valid certificate, ADR 0006) and nothing is numbered.
+
+    **400 vs 422:** `400` = the body does not match its JSON Schema (format, required fields, cross-field
+    rules such as USD without exchange rate or a free-of-charge line with a price); `422` = a business rule
+    that needs data the schema cannot see (RUC check digit, totals, note on a non-accepted document).
   contact:
     name: ABC Software Corp — Architecture
   license:
@@ -38,14 +44,16 @@ tags:
   - name: Registers
     description: PLE format 14.1 sales register and format 12.1 inventory register / stock card. Feature 004.
   - name: Configuration
-    description: Issuer, validator and digital certificate. Administrator only.
+    description: Issuer, validator, digital certificate and Series per point of issue. Administrator only.
+  - name: Contingency
+    description: Paper documents issued during a contingency (FR-16).
 paths:
   /documents:
     post:
       tags: [Documents]
       operationId: issueDocument
       summary: Issue an invoice (01) or sales receipt (03)
-      description: "FR-01 to FR-15. AC-01 to AC-25. Calculates taxes, generates the UBL 2.1 XML from the XSD-derived classes (ADR 0005), validates XSD, signs and sends. Roles: Salesperson, Administrator."
+      description: "FR-01 to FR-15, FR-45 to FR-50. AC-01 to AC-25, AC-61 to AC-72. Calculates taxes, generates the UBL 2.1 XML from the XSD-derived classes (ADR 0005), validates XSD, signs and sends. Roles: Salesperson, Administrator."
       parameters:
         - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
@@ -61,12 +69,14 @@ paths:
           content:
             application/json:
               schema: { $ref: './schemas/document-response.schema.json' }
+        '200': { $ref: '#/components/responses/IdempotentReplay' }
         '202': { $ref: '#/components/responses/AcceptedPendingResend' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
         '502': { $ref: '#/components/responses/BadGateway' }
         '503': { $ref: '#/components/responses/ServiceUnavailable' }
     get:
@@ -132,7 +142,7 @@ paths:
       description: "FR-13, AC-23. Roles: Salesperson, Administrator, Accountant."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
-        '200': { description: Signed XML, content: { application/xml: { schema: { type: string } } } }
+        '200': { description: Signed XML exactly as sent (never reformatted), content: { application/xml: { schema: { type: string, format: binary } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -144,7 +154,7 @@ paths:
       description: "FR-13, AC-23. 404 also when the document has no CDR yet (PENDING_RESEND). Roles: Salesperson, Administrator, Accountant."
       parameters: [ { $ref: '#/components/parameters/Id' } ]
       responses:
-        '200': { description: CDR ZIP, content: { application/zip: { schema: { type: string, contentEncoding: base64 } } } }
+        '200': { description: CDR ZIP (binary), content: { application/zip: { schema: { type: string, format: binary } } } }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
@@ -158,7 +168,7 @@ paths:
         - $ref: '#/components/parameters/Id'
         - { name: format, in: query, description: Paper format, schema: { type: string, enum: [A4, TICKET_80MM], default: A4 } }
       responses:
-        '200': { description: PDF, content: { application/pdf: { schema: { type: string, contentEncoding: base64 } } } }
+        '200': { description: PDF (binary), content: { application/pdf: { schema: { type: string, format: binary } } } }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -495,6 +505,87 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '422': { $ref: '#/components/responses/Unprocessable' }
+  /configuration/series:
+    get:
+      tags: [Configuration]
+      operationId: listSeries
+      summary: List the Series of the issuer by establishment and point of issue
+      description: "FR-49, FR-51. Roles: Administrator; a Salesperson sees only the Series of their point of issue."
+      parameters:
+        - $ref: '#/components/parameters/Establishment'
+        - { name: pointOfIssue, in: query, description: Till or point of issue, schema: { type: string, maxLength: 30 } }
+      responses:
+        '200':
+          description: Series with their last sequence number
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: './schemas/series.schema.json' } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Configuration]
+      operationId: createSeries
+      summary: Create a Series for a point of issue
+      description: "FR-49, FR-51. AC-73. The server starts it at 0; lastSequence is never sent by the client. Role: Administrator."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/series.schema.json' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location: { $ref: '#/components/headers/Location' }
+          content:
+            application/json:
+              schema: { $ref: './schemas/series.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /configuration/series/{code}:
+    get:
+      tags: [Configuration]
+      operationId: getSeries
+      summary: Get a Series and its last sequence number
+      description: "FR-51, AC-74 (the number can be read, never lowered: there is no PUT on lastSequence). Role: Administrator."
+      parameters:
+        - { name: code, in: path, required: true, description: Series code, schema: { $ref: './schemas/common.schema.json#/$defs/Series' } }
+      responses:
+        '200':
+          description: Series
+          content:
+            application/json:
+              schema: { $ref: './schemas/series.schema.json' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /contingencies:
+    post:
+      tags: [Contingency]
+      operationId: recordContingency
+      summary: Record paper contingency documents and send their report
+      description: "FR-16, AC-26. Only while the Administrator has activated Contingency. 422 CONTINGENCY_PAST_DEADLINE when a document is older than 7 calendar days. Role: Administrator."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: './schemas/contingency-request.schema.json' }
+      responses:
+        '202':
+          description: Report sent, ticket pending
+          content:
+            application/json:
+              schema: { $ref: './schemas/batch-submission-response.schema.json' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Unprocessable' }
+        '502': { $ref: '#/components/responses/BadGateway' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
@@ -523,7 +614,7 @@ components:
       name: Idempotency-Key
       in: header
       required: false
-      description: "UUID generated by the client for each issuance attempt. If it arrives again, the server returns the same document and does not assign a new sequence number (prevents double issuance on retries)."
+      description: "UUID generated by the client (or by the offline queue, ADR 0008) for each sale. If it arrives again, the server answers 200 with the same document and does not assign a new sequence number (AC-70)."
       schema: { type: string, format: uuid }
   headers:
     Location:
@@ -533,6 +624,16 @@ components:
       description: Seconds after which the client may retry
       schema: { type: integer, minimum: 1 }
   responses:
+    IdempotentReplay:
+      description: "The Idempotency-Key was already used: the document issued the first time is returned unchanged and no new number is assigned (AC-70)."
+      content:
+        application/json:
+          schema: { $ref: './schemas/document-response.schema.json' }
+    TooManyRequests:
+      description: Too many requests from this client; retry after `Retry-After`
+      headers:
+        Retry-After: { $ref: '#/components/headers/RetryAfter' }
+      content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     AcceptedPendingResend:
       description: "The SUNAT validator did not answer in 30 s. The document is numbered, signed and stored as PENDING_RESEND; it is retried automatically (FR-11, AC-19)."
       headers:
@@ -558,10 +659,10 @@ components:
       description: "State conflict (sequence number, note on a non-accepted document, resend of an already accepted document, duplicate product or batch). AC-02, AC-30, AC-44."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     Unprocessable:
-      description: "Business rule violated: INVALID_RUC, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT, INVALID_CERTIFICATE, PLE_INCOMPLETE_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
+      description: "Business rule violated: INVALID_RUC, SERIES_NOT_ALLOWED (Series of another point of issue, ADR 0008), CONTINGENCY_PAST_DEADLINE, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT, INVALID_CERTIFICATE, PLE_INCOMPLETE_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     BadGateway:
-      description: "The SUNAT validator or OSE answered with a service error (SUNAT codes 0100–0199) or an unreadable CDR. The document, if any, stays PENDING_RESEND; `detail` carries its id and `sunatCode` the validator's code."
+      description: "The SUNAT validator or OSE answered with a service error (SUNAT exception codes 0100–1999, FR-45) or an unreadable CDR. The document, if any, stays PENDING_RESEND; `detail` carries its id and `sunatCode` the validator's code."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     ServiceUnavailable:
       description: "Issuing is suspended (no valid digital certificate, ADR 0006, or validator in maintenance). Nothing is numbered; retry after `Retry-After`."

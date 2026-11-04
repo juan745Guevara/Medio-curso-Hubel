@@ -1,0 +1,31 @@
+{
+  "title": "PLE Tabla 2 — Tipo de documento de identidad",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "0",
+      "description": "OTROS TIPOS DE DOCUMENTOS"
+    },
+    {
+      "code": "1",
+      "description": "DOCUMENTO NACIONAL DE IDENTIDAD (DNI)"
+    },
+    {
+      "code": "4",
+      "description": "CARNET DE EXTRANJERIA"
+    },
+    {
+      "code": "6",
+      "description": "REGISTRO ÚNICO DE CONTRIBUYENTES"
+    },
+    {
+      "code": "7",
+      "description": "PASAPORTE"
+    },
+    {
+      "code": "A",
+      "description": "CÉDULA DIPLOMÁTICA DE IDENTIDAD"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "type": "08",
+  "series": "FD01",
+  "modifiedDocument": {
+    "type": "01",
+    "number": "F001-42"
+  },
+  "reason": {
+    "code": "07",
+    "description": "AUMENTO EN EL VALOR"
+  },
+  "items": [
+    {
+      "productCode": "P-001",
+      "quantity": "2",
+      "unit": "NIU",
+      "unitValue": "5.00"
+    }
+  ]
+}

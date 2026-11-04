@@ -1,0 +1,70 @@
+{
+  "title": "Catálogo 05 — Códigos de tipos de tributos",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "1000",
+      "description": "IGV IMPUESTO GENERAL A LAS VENTAS",
+      "name": "IGV",
+      "un5153": "VAT",
+      "un5305": "S"
+    },
+    {
+      "code": "1016",
+      "description": "IMPUESTO A LA VENTA ARROZ PILADO",
+      "name": "IVAP",
+      "un5153": "VAT",
+      "un5305": "S"
+    },
+    {
+      "code": "2000",
+      "description": "ISC IMPUESTO SELECTIVO AL CONSUMO",
+      "name": "ISC",
+      "un5153": "EXC",
+      "un5305": "S"
+    },
+    {
+      "code": "7152",
+      "description": "IMPUESTO A LA BOLSA PLASTICA",
+      "name": "ICBPER",
+      "un5153": "OTH",
+      "un5305": "S"
+    },
+    {
+      "code": "9995",
+      "description": "EXPORTACIÓN",
+      "name": "EXP",
+      "un5153": "FRE",
+      "un5305": "G"
+    },
+    {
+      "code": "9996",
+      "description": "GRATUITO",
+      "name": "GRA",
+      "un5153": "FRE",
+      "un5305": "Z"
+    },
+    {
+      "code": "9997",
+      "description": "EXONERADO",
+      "name": "EXO",
+      "un5153": "VAT",
+      "un5305": "E"
+    },
+    {
+      "code": "9998",
+      "description": "INAFECTO",
+      "name": "INA",
+      "un5153": "FRE",
+      "un5305": "O"
+    },
+    {
+      "code": "9999",
+      "description": "OTROS CONCEPTOS DE PAGO",
+      "name": "OTROS",
+      "un5153": "OTH",
+      "un5305": "S"
+    }
+  ]
+}

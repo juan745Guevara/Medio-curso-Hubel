@@ -18,7 +18,8 @@
     "type": {
       "enum": [
         "DAILY_SUMMARY",
-        "VOIDING_NOTICE"
+        "VOIDING_NOTICE",
+        "CONTINGENCY_REPORT"
       ]
     },
     "identifier": {

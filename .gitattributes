@@ -1,0 +1,6 @@
+# LF everywhere so hashes, signatures and the validator give the same result on Windows and Linux
+* text=auto eol=lf
+*.xsd text eol=lf
+*.xml text eol=lf
+*.png binary
+*.pdf binary

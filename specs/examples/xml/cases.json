@@ -1,0 +1,115 @@
+{
+  "20131312955-01-F001-42.xml": {
+    "kind": "invoice",
+    "request": "valid/issue-invoice-cash.json",
+    "number": 42,
+    "issueTime": "10:15:00",
+    "acs": [
+      "AC-08",
+      "AC-12",
+      "AC-13",
+      "AC-14",
+      "AC-16",
+      "AC-25"
+    ]
+  },
+  "20131312955-01-F001-43.xml": {
+    "kind": "invoice",
+    "request": "valid/issue-invoice-credit.json",
+    "number": 43,
+    "issueTime": "11:02:10",
+    "acs": [
+      "AC-21",
+      "AC-22"
+    ]
+  },
+  "20131312955-01-F001-44.xml": {
+    "kind": "invoice",
+    "request": "valid/issue-invoice-isc.json",
+    "number": 44,
+    "issueTime": "09:30:00",
+    "acs": [
+      "AC-09",
+      "AC-11",
+      "AC-68"
+    ]
+  },
+  "20131312955-01-F001-45.xml": {
+    "kind": "invoice",
+    "request": "valid/issue-invoice-usd.json",
+    "number": 45,
+    "issueTime": "16:45:00",
+    "acs": [
+      "AC-65"
+    ]
+  },
+  "20131312955-03-B001-10.xml": {
+    "kind": "invoice",
+    "request": "valid/issue-receipt-free-line.json",
+    "number": 10,
+    "issueTime": "18:20:00",
+    "acs": [
+      "AC-67"
+    ]
+  },
+  "20131312955-07-FC01-1.xml": {
+    "kind": "note",
+    "request": "valid/note-credit-return.json",
+    "number": 1,
+    "issueDate": "2026-10-22",
+    "issueTime": "09:00:00",
+    "buyer": {
+      "document": {
+        "type": "6",
+        "number": "20600123450"
+      },
+      "name": "BODEGA SAN MARTIN S.A.C."
+    },
+    "acs": [
+      "AC-29"
+    ]
+  },
+  "20131312955-08-FD01-1.xml": {
+    "kind": "note",
+    "request": "valid/note-debit-increase.json",
+    "number": 1,
+    "issueDate": "2026-10-23",
+    "issueTime": "09:00:00",
+    "buyer": {
+      "document": {
+        "type": "6",
+        "number": "20600123450"
+      },
+      "name": "BODEGA SAN MARTIN S.A.C."
+    },
+    "acs": [
+      "AC-75"
+    ]
+  },
+  "20131312955-RC-20261020-1.xml": {
+    "kind": "summary",
+    "id": "RC-20261020-1",
+    "referenceDate": "2026-10-20",
+    "issueDate": "2026-10-20",
+    "documents": [
+      {
+        "request": "valid/issue-receipt-free-line.json",
+        "number": 10,
+        "conditionCode": "1"
+      }
+    ],
+    "acs": [
+      "AC-36"
+    ]
+  },
+  "20131312955-RA-20261021-1.xml": {
+    "kind": "voided",
+    "id": "RA-20261021-1",
+    "referenceDate": "2026-10-20",
+    "issueDate": "2026-10-21",
+    "request": "valid/void-request.json",
+    "acs": [
+      "AC-76"
+    ]
+  }
+}

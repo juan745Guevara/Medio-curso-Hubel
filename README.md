@@ -6,32 +6,48 @@ Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-
 
 | Requested item (§4) | File(s) |
 |---|---|
-| **1. Domain Model and Contracts (DTOs / Schemas)** | [`specs/domain/domain-model.md`](specs/domain/domain-model.md) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (13 JSON Schema 2020-12; `UnitOfMeasure` closed to the Catalog 03 enum) |
-| **2. MVC Architecture Diagrams with a Hexagonal vision** | [`specs/architecture/architecture.md`](specs/architecture/architecture.md) (C4 levels 1 and 2, MVC view, hexagonal view, Clean Architecture equivalence, migration path to microservices, sequence) · [ADR 0001](specs/adr/0001-architecture.md) · [ADR 0005](specs/adr/0005-ubl-from-xsd-generated-classes.md) (UBL from XSD-generated classes) · [ADR 0006](specs/adr/0006-certificate-custody.md) (certificate custody) |
-| **3. Endpoint / Service Specification (API Contracts)** | [`specs/contracts/invoicing-api.yaml`](specs/contracts/invoicing-api.yaml) (OpenAPI 3.1, 22 operations, 401/403/404/400/202/502/503 declared; Redocly and Spectral lint: 0 errors, 0 warnings) · [`specs/contracts/ports.md`](specs/contracts/ports.md) (ports and SUNAT contract) |
-| **4. SUNAT ↔ UBL Regulatory Traceability Matrix** | [`specs/traceability/regulatory-matrix.md`](specs/traceability/regulatory-matrix.md) (§A–H, 49 rows: data → regulation → catalog → XSD cardinality → UBL tag → DTO → SUNAT error → AC; §I PLE 14.1 and §J PLE 12.1 with the UBL origin of every field; §K Catalog 03 ↔ Table 6) · [`specs/traceability/traceability.md`](specs/traceability/traceability.md) (US → FR → AC → UC → test) |
+| **1. Domain Model and Contracts (DTOs / Schemas)** | [`specs/domain/domain-model.md`](specs/domain/domain-model.md) (class diagram with Invoicing, Catalog, Inventory, Migration, Registers and Configuration contexts; DailySummary, VoidingNotice, Outbox; life cycle by CDR return code) · [`specs/contracts/schemas/`](specs/contracts/schemas/) (15 JSON Schema 2020-12; enums are subsets of the SUNAT catalogs versioned as data in [`specs/catalogs/`](specs/catalogs/)) · [`specs/examples/`](specs/examples/README.md) (12 valid requests, 22 invalid ones with their expected error) |
+| **2. MVC Architecture Diagrams with a Hexagonal vision** | [`specs/architecture/architecture.md`](specs/architecture/architecture.md) (C4 1 and 2, MVC view, hexagonal view, Clean Architecture equivalence, migration path, **target microservices** diagram, sequence in two transactions with outbox) · 13 diagrams exported to SVG/PNG in [`specs/architecture/diagrams/`](specs/architecture/diagrams/README.md) · ADR [0001](specs/adr/0001-architecture.md) to [0009](specs/adr/0009-amazonia-igv-exemption.md) |
+| **3. Endpoint / Service Specification (API Contracts)** | [`specs/contracts/invoicing-api.yaml`](specs/contracts/invoicing-api.yaml) (OpenAPI 3.1, 26 operations; 401/403 on all, 400 vs 422, 201/200/202/502/503 on issuance, binary downloads; Redocly and Spectral: 0 errors, 0 warnings) · [`specs/contracts/events.asyncapi.yaml`](specs/contracts/events.asyncapi.yaml) (AsyncAPI 3.1, 6 domain-event channels: the cut line to microservices) · [`specs/contracts/ports.md`](specs/contracts/ports.md) (input/output ports, `UblGeneratorPort`, `OutboxPort`, SUNAT contract) |
+| **4. SUNAT ↔ UBL Regulatory Traceability Matrix** | [`specs/traceability/regulatory-matrix.md`](specs/traceability/regulatory-matrix.md) (70 SUNAT ↔ UBL rows: invoice, sales receipt, free-of-charge lines, exchange rate, notes, **daily summary RC** and **voiding notice RA** against SUNAT's own XSD; §G/§G2 SUNAT error and **CDR return-code ranges**; §I PLE 14.1 and §J PLE 12.1 with the UBL origin of every field; §K Catalog 03 ↔ Table 6; every one of the 175 SUNAT codes cited exists in [`sunat-return-codes.json`](specs/catalogs/sunat-return-codes.json)) · [`specs/traceability/traceability.md`](specs/traceability/traceability.md) (US → FR → AC → UC → test, 76 AC) |
 | Use cases (§3) | [`specs/use-cases/use-cases.md`](specs/use-cases/use-cases.md) |
 | Legacy and migration (§2) | [`specs/migration/legacy-mapping.md`](specs/migration/legacy-mapping.md) · [feature 003](specs/features/003-migrate-legacy-data/spec.md) |
-| Catalog 8 (§2, "key point") | Matrix row 33 · [`domain-model.md`](specs/domain/domain-model.md) (`IscConfig`) · AC-09, AC-10 · skill [`sunat-einvoicing`](.claude/skills/sunat-einvoicing/SKILL.md) §2 |
-| PLE books 14.1 and 12.1 | [feature 004](specs/features/004-generate-sales-register/spec.md) · [`sales-register-row.schema.json`](specs/contracts/schemas/sales-register-row.schema.json) · [`stock-card.schema.json`](specs/contracts/schemas/stock-card.schema.json) · matrix §I–K |
-| MSI / APK distribution (§2) | [ADR 0004](specs/adr/0004-msi-apk-packaging.md) · NFR-04 |
+| Catalog 8 (§2, "key point") | Matrix row 33 · [`catalog-08.json`](specs/catalogs/catalog-08.json) · `IscConfig` in the [domain](specs/domain/domain-model.md) · AC-09, AC-10, AC-68 · reference XML [`F001-44`](specs/examples/xml/20131312955-01-F001-44.xml) with systems 01, 02 and 03 in `TierRange` |
+| PLE books 14.1 and 12.1 | [feature 004](specs/features/004-generate-sales-register/spec.md) · [`sales-register-row.schema.json`](specs/contracts/schemas/sales-register-row.schema.json) · [`stock-card.schema.json`](specs/contracts/schemas/stock-card.schema.json) · matrix §I–K · PLE tables 2, 5, 6, 10, 12, 13 in [`specs/catalogs/`](specs/catalogs/) |
+| MSI / APK distribution (§2) | [ADR 0004](specs/adr/0004-msi-apk-packaging.md) · [ADR 0008](specs/adr/0008-server-numbering-series-per-point-of-issue.md) (numbering and signing only on the server) · NFR-04 |
+| `UBL-Invoice-2.1.xsd` (§1) | [`xsd/`](xsd/README.md): the file of the statement plus every schema it imports, CreditNote, DebitNote, ApplicationResponse (CDR) and SUNAT's RC/RA schemas, with a hash manifest |
+
+## How to verify it (executable spec)
+
+```bash
+pip install -r tools/requirements.txt
+python tools/validate_specs.py          # 142 checks (144 with --lint): XSD hashes, schemas vs catalogs, valid/invalid examples,
+                                        # reference XML (XSD + signature + amounts), ACs recalculated, OpenAPI,
+                                        # AsyncAPI, FR/AC numbering, traceability, matrix codes, links, secrets
+python tools/validate_specs.py --lint   # also Redocly + Spectral (needs Node.js)
+python tools/ubl_build.py               # rebuilds the 9 signed reference XML from the JSON examples
+python tools/render_diagrams.py         # re-exports the 13 Mermaid diagrams to SVG/PNG
+```
+
+`tools/` only verifies the specs; it is not product code (see [`CLAUDE.md`](CLAUDE.md)).
 
 ## Reading order
 1. [`problem-analysis.md`](specs/problem-analysis.md) — what the exam says, adding nothing.
 2. [`00-constitution.md`](specs/00-constitution.md) and [`glossary.md`](specs/glossary.md).
 3. Specs: [001 issue](specs/features/001-issue-document/spec.md) · [002 notes and voids](specs/features/002-manage-notes-and-voids/spec.md) · [003 migrate legacy](specs/features/003-migrate-legacy-data/spec.md) · [004 sales register](specs/features/004-generate-sales-register/spec.md), each with its `research.md`.
 4. Deliverables 1 to 4 (table above).
-5. ADR 0001 to 0006 and each feature's `review.md`.
+5. ADR 0001 to 0009 and each feature's `review.md`.
+6. [`specs/examples/`](specs/examples/README.md) and `python tools/validate_specs.py`.
 
 ## Numbers
 
 | Feature | US | FR | NFR | AC | Clarifications |
 |---|---|---|---|---|---|
-| 001 Issue document | 6 | 17 | 7 | 27 | 8 |
-| 002 Notes, voids, summary | 5 | 10 | 2 | 11 | 4 |
+| 001 Issue document | 6 | 24 | 8 | 41 | 7 |
+| 002 Notes, voids, summary | 5 | 10 | 2 | 13 | 4 |
 | 003 Migrate legacy | 3 | 9 | 2 | 9 | 5 |
 | 004 Sales register (PLE 14.1) and stock card (PLE 12.1) | 2 | 8 | 1 | 13 | 3 |
-| **Total** | **16** | **44** | **12** | **60** | **20** |
+| **Total** | **16** | **51** | **13** | **76** | **19** |
 
 ## Architecture and stack
 - **Architecture** (origin: problem statement): MVC monolith whose Model is a hexagonal core (Domain ← Application ← Infrastructure), with bounded contexts ready to be split into microservices. [ADR 0001](specs/adr/0001-architecture.md).
@@ -39,6 +55,8 @@ Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-
 
 ## Assumptions made
 - Documents are sent directly to SUNAT (SEE-Del contribuyente), with a swappable OSE adapter, until the provider is clarified.
+- Only the server numbers and signs; each till has its own Series; the app queues requests offline without numbers (ADR 0008).
+- Issuance in two transactions with an outbox, so SUNAT's latency never holds the Series lock (ADR 0007).
 - Scope: invoice, sales receipt, notes, voiding and daily summary for domestic sales (catalog 51 = 0101), soles and dollars.
 - The rule "a note modifies a single document" is adopted now (in force in SEE-OSE from 1/1/2027).
 - The legacy system has no prices or customers; only inventory movements are migrated.

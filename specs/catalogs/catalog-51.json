@@ -1,0 +1,31 @@
+{
+  "title": "Catálogo 51 — Código de tipo de operación; subset",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "0101",
+      "description": "Venta interna"
+    },
+    {
+      "code": "0112",
+      "description": "Venta Interna - Sustenta Gastos Deducibles Persona Natural"
+    },
+    {
+      "code": "0113",
+      "description": "Venta Interna-NRUS"
+    },
+    {
+      "code": "0200",
+      "description": "Exportación de Bienes"
+    },
+    {
+      "code": "1001",
+      "description": "Operación Sujeta a Detracción"
+    },
+    {
+      "code": "2001",
+      "description": "Operación Sujeta a Percepción"
+    }
+  ]
+}

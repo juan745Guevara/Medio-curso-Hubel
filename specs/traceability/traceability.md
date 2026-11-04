@@ -64,5 +64,21 @@ One row per acceptance criterion across all features. Test names follow the C# (
 | 004 | US-16 | FR-42 | AC-58 | UC-14 | `Ac58_InventoryRegisterExport()` |
 | 004 | US-16 | FR-43 | AC-59 | UC-14 | `Ac59_ProductWithoutStockType()` |
 | 004 | US-15 | FR-44 | AC-60 | UC-14 | `Ac60_VoidedDocumentInTheRegister()` |
+| 001 | US-04 | FR-45 | AC-61 | UC-08 | `Ac61_ExceptionCodeKeepsTheNumber()` |
+| 001 | US-04 | FR-45 | AC-62 | UC-08 | `Ac62_RejectionCodeConsumesTheNumber()` |
+| 001 | US-04 | FR-45 | AC-63 | UC-08 | `Ac63_ObservationCodeMeansAccepted()` |
+| 001 | US-01 | FR-46 | AC-64 | UC-01 | `Ac64_DollarInvoiceWithoutExchangeRate()` + example `invalid/issue-usd-without-exchange-rate.json` |
+| 001 | US-01 | FR-46 | AC-65 | UC-01 | `Ac65_DollarInvoiceWithExchangeRate()` + XML `20131312955-01-F001-45.xml` |
+| 001 | US-03 | FR-47 | AC-66 | UC-02 | `Ac66_FreeOfChargeLineWithAPrice()` + example `invalid/issue-free-line-with-value.json` |
+| 001 | US-03 | FR-47 | AC-67 | UC-02 | `Ac67_FreeOfChargeLineAmounts()` + XML `20131312955-03-B001-10.xml` |
+| 001 | US-03 | FR-48 | AC-68 | UC-01 | `Ac68_FixedAmountIscPerLitre()` + XML `20131312955-01-F001-44.xml` |
+| 001 | US-06 | FR-49 | AC-69 | UC-01 | `Ac69_TwoTillsNeverCollide()` |
+| 001 | US-06 | FR-49 | AC-70 | UC-01 | `Ac70_OfflineQueueDoesNotNumber()` |
+| 001 | US-04 | FR-50 | AC-71 | UC-01 | `Ac71_SlowValidatorDoesNotBlockTheSeries()` |
+| 001 | US-04 | FR-50 | AC-72 | UC-08 | `Ac72_CrashAfterSigning()` |
+| 001 | US-06 | FR-51 | AC-73 | UC-11 | `Ac73_SeriesOfTheWrongLetter()` + example `invalid/series-wrong-letter.json` |
+| 001 | US-06 | FR-51 | AC-74 | UC-11 | `Ac74_SequenceCannotGoBack()` |
+| 002 | US-08 | FR-18 | AC-75 | UC-05 | `Ac75_DebitNoteIsItsOwnDocument()` + XML `20131312955-08-FD01-1.xml` |
+| 002 | US-09 | FR-23 | AC-76 | UC-06 | `Ac76_VoidingNoticeXml()` + XML `20131312955-RA-20261021-1.xml` |
 
-Total: 60 AC.
+Total: 76 AC. The JSON examples and reference XML named in the Test column live in [`specs/examples/`](../examples/) and are checked by `python tools/validate_specs.py` on every change.

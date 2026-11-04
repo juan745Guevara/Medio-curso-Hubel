@@ -1,0 +1,27 @@
+{
+  "type": "01",
+  "series": "F001",
+  "issueDate": "2026-10-21",
+  "currency": "USD",
+  "exchangeRate": "3.745",
+  "operationType": "0101",
+  "buyer": {
+    "document": {
+      "type": "6",
+      "number": "20600123450"
+    },
+    "name": "BODEGA SAN MARTIN S.A.C.",
+    "address": "JR. MONZON 245, TINGO MARIA"
+  },
+  "paymentTerms": {
+    "type": "CASH"
+  },
+  "items": [
+    {
+      "productCode": "P-001",
+      "quantity": "20",
+      "unit": "NIU",
+      "unitValue": "1.50"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "type": "01",
+  "series": "F001",
+  "issueDate": "2026-10-20",
+  "currency": "PEN",
+  "operationType": "0101",
+  "buyer": {
+    "document": {
+      "type": "6",
+      "number": "20488120027"
+    },
+    "name": "MINIMARKET LA SELVA E.I.R.L."
+  },
+  "paymentTerms": {
+    "type": "CREDIT",
+    "outstandingAmount": "413.00",
+    "installments": [
+      {
+        "amount": "206.50",
+        "dueDate": "2026-11-19"
+      },
+      {
+        "amount": "206.50",
+        "dueDate": "2026-12-19"
+      }
+    ]
+  },
+  "items": [
+    {
+      "productCode": "P-002",
+      "quantity": "100",
+      "unit": "KGM",
+      "unitValue": "3.50"
+    }
+  ]
+}

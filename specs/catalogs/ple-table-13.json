@@ -1,0 +1,19 @@
+{
+  "title": "PLE Tabla 13 — Catálogo de existencias",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "1",
+      "description": "NACIONES UNIDAS (UNSPSC)"
+    },
+    {
+      "code": "3",
+      "description": "GS1 (EAN-UCC)"
+    },
+    {
+      "code": "9",
+      "description": "OTROS"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Catálogo 53 — Códigos de cargos, descuentos y otras deducciones; subset",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "00",
+      "description": "Descuentos que afectan la base imponible del IGV/IVAP"
+    },
+    {
+      "code": "01",
+      "description": "Descuentos que no afectan la base imponible del IGV/IVAP"
+    },
+    {
+      "code": "02",
+      "description": "Descuentos globales que afectan la base imponible del IGV/IVAP"
+    },
+    {
+      "code": "03",
+      "description": "Descuentos globales que no afectan la base imponible del IGV/IVAP"
+    }
+  ]
+}

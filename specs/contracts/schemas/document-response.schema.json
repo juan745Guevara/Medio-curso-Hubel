@@ -31,6 +31,9 @@
     "currency": {
       "$ref": "common.schema.json#/$defs/Currency"
     },
+    "exchangeRate": {
+      "$ref": "common.schema.json#/$defs/ExchangeRate"
+    },
     "status": {
       "$ref": "common.schema.json#/$defs/SunatStatus"
     },
@@ -129,7 +132,9 @@
       "type": "object",
       "properties": {
         "code": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[0-9]{1,4}$",
+          "description": "ResponseCode of the CDR or SOAP fault code"
         },
         "description": {
           "type": "string"
@@ -137,14 +142,38 @@
         "observations": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "required": [
+              "code",
+              "description"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[4-9][0-9]{3}$"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
           }
         },
         "received": {
           "type": "string",
           "format": "date-time"
+        },
+        "codeClass": {
+          "enum": [
+            "ACCEPTED",
+            "OBSERVATION",
+            "EXCEPTION",
+            "REJECTION"
+          ],
+          "description": "0 → ACCEPTED (OBSERVATION when there are 4000+ notes); 0100–1999 → EXCEPTION; 2000–3999 → REJECTION"
         }
-      }
+      },
+      "description": "CDR returned by the SUNAT validator. codeClass follows FR-45 (sunat-return-codes.json)."
     },
     "xmlHash": {
       "type": "string",

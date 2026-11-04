@@ -42,7 +42,7 @@
         "rate": {
           "type": "string",
           "pattern": "^[0-9]{1,3}(\\.[0-9]{1,4})?$",
-          "description": "Percentage, systems 01 and 03"
+          "description": "Percentage, systems 01 and 03 (never used for system 02)"
         },
         "fixedAmount": {
           "$ref": "common.schema.json#/$defs/UnitAmount",
@@ -65,12 +65,18 @@
           "then": {
             "required": [
               "fixedAmount"
-            ]
+            ],
+            "properties": {
+              "fixedAmount": {}
+            }
           },
           "else": {
             "required": [
               "rate"
-            ]
+            ],
+            "properties": {
+              "rate": {}
+            }
           }
         },
         {
@@ -84,10 +90,48 @@
           "then": {
             "required": [
               "suggestedRetailPrice"
-            ]
+            ],
+            "properties": {
+              "suggestedRetailPrice": {}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "system": {
+                "const": "02"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "rate"
+              ],
+              "properties": {
+                "rate": {}
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "fixedAmount"
+              ],
+              "properties": {
+                "fixedAmount": {}
+              }
+            }
           }
         }
       ]
+    },
+    "iscUnitsPerItem": {
+      "type": "string",
+      "pattern": "^[0-9]{1,6}(\\.[0-9]{1,4})?$",
+      "default": "1",
+      "description": "FR-48. Units of the ISC fixed amount (system 02) contained in one sale unit, e.g. 0.62 litres per 620 ml bottle sold as NIU."
     },
     "isPlasticBag": {
       "type": "boolean",

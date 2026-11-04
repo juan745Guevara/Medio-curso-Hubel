@@ -1,0 +1,259 @@
+{
+  "title": "PLE Tabla 6 — Código de la unidad de medida",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "4A",
+      "description": "BOBINAS"
+    },
+    {
+      "code": "BJ",
+      "description": "BALDE"
+    },
+    {
+      "code": "BLL",
+      "description": "BARRILES"
+    },
+    {
+      "code": "BG",
+      "description": "BOLSA"
+    },
+    {
+      "code": "BO",
+      "description": "BOTELLAS"
+    },
+    {
+      "code": "BX",
+      "description": "CAJA"
+    },
+    {
+      "code": "CT",
+      "description": "CARTONES"
+    },
+    {
+      "code": "CMK",
+      "description": "CENTIMETRO CUADRADO"
+    },
+    {
+      "code": "CMQ",
+      "description": "CENTIMETRO CUBICO"
+    },
+    {
+      "code": "CMT",
+      "description": "CENTIMETRO LINEAL"
+    },
+    {
+      "code": "CEN",
+      "description": "CIENTO DE UNIDADES"
+    },
+    {
+      "code": "CY",
+      "description": "CILINDRO"
+    },
+    {
+      "code": "CJ",
+      "description": "CONOS"
+    },
+    {
+      "code": "DZN",
+      "description": "DOCENA"
+    },
+    {
+      "code": "DZP",
+      "description": "DOCENA POR 10**6"
+    },
+    {
+      "code": "BE",
+      "description": "FARDO"
+    },
+    {
+      "code": "GLI",
+      "description": "GALON INGLES (4,545956L)"
+    },
+    {
+      "code": "GRM",
+      "description": "GRAMO"
+    },
+    {
+      "code": "GRO",
+      "description": "GRUESA"
+    },
+    {
+      "code": "HLT",
+      "description": "HECTOLITRO"
+    },
+    {
+      "code": "LEF",
+      "description": "HOJA"
+    },
+    {
+      "code": "SET",
+      "description": "JUEGO"
+    },
+    {
+      "code": "KGM",
+      "description": "KILOGRAMO"
+    },
+    {
+      "code": "KTM",
+      "description": "KILOMETRO"
+    },
+    {
+      "code": "KWH",
+      "description": "KILOVATIO HORA"
+    },
+    {
+      "code": "KT",
+      "description": "KIT"
+    },
+    {
+      "code": "CA",
+      "description": "LATAS"
+    },
+    {
+      "code": "LBR",
+      "description": "LIBRAS"
+    },
+    {
+      "code": "LTR",
+      "description": "LITRO"
+    },
+    {
+      "code": "MWH",
+      "description": "MEGAWATT HORA"
+    },
+    {
+      "code": "MTR",
+      "description": "METRO"
+    },
+    {
+      "code": "MTK",
+      "description": "METRO CUADRADO"
+    },
+    {
+      "code": "MTQ",
+      "description": "METRO CUBICO"
+    },
+    {
+      "code": "MGM",
+      "description": "MILIGRAMOS"
+    },
+    {
+      "code": "MLT",
+      "description": "MILILITRO"
+    },
+    {
+      "code": "MMT",
+      "description": "MILIMETRO"
+    },
+    {
+      "code": "MMK",
+      "description": "MILIMETRO CUADRADO"
+    },
+    {
+      "code": "MMQ",
+      "description": "MILIMETRO CUBICO"
+    },
+    {
+      "code": "MLL",
+      "description": "MILLARES"
+    },
+    {
+      "code": "UM",
+      "description": "MILLON DE UNIDADES"
+    },
+    {
+      "code": "ONZ",
+      "description": "ONZAS"
+    },
+    {
+      "code": "PF",
+      "description": "PALETAS"
+    },
+    {
+      "code": "PK",
+      "description": "PAQUETE"
+    },
+    {
+      "code": "PR",
+      "description": "PAR"
+    },
+    {
+      "code": "FOT",
+      "description": "PIES"
+    },
+    {
+      "code": "FTK",
+      "description": "PIES CUADRADOS"
+    },
+    {
+      "code": "FTQ",
+      "description": "PIES CUBICOS"
+    },
+    {
+      "code": "C62",
+      "description": "PIEZAS"
+    },
+    {
+      "code": "PG",
+      "description": "PLACAS"
+    },
+    {
+      "code": "ST",
+      "description": "PLIEGO"
+    },
+    {
+      "code": "INH",
+      "description": "PULGADAS"
+    },
+    {
+      "code": "RM",
+      "description": "RESMA"
+    },
+    {
+      "code": "DR",
+      "description": "TAMBOR"
+    },
+    {
+      "code": "STN",
+      "description": "TONELADA CORTA"
+    },
+    {
+      "code": "LTN",
+      "description": "TONELADA LARGA"
+    },
+    {
+      "code": "TNE",
+      "description": "TONELADAS"
+    },
+    {
+      "code": "TU",
+      "description": "TUBOS"
+    },
+    {
+      "code": "NIU",
+      "description": "UNIDAD (BIENES)"
+    },
+    {
+      "code": "ZZ",
+      "description": "UNIDAD (SERVICIOS)"
+    },
+    {
+      "code": "GLL",
+      "description": "US GALON (3,7843 L)"
+    },
+    {
+      "code": "YRD",
+      "description": "YARDA"
+    },
+    {
+      "code": "YDK",
+      "description": "YARDA CUADRADA"
+    },
+    {
+      "code": "99",
+      "description": "OTROS"
+    }
+  ]
+}

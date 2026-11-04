@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/series.schema.json",
+  "title": "Series",
+  "description": "Series of a point of issue (FR-49, FR-51, ADR 0008). Created by the Administrator; lastSequence is assigned only by the server and never decreases.",
+  "type": "object",
+  "required": [
+    "code",
+    "documentType",
+    "establishmentCode",
+    "pointOfIssue"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "$ref": "common.schema.json#/$defs/Series"
+    },
+    "documentType": {
+      "$ref": "common.schema.json#/$defs/DocumentType"
+    },
+    "establishmentCode": {
+      "$ref": "common.schema.json#/$defs/EstablishmentCode"
+    },
+    "pointOfIssue": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30,
+      "description": "Till or point of issue name, e.g. CAJA-01"
+    },
+    "lastSequence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 99999999,
+      "readOnly": true,
+      "description": "Last number assigned by the server; 0 for a new Series. Never decreases (AC-74)."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "documentType": {
+            "const": "01"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "code": {
+            "pattern": "^F"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "documentType": {
+            "const": "03"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "code": {
+            "pattern": "^B"
+          }
+        }
+      }
+    }
+  ]
+}

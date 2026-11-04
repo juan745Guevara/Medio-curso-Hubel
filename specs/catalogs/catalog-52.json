@@ -1,0 +1,23 @@
+{
+  "title": "Catálogo 52 — Códigos de leyendas; subset",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "1000",
+      "description": "Monto en Letras"
+    },
+    {
+      "code": "1002",
+      "description": "TRANSFERENCIA GRATUITA DE UN BIEN Y/O SERVICIO PRESTADO GRATUITAMENTE"
+    },
+    {
+      "code": "2000",
+      "description": "COMPROBANTE DE PERCEPCIÓN"
+    },
+    {
+      "code": "2006",
+      "description": "Operación sujeta a detracción"
+    }
+  ]
+}

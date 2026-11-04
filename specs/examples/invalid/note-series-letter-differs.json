@@ -1,0 +1,20 @@
+{
+  "type": "07",
+  "series": "BC01",
+  "modifiedDocument": {
+    "type": "01",
+    "number": "F001-42"
+  },
+  "reason": {
+    "code": "07",
+    "description": "DEVOLUCION DE 3 BOTELLAS DE ACEITE"
+  },
+  "items": [
+    {
+      "productCode": "P-001",
+      "quantity": "3",
+      "unit": "NIU",
+      "unitValue": "5.00"
+    }
+  ]
+}

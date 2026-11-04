@@ -51,12 +51,12 @@ AC-52 (FR-41) — Export
   Then they get a TXT with 3 lines, each with 35 fields separated by "|" and ending in "|"
 
 AC-53 (FR-37) — Format 14.1 fields of an invoice
-  Given Invoice F001-00000042 issued on 15/10/2026 to RUC 20131312955 with taxed base 100.00, IGV 18.00 and total 118.00 in PEN
+  Given Invoice F001-42 issued on 15/10/2026 to RUC 20131312955 with taxed base 100.00, IGV 18.00 and total 118.00 in PEN
   When the 2026-10 Register is generated
   Then the row has period 20261000, type 01, series F001, number 42, customer document type 6 and number 20131312955, taxed base 100.00, IGV 18.00, total 118.00, currency PEN, exchange rate 1.000 and status 1
 
 AC-54 (FR-38) — Modified document of a credit note
-  Given credit note FC01-00000003 issued on 20/10/2026 that modifies Invoice F001-00000042 of 15/10/2026 by 18.00
+  Given credit note FC01-3 issued on 20/10/2026 that modifies Invoice F001-42 of 15/10/2026 by 18.00
   When the 2026-10 Register is generated
   Then the note row has type 07, total -18.00 and fields 28–31 = 15/10/2026, 01, F001, 42
 
@@ -66,7 +66,7 @@ AC-55 (FR-37) — Document in dollars
   Then the row has currency USD and exchange rate 3.745
 
 AC-56 (FR-40) — Format 12.1 fields with running balance
-  Given P-001 (stock type 01, unit NIU) in establishment 0000 with an opening balance of 50 and Invoice F001-00000042 for 10 units
+  Given P-001 (stock type 01, unit NIU) in establishment 0000 with an opening balance of 50 and Invoice F001-42 for 10 units
   When the 2026-10 stock card is opened
   Then row 1 has operation 16, inflow 50.00, outflow 0.00 and balance 50.00, and row 2 has document 01 F001 42, operation 01, inflow 0.00, outflow -10.00 and balance 40.00
 
@@ -86,7 +86,7 @@ AC-59 (FR-43) — Product without stock type
   Then the export is blocked with PLE_INCOMPLETE_PRODUCT listing P-009
 
 AC-60 (FR-44) — Voided document in the register
-  Given Invoice F001-00000045 for 118.00 VOIDED in 2026-10
+  Given Invoice F001-45 for 118.00 VOIDED in 2026-10
   When the 2026-10 Register is generated
   Then its row has status 2 and every amount is 0.00
 

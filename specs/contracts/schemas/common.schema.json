@@ -299,7 +299,8 @@
         "properties": {
           "installments": {
             "minItems": 1
-          }
+          },
+          "outstandingAmount": {}
         }
       },
       "additionalProperties": false
