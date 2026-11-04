@@ -30,6 +30,6 @@ a4f726bcf8cc3f7d9ffa4dab99e005535a8e8b60dced1e5d94578d2e05afa96e  ubl-2.1/common
 1fa4625e9cefcb7a9abb5ac1b64315547450031eece8a55bd584e4ba4b79dbc1  ubl-2.1/common/UBL-XAdESv141-2.1.xsd
 101909c9f06456d61ddcc4fb982f1d40dc357b439f393b1a2eb46e42acd60809  ubl-2.1/common/UBL-xmldsig-core-schema-2.1.xsd
 b9adc27c538c937a54479e678d1e19b0a91bb7ce36ac0b558961173508466125  ubl-2.1/maindoc/UBL-ApplicationResponse-2.1.xsd
-21eee9df7418a4ec2a26d92ad80c9b41d5e884959a698793311d2c5c6754c4b0  ubl-2.1/maindoc/UBL-CreditNote-2.1.xsd
-ea5303c2191dfb579d6d53a66e41094020f33dca0531086da1bd62f722202da0  ubl-2.1/maindoc/UBL-DebitNote-2.1.xsd
+a54651b1225052f811bf2ba01346f13f2454e7cc3e0be290c91dd680dc7b7b1a  ubl-2.1/maindoc/UBL-CreditNote-2.1.xsd
+295d142102a2a0cd8b223a79b8314c0fe1b55055478221dd2f0ed7603fecf920  ubl-2.1/maindoc/UBL-DebitNote-2.1.xsd
 40fae8cb436f3a9506d7acce65ba162caef3b0bed4d5cbc0992b2153ded4edf4  ubl-2.1/maindoc/UBL-Invoice-2.1.xsd
