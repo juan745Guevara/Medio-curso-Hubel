@@ -1,0 +1,31 @@
+{
+  "type": "01",
+  "series": "F001",
+  "issueDate": "2026-10-20",
+  "currency": "PEN",
+  "operationType": "0101",
+  "buyer": {
+    "document": {
+      "type": "1",
+      "number": "45678912"
+    },
+    "name": "ROSA QUISPE MAMANI"
+  },
+  "paymentTerms": {
+    "type": "CASH"
+  },
+  "items": [
+    {
+      "productCode": "P-001",
+      "quantity": "10",
+      "unit": "NIU",
+      "unitValue": "5.00"
+    },
+    {
+      "productCode": "P-010",
+      "quantity": "4",
+      "unit": "KGM",
+      "unitValue": "5.00"
+    }
+  ]
+}

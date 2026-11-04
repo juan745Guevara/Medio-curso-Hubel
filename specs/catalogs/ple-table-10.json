@@ -1,0 +1,31 @@
+{
+  "title": "PLE Tabla 10 — Tipo de comprobante de pago o documento",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "00",
+      "description": "OTROS"
+    },
+    {
+      "code": "01",
+      "description": "FACTURA"
+    },
+    {
+      "code": "03",
+      "description": "BOLETA DE VENTA"
+    },
+    {
+      "code": "07",
+      "description": "NOTA DE CRÉDITO"
+    },
+    {
+      "code": "08",
+      "description": "NOTA DE DÉBITO"
+    },
+    {
+      "code": "09",
+      "description": "GUÍA DE REMISIÓN - REMITENTE"
+    }
+  ]
+}

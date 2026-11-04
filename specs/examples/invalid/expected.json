@@ -1,0 +1,156 @@
+{
+  "issue-receipt-with-F-series.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "pattern",
+    "ac": "AC-31",
+    "why": "Sales receipt (03) must use a B series"
+  },
+  "issue-invoice-to-dni.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "const",
+    "ac": "AC-05",
+    "why": "Invoice (01) requires a buyer with RUC (type 6)"
+  },
+  "issue-credit-without-installments.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-21",
+    "why": "Credit requires installments"
+  },
+  "issue-usd-without-exchange-rate.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-64",
+    "why": "USD requires the exchange rate"
+  },
+  "issue-free-line-with-value.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "pattern",
+    "ac": "AC-66",
+    "why": "Free-of-charge line must have unit value 0.00"
+  },
+  "issue-free-line-without-reference-value.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-67",
+    "why": "Free-of-charge line needs the catalog 16 reference value"
+  },
+  "issue-unit-not-in-catalog-03.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "enum",
+    "ac": "AC-08",
+    "why": "Unit must be a catalog 03 code"
+  },
+  "issue-client-sends-taxes.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "additionalProperties",
+    "ac": "AC-08",
+    "why": "The client never sends taxes (FR-05)"
+  },
+  "issue-client-sends-sequence-number.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "additionalProperties",
+    "ac": "AC-01",
+    "why": "Only the server assigns the sequence number (FR-49)"
+  },
+  "issue-currency-not-allowed.json": {
+    "schema": "issue-document-request",
+    "layer": "schema",
+    "expect": "enum",
+    "ac": "—",
+    "why": "Only PEN and USD in scope"
+  },
+  "issue-invalid-ruc-check-digit.json": {
+    "schema": "issue-document-request",
+    "layer": "business",
+    "expect": "INVALID_RUC",
+    "ac": "AC-04",
+    "why": "RUC with a wrong modulo-11 check digit"
+  },
+  "issue-installments-mismatch.json": {
+    "schema": "issue-document-request",
+    "layer": "business",
+    "expect": "INSTALLMENTS_MISMATCH",
+    "ac": "AC-22",
+    "why": "Installments add up to 313.00, outstanding 413.00"
+  },
+  "issue-receipt-over-700-without-document.json": {
+    "schema": "issue-document-request",
+    "layer": "business",
+    "expect": "RECEIPT_REQUIRES_DOCUMENT",
+    "ac": "AC-06",
+    "why": "Sales receipt over S/ 700 needs the buyer document"
+  },
+  "product-isc-without-rate.json": {
+    "schema": "product",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-09",
+    "why": "ISC system 01 needs its rate"
+  },
+  "product-isc-fixed-amount-with-rate.json": {
+    "schema": "product",
+    "layer": "schema",
+    "expect": "not",
+    "ac": "AC-10",
+    "why": "ISC system 02 uses a fixed amount, never a rate"
+  },
+  "product-isc-system-not-in-catalog-08.json": {
+    "schema": "product",
+    "layer": "schema",
+    "expect": "enum",
+    "ac": "AC-09",
+    "why": "Catalog 08 only has 01, 02, 03"
+  },
+  "note-without-modified-document.json": {
+    "schema": "note-request",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-30",
+    "why": "A note must reference the document it modifies"
+  },
+  "note-without-reason.json": {
+    "schema": "note-request",
+    "layer": "schema",
+    "expect": "required",
+    "ac": "AC-28",
+    "why": "A note needs its catalog 09/10 reason"
+  },
+  "debit-note-with-credit-reason.json": {
+    "schema": "note-request",
+    "layer": "schema",
+    "expect": "enum",
+    "ac": "AC-28",
+    "why": "Debit note reasons come from catalog 10"
+  },
+  "note-series-letter-differs.json": {
+    "schema": "note-request",
+    "layer": "schema",
+    "expect": "pattern",
+    "ac": "AC-31",
+    "why": "A note on an invoice uses an F series (FR-20)"
+  },
+  "series-wrong-letter.json": {
+    "schema": "series",
+    "layer": "schema",
+    "expect": "pattern",
+    "ac": "AC-73",
+    "why": "Invoice series must start with F"
+  },
+  "series-negative-sequence.json": {
+    "schema": "series",
+    "layer": "schema",
+    "expect": "minimum",
+    "ac": "AC-74",
+    "why": "Sequence numbers start at 0 and never go back"
+  }
+}

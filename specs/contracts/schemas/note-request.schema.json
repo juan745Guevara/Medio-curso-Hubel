@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/note-request.schema.json",
   "title": "IssueNoteRequest",
-  "description": "Credit note (07, cat. 09) or debit note (08, cat. 10). FR-18 to FR-22.",
+  "description": "Credit note (07, cat. 09) or debit note (08, cat. 10). FR-18 to FR-22. Its Series starts with the letter of the modified document (FR-20).",
   "type": "object",
   "required": [
     "type",
@@ -123,6 +123,46 @@
                 ]
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "modifiedDocument": {
+            "properties": {
+              "number": {
+                "pattern": "^F"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "series": {
+            "pattern": "^F"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "modifiedDocument": {
+            "properties": {
+              "number": {
+                "pattern": "^B"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "series": {
+            "pattern": "^B"
           }
         }
       }

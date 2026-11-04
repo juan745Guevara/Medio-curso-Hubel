@@ -1,0 +1,11 @@
+{
+  "code": "P-021",
+  "description": "PISCO BOTELLA 700 ML",
+  "unit": "NIU",
+  "igvTreatment": "10",
+  "isc": {
+    "system": "01"
+  },
+  "existenceType": "01",
+  "unspscCode": "50202206"
+}

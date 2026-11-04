@@ -1,0 +1,83 @@
+{
+  "title": "PLE Tabla 5 — Tipo de existencia",
+  "source": "PLE tables — Annex 3 RS 169-2015/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2015/anexo3-rs169-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "01",
+      "description": "MERCADERÍAS"
+    },
+    {
+      "code": "02",
+      "description": "PRODUCTO TERMINADO"
+    },
+    {
+      "code": "03",
+      "description": "MATERIAS PRIMAS"
+    },
+    {
+      "code": "04",
+      "description": "ENVASES"
+    },
+    {
+      "code": "05",
+      "description": "MATERIALES AUXILIARES"
+    },
+    {
+      "code": "06",
+      "description": "SUMINISTROS"
+    },
+    {
+      "code": "07",
+      "description": "REPUESTOS"
+    },
+    {
+      "code": "08",
+      "description": "EMBALAJES"
+    },
+    {
+      "code": "09",
+      "description": "SUBPRODUCTOS"
+    },
+    {
+      "code": "10",
+      "description": "DESECHOS Y DESPERDICIOS"
+    },
+    {
+      "code": "91",
+      "description": "OTROS 1"
+    },
+    {
+      "code": "92",
+      "description": "OTROS 2"
+    },
+    {
+      "code": "93",
+      "description": "OTROS 3"
+    },
+    {
+      "code": "94",
+      "description": "OTROS 4"
+    },
+    {
+      "code": "95",
+      "description": "OTROS 5"
+    },
+    {
+      "code": "96",
+      "description": "OTROS 6"
+    },
+    {
+      "code": "97",
+      "description": "OTROS 7"
+    },
+    {
+      "code": "98",
+      "description": "OTROS 8"
+    },
+    {
+      "code": "99",
+      "description": "OTROS 9"
+    }
+  ]
+}

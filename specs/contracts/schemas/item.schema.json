@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/item.schema.json",
   "title": "ItemDTO",
-  "description": "Document line. Taxes are calculated by the system (FR-05); the client does not send them.",
+  "description": "Document line. Taxes are calculated by the system (FR-05); the client does not send them. A free-of-charge line (FR-47) states its IGV treatment, unit value 0.00 and the reference unit value.",
   "type": "object",
   "required": [
     "productCode",
@@ -32,7 +32,89 @@
     },
     "discount": {
       "$ref": "common.schema.json#/$defs/Amount"
+    },
+    "igvTreatment": {
+      "$ref": "common.schema.json#/$defs/IgvTreatment",
+      "description": "Optional override of the Product's treatment, only for free-of-charge lines (catalog 07 codes 11–16, 21, 31–37). FR-47."
+    },
+    "referenceUnitValue": {
+      "$ref": "common.schema.json#/$defs/UnitAmount",
+      "description": "Catalog 16 code 02: reference unit value of a free-of-charge line. FR-47."
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "igvTreatment"
+        ],
+        "properties": {
+          "igvTreatment": {
+            "enum": [
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "21",
+              "31",
+              "32",
+              "33",
+              "34",
+              "35",
+              "36",
+              "37"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "referenceUnitValue"
+        ],
+        "properties": {
+          "unitValue": {
+            "pattern": "^0+(\\.0+)?$"
+          },
+          "referenceUnitValue": {
+            "not": {
+              "pattern": "^0+(\\.0+)?$"
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "igvTreatment": {
+            "enum": [
+              "11",
+              "12",
+              "13",
+              "14",
+              "15",
+              "16",
+              "21",
+              "31",
+              "32",
+              "33",
+              "34",
+              "35",
+              "36",
+              "37"
+            ]
+          }
+        },
+        "not": {
+          "required": [
+            "referenceUnitValue"
+          ],
+          "properties": {
+            "referenceUnitValue": {}
+          }
+        }
+      }
+    }
+  ]
 }

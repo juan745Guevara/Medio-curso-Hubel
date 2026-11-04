@@ -1,0 +1,164 @@
+asyncapi: 3.1.0
+info:
+  title: ABC Invoicing domain events
+  version: 0.1.0
+  description: |
+    Domain events of the bounded contexts (domain-model.md). Today they are written to the outbox table
+    in the same transaction as the change and delivered in memory (ADR 0007); when the contexts become
+    services (architecture.md §5b) the same messages go through a broker. This contract is the cut line
+    between future microservices: a consumer depends on these payloads, never on another context's tables.
+    Delivery is at-least-once: every consumer is idempotent on `eventId`.
+defaultContentType: application/json
+channels:
+  documentAccepted:
+    address: invoicing.document.accepted
+    description: An electronic document reached ACCEPTED or OBSERVED (FR-45). Inventory registers the outflow (FR-17); Registers adds the 14.1 row.
+    messages:
+      documentAccepted: { $ref: '#/components/messages/DocumentAccepted' }
+  documentRejected:
+    address: invoicing.document.rejected
+    description: The CDR carried a 2000–3999 code; the number is consumed (FR-45, constitution 6).
+    messages:
+      documentRejected: { $ref: '#/components/messages/DocumentRejected' }
+  documentVoided:
+    address: invoicing.document.voided
+    description: A voiding notice (RA) or daily summary with condition 3 was accepted (FR-23). Inventory reverses the outflow; Registers sets the 14.1 status.
+    messages:
+      documentVoided: { $ref: '#/components/messages/DocumentVoided' }
+  cdrReceived:
+    address: sunatgateway.cdr.received
+    description: The SUNAT/OSE gateway received a CDR or a ticket result.
+    messages:
+      cdrReceived: { $ref: '#/components/messages/CdrReceived' }
+  batchMigrated:
+    address: migration.batch.migrated
+    description: A legacy batch finished and was reconciled (FR-34); Inventory loads the opening balances (Table 12 code 16).
+    messages:
+      batchMigrated: { $ref: '#/components/messages/BatchMigrated' }
+  stockChanged:
+    address: inventory.stock.changed
+    description: A movement changed the balance of a product in an establishment (12.1 row).
+    messages:
+      stockChanged: { $ref: '#/components/messages/StockChanged' }
+operations:
+  publishDocumentAccepted:
+    action: send
+    channel: { $ref: '#/channels/documentAccepted' }
+  publishDocumentRejected:
+    action: send
+    channel: { $ref: '#/channels/documentRejected' }
+  publishDocumentVoided:
+    action: send
+    channel: { $ref: '#/channels/documentVoided' }
+  publishCdrReceived:
+    action: send
+    channel: { $ref: '#/channels/cdrReceived' }
+  publishBatchMigrated:
+    action: send
+    channel: { $ref: '#/channels/batchMigrated' }
+  publishStockChanged:
+    action: send
+    channel: { $ref: '#/channels/stockChanged' }
+  inventoryOnDocumentAccepted:
+    action: receive
+    channel: { $ref: '#/channels/documentAccepted' }
+  inventoryOnDocumentVoided:
+    action: receive
+    channel: { $ref: '#/channels/documentVoided' }
+  inventoryOnBatchMigrated:
+    action: receive
+    channel: { $ref: '#/channels/batchMigrated' }
+  registersOnStockChanged:
+    action: receive
+    channel: { $ref: '#/channels/stockChanged' }
+components:
+  schemas:
+    Envelope:
+      type: object
+      required: [eventId, occurredAt, aggregateId]
+      properties:
+        eventId: { type: string, format: uuid, description: Idempotency key for consumers }
+        occurredAt: { type: string, format: date-time }
+        aggregateId: { type: string, format: uuid }
+    DocumentRef:
+      type: object
+      required: [documentType, number, issueDate]
+      properties:
+        documentType: { type: string, enum: ['01', '03', '07', '08'], description: Catalog 01 }
+        number: { type: string, pattern: '^[FB][A-Z0-9]{3}-[1-9][0-9]{0,7}$' }
+        issueDate: { type: string, format: date }
+  messages:
+    DocumentAccepted:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - { $ref: '#/components/schemas/DocumentRef' }
+          - type: object
+            required: [status, establishmentCode, items]
+            properties:
+              status: { type: string, enum: [ACCEPTED, OBSERVED] }
+              establishmentCode: { type: string, pattern: '^[0-9]{4}$' }
+              modifiedDocument: { $ref: '#/components/schemas/DocumentRef' }
+              items:
+                type: array
+                items:
+                  type: object
+                  required: [productCode, quantity, unit]
+                  properties:
+                    productCode: { type: string }
+                    quantity: { type: string, pattern: '^[0-9]{1,12}(\.[0-9]{1,10})?$' }
+                    unit: { type: string, description: Catalog 03 }
+    DocumentRejected:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - { $ref: '#/components/schemas/DocumentRef' }
+          - type: object
+            required: [cdrCode]
+            properties:
+              cdrCode: { type: string, pattern: '^[23][0-9]{3}$' }
+              cdrDescription: { type: string }
+    DocumentVoided:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - { $ref: '#/components/schemas/DocumentRef' }
+          - type: object
+            required: [via]
+            properties:
+              via: { type: string, enum: [VOIDING_NOTICE, DAILY_SUMMARY] }
+              ticket: { type: string }
+    CdrReceived:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - type: object
+            required: [fileName, code, codeClass]
+            properties:
+              fileName: { type: string, description: 'RUC-TT-SERIES-NUMBER or RUC-RC/RA-YYYYMMDD-n' }
+              code: { type: string }
+              codeClass: { type: string, enum: [ACCEPTED, OBSERVATION, EXCEPTION, REJECTION] }
+    BatchMigrated:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - type: object
+            required: [batchId, rowsRead, migrated, rejected, duplicates]
+            properties:
+              batchId: { type: string, format: uuid }
+              rowsRead: { type: integer, minimum: 0 }
+              migrated: { type: integer, minimum: 0 }
+              rejected: { type: integer, minimum: 0 }
+              duplicates: { type: integer, minimum: 0 }
+    StockChanged:
+      payload:
+        allOf:
+          - { $ref: '#/components/schemas/Envelope' }
+          - type: object
+            required: [productCode, establishmentCode, operationType, quantity, finalBalance]
+            properties:
+              productCode: { type: string }
+              establishmentCode: { type: string, pattern: '^[0-9]{4}$' }
+              operationType: { type: string, description: PLE Table 12 }
+              quantity: { type: string }
+              finalBalance: { type: string }

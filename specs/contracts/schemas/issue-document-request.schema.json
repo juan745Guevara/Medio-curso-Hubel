@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/issue-document-request.schema.json",
   "title": "IssueDocumentRequest",
-  "description": "Input to issue an invoice (01) or sales receipt (03). FR-01 to FR-15. Idempotency goes in the HTTP header Idempotency-Key (UUID), not in the body.",
+  "description": "Input to issue an invoice (01) or sales receipt (03). FR-01 to FR-15, FR-46 to FR-49. Idempotency goes in the HTTP header Idempotency-Key (UUID), not in the body. The client never sends the sequence number nor any tax: the server assigns and calculates them.",
   "type": "object",
   "required": [
     "type",
@@ -29,6 +29,10 @@
     },
     "currency": {
       "$ref": "common.schema.json#/$defs/Currency"
+    },
+    "exchangeRate": {
+      "$ref": "common.schema.json#/$defs/ExchangeRate",
+      "description": "FR-46. Required when currency is USD: SUNAT's published selling rate of the issue date. Goes to cac:PaymentExchangeRate and PLE 14.1 field 27."
     },
     "operationType": {
       "$ref": "common.schema.json#/$defs/OperationType"
@@ -66,6 +70,9 @@
             "pattern": "^F"
           },
           "buyer": {
+            "required": [
+              "document"
+            ],
             "properties": {
               "document": {
                 "properties": {
@@ -92,6 +99,26 @@
           "series": {
             "pattern": "^B"
           }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "currency": {
+            "const": "USD"
+          }
+        },
+        "required": [
+          "currency"
+        ]
+      },
+      "then": {
+        "required": [
+          "exchangeRate"
+        ],
+        "properties": {
+          "exchangeRate": {}
         }
       }
     }

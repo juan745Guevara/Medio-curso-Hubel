@@ -1,0 +1,44 @@
+{
+  "type": "01",
+  "series": "F001",
+  "issueDate": "2026-10-21",
+  "currency": "PEN",
+  "operationType": "0101",
+  "buyer": {
+    "document": {
+      "type": "6",
+      "number": "20600123450"
+    },
+    "name": "BODEGA SAN MARTIN S.A.C.",
+    "address": "JR. MONZON 245, TINGO MARIA"
+  },
+  "paymentTerms": {
+    "type": "CASH"
+  },
+  "items": [
+    {
+      "productCode": "P-021",
+      "quantity": "4",
+      "unit": "NIU",
+      "unitValue": "25.00"
+    },
+    {
+      "productCode": "P-020",
+      "quantity": "12",
+      "unit": "NIU",
+      "unitValue": "4.00"
+    },
+    {
+      "productCode": "P-022",
+      "quantity": "2",
+      "unit": "NIU",
+      "unitValue": "30.00"
+    },
+    {
+      "productCode": "P-030",
+      "quantity": "3",
+      "unit": "NIU",
+      "unitValue": "0.10"
+    }
+  ]
+}

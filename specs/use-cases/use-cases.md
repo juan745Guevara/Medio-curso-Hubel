@@ -44,10 +44,10 @@ flowchart LR
 | UC-05 | Issue debit note | Salesperson | Interest, increase | Choose Document → catalog 10 reason → issue | Document not accepted | FR-18 to FR-21 |
 | UC-06 | Submit voiding notice | Administrator | Document issued by mistake | Choose → reason → Voiding notice → Ticket → CDR | Past the deadline → use CN | FR-23, FR-24 |
 | UC-07 | Send daily summary | System / Administrator | End of day | Group Sales receipts and Notes → blocks of 500 → send → Ticket | Ticket in progress; rejection | FR-25, FR-26 |
-| UC-08 | Check status and resend | Salesperson | Doubt or alert | Search → see SUNAT status and CDR → resend pending | Deadline about to expire | FR-11, FR-27 |
+| UC-08 | Check status and resend | Salesperson | Doubt or alert | Search → see SUNAT status, CDR and observations → resend pending | Deadline about to expire; exception code 0100–1999 (resend same file); rejection 2000–3999 (new number) | FR-11, FR-27, FR-45 |
 | UC-09 | Download / send documents | Salesperson | Customer asks for a copy | Download PDF, XML, CDR or send by e-mail | No e-mail registered | FR-13, FR-14 |
 | UC-10 | Record contingency | Administrator | Documented outage | Activate → record paper documents → report ≤ 7 days | Past the deadline | FR-16 |
-| UC-11 | Configure issuer | Administrator | Go-live | RUC, business name, address, Series, Certificate, SUNAT/OSE, beta/production | Expired certificate | NFR-05, NFR-07 |
+| UC-11 | Configure issuer | Administrator | Go-live | RUC, business name, address, points of issue and their Series, Certificate, SUNAT/OSE, beta/production | Expired certificate; Series with the wrong letter; attempt to lower a Sequence number | NFR-05, NFR-07, FR-49, FR-51 |
 | UC-12 | Manage products | Administrator | Create or change | Code, description, unit (cat. 03), IGV treatment (cat. 07), ISC system (cat. 08), ICBPER bag | Product PENDING_CLASSIFICATION | FR-05, FR-36 |
 | UC-13 | Migrate legacy data | Administrator | Implementation | Upload file → Batch → validate rows → migrate → reconcile | Rejected rows; duplicates | FR-28 to FR-36 |
 | UC-14 | Sales register and inventory register | Accountant | Month-end | Choose Period → list in format 14.1 / 12.1 → export PLE TXT | Pending documents; Product without Table 5 stock type | FR-37 to FR-39, FR-41 to FR-44 |
@@ -61,7 +61,9 @@ flowchart LR
 | SUNAT/OSE service outages at peak hours | Queue with retry and PENDING_RESEND status (FR-11) |
 | Forgetting the submission deadline | Deadline alerts (FR-11, AC-20) |
 | Not knowing why it was rejected | Show CDR code and description (FR-10, FR-27) |
-| Needing to issue without internet | Contingency (FR-16) and offline-mode clarification |
+| Needing to issue without internet | Offline request queue without numbers in the app, issued by the server on reconnection (FR-49, ADR 0008); paper Contingency only when the whole system is down (FR-16) |
+| Two tills repeating numbers | Server-only numbering with one Series per point of issue (FR-49, FR-51) |
+| Promotions and gifts ("bonificaciones") | Free-of-charge lines with reference value and tax 9996 (FR-47) |
 | Changing OSE provider | `SunatValidatorPort` port with interchangeable adapters (ADR 0001) |
 
 ## Clarifications

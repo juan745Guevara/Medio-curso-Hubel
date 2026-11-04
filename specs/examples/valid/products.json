@@ -1,0 +1,73 @@
+[
+  {
+    "code": "P-001",
+    "description": "ACEITE VEGETAL BOTELLA 1 L",
+    "unit": "NIU",
+    "igvTreatment": "10",
+    "existenceType": "01",
+    "unspscCode": "50151513"
+  },
+  {
+    "code": "P-002",
+    "description": "AZUCAR RUBIA",
+    "unit": "KGM",
+    "igvTreatment": "10",
+    "existenceType": "01",
+    "unspscCode": "50161509"
+  },
+  {
+    "code": "P-010",
+    "description": "HUEVOS DE GALLINA",
+    "unit": "KGM",
+    "igvTreatment": "20",
+    "existenceType": "01",
+    "unspscCode": "50131701"
+  },
+  {
+    "code": "P-020",
+    "description": "CERVEZA BOTELLA 620 ML",
+    "unit": "NIU",
+    "igvTreatment": "10",
+    "isc": {
+      "system": "02",
+      "fixedAmount": "1.50"
+    },
+    "iscUnitsPerItem": "0.62",
+    "existenceType": "01",
+    "unspscCode": "50202201"
+  },
+  {
+    "code": "P-021",
+    "description": "PISCO BOTELLA 700 ML",
+    "unit": "NIU",
+    "igvTreatment": "10",
+    "isc": {
+      "system": "01",
+      "rate": "25"
+    },
+    "existenceType": "01",
+    "unspscCode": "50202206"
+  },
+  {
+    "code": "P-022",
+    "description": "WHISKY BOTELLA 750 ML",
+    "unit": "NIU",
+    "igvTreatment": "10",
+    "isc": {
+      "system": "03",
+      "rate": "30",
+      "suggestedRetailPrice": "45.00"
+    },
+    "existenceType": "01",
+    "unspscCode": "50202206"
+  },
+  {
+    "code": "P-030",
+    "description": "BOLSA PLASTICA",
+    "unit": "NIU",
+    "igvTreatment": "10",
+    "isPlasticBag": true,
+    "existenceType": "04",
+    "unspscCode": "24111503"
+  }
+]

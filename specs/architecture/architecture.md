@@ -1,6 +1,8 @@
 # Architecture: MVC with a Hexagonal vision
 
-Deliverable 2 of the exam. Decisions in [ADR 0001](../adr/0001-architecture.md), [ADR 0002](../adr/0002-technology-stack.md), [ADR 0003](../adr/0003-validate-xsd-before-signing.md), [ADR 0004](../adr/0004-msi-apk-packaging.md), [ADR 0005](../adr/0005-ubl-from-xsd-generated-classes.md) and [ADR 0006](../adr/0006-certificate-custody.md).
+Deliverable 2 of the exam. Decisions in [ADR 0001](../adr/0001-architecture.md), [ADR 0002](../adr/0002-technology-stack.md), [ADR 0003](../adr/0003-validate-xsd-before-signing.md), [ADR 0004](../adr/0004-msi-apk-packaging.md), [ADR 0005](../adr/0005-ubl-from-xsd-generated-classes.md), [ADR 0006](../adr/0006-certificate-custody.md), [ADR 0007](../adr/0007-two-step-issuance-outbox.md) (two transactions + outbox), [ADR 0008](../adr/0008-server-numbering-series-per-point-of-issue.md) (numbering only on the server) and [ADR 0009](../adr/0009-amazonia-igv-exemption.md) (Amazonía).
+
+Every diagram is also exported as SVG in [`diagrams/`](diagrams/) (`python tools/render_diagrams.py`).
 
 The idea in one line: **today it is an MVC monolith; its "M" is already built as a hexagon**, so the future migration does not rewrite rules, it only relocates adapters.
 
@@ -29,12 +31,12 @@ flowchart LR
   subgraph Native clients
     win[Windows app<br/>.NET MAUI · MSI]
     and[Android app<br/>.NET MAUI · APK]
-    cache[(Local SQLite<br/>queue + catalogs)]
+    cache[(Local SQLite<br/>request queue without numbers + catalogs)]
   end
   subgraph ABC server
     web[ASP.NET Core MVC monolith<br/>Controllers + admin Views]
-    jobs[Scheduled jobs<br/>resends, daily summary, tickets]
-    db[(PostgreSQL)]
+    jobs[Scheduled jobs<br/>outbox dispatcher, daily summary, tickets]
+    db[(PostgreSQL<br/>+ outbox table)]
     files[(XML, CDR, PDF storage<br/>5 years)]
   end
   win & and -- HTTPS JSON<br/>invoicing-api.yaml --> web
@@ -42,8 +44,7 @@ flowchart LR
   web --- db
   jobs --- db
   web --- files
-  web -- SOAP WS-Security --> sunat[(SUNAT / OSE)]
-  jobs -- SOAP --> sunat
+  jobs -- SOAP WS-Security --> sunat[(SUNAT / OSE)]
 ```
 
 ## 3. Initial view: MVC (what is built first)
@@ -92,7 +93,7 @@ flowchart LR
   subgraph Hexagon
     pin[[Input ports<br/>IssueDocument, IssueNote,<br/>SubmitVoiding, GenerateDailySummary,<br/>MigrateBatch, GenerateSalesRegister]]
     core((Domain<br/>Invoicing · Catalog · Inventory))
-    pout[[Output ports<br/>DocumentRepository, SeriesRepository,<br/>UblGenerator, XsdValidator, Signer,<br/>SunatValidator, Notifier, Clock]]
+    pout[[Output ports<br/>DocumentRepository, SeriesRepository,<br/>UblGenerator, XsdValidator, Signer,<br/>Outbox, SunatValidator, ExchangeRate,<br/>Notifier, Clock]]
     pin --> core --> pout
   end
   subgraph Secondary adapters
@@ -161,7 +162,58 @@ flowchart LR
   m[MVC monolith<br/>hexagonal core] --> h[Modular monolith<br/>explicit hexagonal] --> e[Contexts with events] --> ms[Microservices<br/>Invoicing · Catalog · Inventory · Registers · SUNAT Gateway]
 ```
 
+### 5b. Target state: microservices (step 3–4)
+
+Each bounded context becomes a service with its own database; they only talk through their APIs and the events of [`events.asyncapi.yaml`](../contracts/events.asyncapi.yaml), published from each service's outbox. The first service extracted is the SUNAT/OSE Gateway (strangler fig): it is the one with its own failure modes and release pace.
+
+```mermaid
+flowchart LR
+  subgraph Clients
+    win[Windows MSI]
+    and[Android APK]
+  end
+  gw[API Gateway<br/>JWT, rate limit]
+  subgraph Services
+    inv[Invoicing service<br/>issue, notes, RC, RA]
+    cat[Catalog service<br/>products, buyers, SUNAT catalogs]
+    stock[Inventory service<br/>movements, stock card]
+    reg[Registers service<br/>PLE 14.1 / 12.1, SIRE]
+    sg[SUNAT/OSE Gateway<br/>sign, send, CDR, tickets]
+    mig[Migration service<br/>legacy batches]
+  end
+  bus{{Message broker<br/>DocumentAccepted, DocumentVoided, BatchMigrated}}
+  invdb[(Invoicing DB)]
+  catdb[(Catalog DB)]
+  stockdb[(Inventory DB)]
+  regdb[(Registers DB)]
+  vault[(Key vault / HSM<br/>certificate)]
+  sunat[(SUNAT / OSE)]
+  win & and --> gw
+  gw --> inv & cat & stock & reg & mig
+  inv --- invdb
+  cat --- catdb
+  stock --- stockdb
+  reg --- regdb
+  inv -- signed-XML request --> sg
+  sg --- vault
+  sg -- SOAP / REST --> sunat
+  inv -- outbox --> bus
+  mig -- outbox --> bus
+  bus --> stock & reg
+```
+
+| Service | Owns | Publishes | Consumes |
+|---|---|---|---|
+| Invoicing | ElectronicDocument, Series, DailySummary, VoidingNotice | `DocumentAccepted`, `DocumentRejected`, `DocumentVoided` | — |
+| SUNAT/OSE Gateway | Certificate use, submissions, CDR | `CdrReceived` | Signing/sending requests from Invoicing |
+| Inventory | InventoryMovement | `StockChanged` | `DocumentAccepted` (outflow, FR-17), `DocumentVoided`, `BatchMigrated` |
+| Registers | Read models of 14.1 and 12.1 | — | `DocumentAccepted`, `DocumentVoided`, `StockChanged` |
+| Catalog | Product, Buyer, SUNAT catalogs | `ProductChanged` | — |
+| Migration | MigrationBatch | `BatchMigrated` | — |
+
 ## 6. Sequence of the central flow (issue invoice)
+
+Two transactions ([ADR 0007](../adr/0007-two-step-issuance-outbox.md)): T1 numbers and signs while it holds the Series row lock for milliseconds; T2 sends outside it. The client app never numbers or signs ([ADR 0008](../adr/0008-server-numbering-series-per-point-of-issue.md)).
 
 ```mermaid
 sequenceDiagram
@@ -175,33 +227,43 @@ sequenceDiagram
   participant U as UblGenerator
   participant X as XsdValidator
   participant F as Signer
+  participant O as Outbox
+  participant W as OutboxDispatcher
   participant VS as SunatValidator
   V->>App: Confirms sale
-  App->>C: POST /documents (DTO)
-  C->>UC: execute(request)
+  App->>C: POST /documents (DTO + Idempotency-Key)
+  C->>UC: execute(command)
+  rect rgba(120,120,120,0.12)
+  Note over UC,O: T1 — one DB transaction, Series row locked
   UC->>D: IssuancePolicy + RucValidator + TaxCalculator
   alt rule violated
     D-->>C: business error
-    C-->>App: 422 problem+json
+    C-->>App: 422 problem+json (nothing numbered)
   end
-  UC->>S: nextSequence(F001)
-  UC->>U: generate(document)
+  UC->>S: nextSequence(F001) [row lock]
+  UC->>U: generate(document) from XSD classes
   U-->>UC: UBL 2.1 XML
   UC->>X: validate(XML)
   alt invalid XSD
     X-->>UC: errors
-    UC-->>C: INVALID_XSD (status DRAFT)
+    UC-->>C: INVALID_XSD (rollback, status DRAFT)
   end
   UC->>F: sign(XML)
   F-->>UC: signed XML + hash
-  UC->>VS: sendBill(ZIP)
-  alt CDR received
-    VS-->>UC: CDR (accepted / observed / rejected)
-  else no response
-    UC-->>UC: PENDING_RESEND + retry
+  UC->>O: save SIGNED + outbox entry
+  Note over UC,O: commit — lock released
   end
-  UC-->>C: ElectronicDocumentResponse
-  C-->>App: 201 + status + PDF/XML/CDR links
+  W->>O: take pending entry (SKIP LOCKED)
+  W->>VS: sendBill(ZIP)
+  alt code 0 (with or without 4000+ notes)
+    VS-->>W: CDR → ACCEPTED / OBSERVED
+  else code 2000–3999
+    VS-->>W: CDR → REJECTED (number consumed)
+  else code 0100–1999 or timeout
+    VS-->>W: exception → PENDING_RESEND, same file retried
+  end
+  UC-->>C: result within 30 s, else PENDING_RESEND
+  C-->>App: 201 (status) or 202 + PDF/XML/CDR links
 ```
 
 ## 7. Proposed folder structure (described, not created in this phase)
@@ -237,3 +299,7 @@ tests/
 | PrintedRepresentation + Notifier | FR-13, FR-14 |
 | Migration | FR-28 to FR-35 |
 | Registers (PLE 14.1 and 12.1 writers) | FR-37 to FR-44 |
+| ResponseCodeClassifier + OutboxDispatcher | FR-45, FR-50 |
+| ExchangeRatePort | FR-46 |
+| IgvTreatmentResolver, TaxCalculator (free lines, ISC per litre) | FR-47, FR-48 |
+| PointOfIssue + SeriesRepository (server only) | FR-49, FR-51 |

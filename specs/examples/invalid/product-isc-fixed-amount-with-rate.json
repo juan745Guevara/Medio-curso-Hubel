@@ -1,0 +1,14 @@
+{
+  "code": "P-020",
+  "description": "CERVEZA BOTELLA 620 ML",
+  "unit": "NIU",
+  "igvTreatment": "10",
+  "isc": {
+    "system": "02",
+    "fixedAmount": "1.50",
+    "rate": "25"
+  },
+  "iscUnitsPerItem": "0.62",
+  "existenceType": "01",
+  "unspscCode": "50202201"
+}

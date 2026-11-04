@@ -1,0 +1,17 @@
+{
+  "reason": "CORTE DE ENERGIA EN TODA LA TIENDA DEL 20/10/2026",
+  "documents": [
+    {
+      "type": "03",
+      "series": "0001",
+      "number": 15,
+      "issueDate": "2026-10-20",
+      "buyer": {
+        "type": "1",
+        "number": "45678912"
+      },
+      "totalAmount": "25.50",
+      "currency": "PEN"
+    }
+  ]
+}

@@ -18,3 +18,4 @@ tools: Read, Write, Edit, Glob
 - Respect `specs/00-constitution.md`; if a task contradicts it, stop and report it.
 - No FR is "done" without all its ACs green.
 - Tests against SUNAT use only the beta environment and test certificates.
+- An AC with numbers is also recalculated in group E of `tools/validate_specs.py`; a negative AC has an example in `specs/examples/invalid/`.

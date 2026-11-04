@@ -1,0 +1,59 @@
+{
+  "title": "Catálogo 06 — Códigos de tipos de documentos de identidad",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "0",
+      "description": "DOC.TRIB.NO.DOM.SIN.RUC"
+    },
+    {
+      "code": "1",
+      "description": "DOC. NACIONAL DE IDENTIDAD"
+    },
+    {
+      "code": "4",
+      "description": "CARNET DE EXTRANJERIA"
+    },
+    {
+      "code": "6",
+      "description": "REG. UNICO DE CONTRIBUYENTES"
+    },
+    {
+      "code": "7",
+      "description": "PASAPORTE"
+    },
+    {
+      "code": "A",
+      "description": "CED. DIPLOMATICA DE IDENTIDAD"
+    },
+    {
+      "code": "B",
+      "description": "DOC.IDENT.PAIS.RESIDENCIA-NO.D"
+    },
+    {
+      "code": "C",
+      "description": "Tax Identification Number - TIN"
+    },
+    {
+      "code": "D",
+      "description": "Identification Number - IN"
+    },
+    {
+      "code": "E",
+      "description": "TAM - Tarjeta Andina de Migración"
+    },
+    {
+      "code": "F",
+      "description": "Permiso Temporal de Permanencia - PTP"
+    },
+    {
+      "code": "G",
+      "description": "Salvoconducto"
+    },
+    {
+      "code": "H",
+      "description": "Carné Permiso Temp. Perman. - CPP"
+    }
+  ]
+}

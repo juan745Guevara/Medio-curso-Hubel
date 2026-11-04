@@ -1,0 +1,51 @@
+{
+  "title": "Catálogo 01 — Código de tipo de documento",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "01",
+      "description": "FACTURA"
+    },
+    {
+      "code": "03",
+      "description": "BOLETA DE VENTA"
+    },
+    {
+      "code": "07",
+      "description": "NOTA DE CRÉDITO"
+    },
+    {
+      "code": "08",
+      "description": "NOTA DE DÉBITO"
+    },
+    {
+      "code": "09",
+      "description": "GUÍA DE REMISIÓN REMITENTE"
+    },
+    {
+      "code": "12",
+      "description": "TICKET DE MÁQUINA REGISTRADORA"
+    },
+    {
+      "code": "13",
+      "description": "DOCUMENTO EMITIDO POR BANCOS, INSTITUCIONES FINANCIERAS, CREDITICIAS Y DE SEGUROS"
+    },
+    {
+      "code": "14",
+      "description": "RECIBO DE SERVICIOS PÚBLICOS"
+    },
+    {
+      "code": "20",
+      "description": "COMPROBANTE DE RETENCIÓN"
+    },
+    {
+      "code": "31",
+      "description": "GUÍA DE REMISIÓN TRANSPORTISTA"
+    },
+    {
+      "code": "40",
+      "description": "COMPROBANTE DE PERCEPCIÓN"
+    }
+  ]
+}

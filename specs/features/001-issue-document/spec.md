@@ -18,7 +18,7 @@ ABC Software Corp sells groceries wholesale and retail and today cannot issue va
 - US-06: As an Administrator, I want to configure Series, Digital certificate and SUNAT validator without touching code, to operate in test and production.
 
 ## Functional requirements
-- **FR-01** (Ubiquitous): The system shall assign each Document a unique Series and Sequence number, consecutive per Series, formatted `SSSS-NNNNNNNN`, where an Invoice Series starts with F and a Sales receipt Series with B.
+- **FR-01** (Ubiquitous): The system shall assign each Document a unique Series and Sequence number, consecutive per Series, written in `cbc:ID` and in the file name as `SSSS-N` (4-character Series, hyphen, Sequence number of 1 to 8 digits without leading zeros, 1 to 99,999,999), where an Invoice Series starts with F and a Sales receipt Series with B.
 - **FR-02** (Event-driven): When the Salesperson enters an Identity document of type 6, the system shall validate that the RUC has 11 digits, prefix 10, 15, 16, 17 or 20 and a correct modulo-11 check digit before allowing issuance.
 - **FR-03** (Unwanted behaviour): If the Salesperson tries to issue an Invoice to a Buyer without a valid RUC, then the system shall block issuance and state that an Invoice requires a RUC.
 - **FR-04** (State-driven): While the total amount of a Sales receipt exceeds S/ 700.00, the system shall require the Buyer's Identity document type, number and name.
@@ -35,6 +35,13 @@ ABC Software Corp sells groceries wholesale and retail and today cannot issue va
 - **FR-15** (Ubiquitous): The system shall include in the UBL XML the legend with the total amount in words (catalog 52, code 1000), written in Spanish as SUNAT requires.
 - **FR-16** (Optional feature): Where the Administrator has activated Contingency due to a documented failure, the system shall allow recording paper contingency Documents and generate their report for SUNAT within 7 calendar days.
 - **FR-17** (Ubiquitous): The system shall deduct from inventory the quantity of each Item of an ACCEPTED or OBSERVED Document as an outflow Inventory movement linked to the Document.
+- **FR-45** (Event-driven): When the SUNAT validator returns a response code, the system shall set the SUNAT status by its range ([`sunat-return-codes.json`](../../catalogs/sunat-return-codes.json)): `0` without observations → ACCEPTED; `0100`–`1999` (exception: the file was not processed) → PENDING_RESEND, resending **the same signed file with the same number** after the cause is fixed or the service recovers; `2000`–`3999` → REJECTED, the number stays consumed and is never reused; `0` with observation notes coded `4000` or more → OBSERVED (accepted with observations), recording every observation code and description.
+- **FR-46** (State-driven): While the Document currency is USD, the system shall require the exchange rate of the issue date (SUNAT's published *tipo de cambio venta*, 3 decimals), include it in `cac:PaymentExchangeRate` and use it for the PLE 14.1 field 27.
+- **FR-47** (State-driven): While an Item has a free-of-charge IGV treatment (catalog 07 codes 11–16, 21, 31–37), the system shall require Unit value 0.00 and a Reference unit value greater than 0 (catalog 16 code 02), report it under tax `9996` (catalog 05) with the IGV calculated on the reference value for codes 11–16 (reported, not charged; 0.00 for 21 and 31–37), leave it out of the total amount and add the legend `1002` (catalog 52).
+- **FR-48** (Ubiquitous): The system shall calculate the fixed-amount ISC (catalog 08 system 02) on the quantity expressed in the unit the tax is set in: quantity × Product `iscUnitsPerItem` (for example 0.62 litres per 620 ml bottle) × fixed amount.
+- **FR-49** (Ubiquitous): The system shall assign Series and Sequence numbers and sign only on the server. Each point of issue (till, establishment) has its own Series per document type, assigned by the Administrator; a client app never numbers, signs or stores the Digital certificate, and its offline queue only holds unsent requests with their `Idempotency-Key`.
+- **FR-50** (Ubiquitous): The system shall issue in two transactions: (1) validate, number, generate the XML, validate the XSD, sign, store as SIGNED and write the submission to the outbox, committing in one database transaction that holds the Series row lock only while it runs; (2) a dispatcher sends the outbox entries to the SUNAT validator outside that transaction and records the CDR.
+- **FR-51** (Event-driven): When the Administrator creates a Series, the system shall validate the pattern by document type (`^F[A-Z0-9]{3}$` for 01, `^B[A-Z0-9]{3}$` for 03, notes with the letter of the documents they modify), its establishment and point of issue, start it at 0 and never allow its last Sequence number to be lowered.
 
 ## Non-functional requirements
 - **NFR-01**: Issuing an Invoice of up to 50 Items, from confirmation to signed XML, shall take ≤ 2 s at the 95th percentile.
@@ -44,17 +51,18 @@ ABC Software Corp sells groceries wholesale and retail and today cannot issue va
 - **NFR-05**: The Digital certificate and its password shall be stored encrypted and never appear in logs or responses.
 - **NFR-06**: XML, CDR and Printed representation shall be kept for at least 5 years without modification (verifiable hash).
 - **NFR-07**: Switching between SUNAT and OSE, or between test (beta) and production, shall be a configuration change without recompiling.
+- **NFR-13**: The Series row lock shall last only the first issuance transaction (≤ 300 ms at the 95th percentile); the SUNAT validator's response time shall never extend it ([ADR 0007](../../adr/0007-two-step-issuance-outbox.md)).
 
 ## Acceptance criteria
 AC-01 (FR-01) — Consecutive sequence per Series
-  Given the last Invoice in Series F001 is F001-00000041
+  Given the last Invoice in Series F001 is F001-41
   When the Salesperson issues a new Invoice in F001
-  Then the Document receives F001-00000042
+  Then the Document receives F001-42
 
 AC-02 (FR-01) — Sequence number is never reused
-  Given F001-00000042 was REJECTED by the SUNAT validator
+  Given F001-42 was REJECTED by the SUNAT validator
   When the Salesperson issues another Invoice in F001
-  Then it receives F001-00000043 and F001-00000042 stays recorded as REJECTED
+  Then it receives F001-43 and F001-42 stays recorded as REJECTED
 
 AC-03 (FR-02) — Valid RUC
   Given RUC 20131312955
@@ -181,6 +189,76 @@ AC-27 (FR-17) — Inventory outflow
   When the acceptance is recorded
   Then there is an outflow Inventory movement of 10 units linked to the Document
 
+AC-61 (FR-45) — Exception code keeps the number
+  Given F001-50 is SIGNED and the SUNAT validator answers code 0109 (service not available)
+  When the dispatcher records the answer
+  Then the status becomes PENDING_RESEND, F001-50 is resent later with the same signed file and no new number is assigned
+
+AC-62 (FR-45) — Rejection code consumes the number
+  Given F001-51 is SENT and the CDR carries code 2800
+  When the CDR is recorded
+  Then the status becomes REJECTED, the code and description are shown and the next Invoice in F001 receives F001-52
+
+AC-63 (FR-45) — Observation code means accepted
+  Given F001-53 is SENT and the CDR carries code 0 with observation 4287
+  When the CDR is recorded
+  Then the status becomes OBSERVED, the Document counts as issued and observation 4287 is listed
+
+AC-64 (FR-46) — Dollar invoice without exchange rate
+  Given an Invoice in USD without exchange rate
+  When the Salesperson tries to issue it
+  Then the request is rejected with 400 and no number is assigned
+
+AC-65 (FR-46) — Dollar invoice with exchange rate
+  Given an Invoice in USD with exchange rate 3.745 for its issue date
+  When the UBL XML is generated
+  Then cac:PaymentExchangeRate has SourceCurrencyCode USD, TargetCurrencyCode PEN and CalculationRate 3.745
+
+AC-66 (FR-47) — Free-of-charge line with a price
+  Given an Item with IGV treatment 15 (bonus) and Unit value 2.50
+  When the Salesperson tries to issue it
+  Then the request is rejected with 400 "A free-of-charge line has unit value 0.00"
+
+AC-67 (FR-47) — Free-of-charge line amounts
+  Given an Item with IGV treatment 15, 2 units and Reference unit value 3.00
+  When the system calculates
+  Then the line reports TaxScheme 9996 with taxable amount 6.00 and IGV 1.08, the total amount does not change and legend 1002 is present
+
+AC-68 (FR-48) — Fixed-amount ISC per litre
+  Given 12 bottles of 620 ml (iscUnitsPerItem 0.62) of a Product with ISC system 02 and S/ 1.50 per litre
+  When the system calculates
+  Then ISC = 11.16 (12 × 0.62 × 1.50)
+
+AC-69 (FR-49) — Two tills never collide
+  Given till 1 issues in Series F001 and till 2 in Series F002 of the same establishment
+  When both issue an Invoice at the same moment
+  Then each Invoice receives the next number of its own Series and no number is repeated
+
+AC-70 (FR-49) — Offline queue does not number
+  Given the Android app has no connection and the Salesperson confirms a sale
+  When the request is queued locally with its Idempotency-Key
+  Then no Series or Sequence number is shown until the server answers, and sending the same request twice returns the same Document
+
+AC-71 (FR-50) — Slow validator does not block the Series
+  Given the SUNAT validator takes 25 s to answer F001-60
+  When another Salesperson issues an Invoice in F001 during those 25 s
+  Then it receives F001-61 without waiting for the first answer
+
+AC-72 (FR-50) — Crash after signing
+  Given F001-62 was committed as SIGNED with its outbox entry and the server stops before sending
+  When the server restarts
+  Then the dispatcher sends F001-62 with the stored signed file and the number is not lost
+
+AC-73 (FR-51) — Series of the wrong letter
+  Given the Administrator creates Series X001 for document type 01
+  When the Series is saved
+  Then the system rejects it with 400
+
+AC-74 (FR-51) — Sequence cannot go back
+  Given Series F001 has last Sequence number 62
+  When the Administrator tries to set it to 40
+  Then the system rejects it with 409 and the Series keeps 62
+
 ## Out of scope
 - Dispatch guides (*guía de remisión*), withholding and perception documents, purchase settlements.
 - Detractions and export operations (catalog 51 other than 0101).
@@ -192,7 +270,7 @@ AC-27 (FR-17) — Inventory outflow
 - [NEEDS CLARIFICATION] Does ABC have its own Digital certificate or will it use a PSE's?
 - [NEEDS CLARIFICATION] Which Products are subject to ISC (spirits, beer, cigarettes, sugary drinks) and with which ISC system and rate or amount?
 - [NEEDS CLARIFICATION] Are plastic bags handed out at the point of sale (ICBPER)?
-- [NEEDS CLARIFICATION] Are sales made in US dollars? If so, which exchange rate is used?
-- [NEEDS CLARIFICATION] How many points of issue are there (one Series per till or per store)?
+- Resolved (FR-46): USD sales use SUNAT's published *tipo de cambio venta* of the issue date. [NEEDS CLARIFICATION] Does ABC sell in US dollars at all?
+- Resolved (FR-49, [ADR 0008](../../adr/0008-server-numbering-series-per-point-of-issue.md)): one Series per document type and point of issue. [NEEDS CLARIFICATION] How many tills does each store have?
 - [NEEDS CLARIFICATION] Do wholesale sales apply volume discounts? Per Item or global?
-- [NEEDS CLARIFICATION] Must the app issue offline and send later, or is paper Contingency enough?
+- Resolved (FR-49, ADR 0008): the app queues requests offline but never issues offline; when the server itself cannot reach SUNAT the Document is issued and stays PENDING_RESEND; paper Contingency (FR-16) is only for a failure of the whole system.

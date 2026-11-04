@@ -56,7 +56,7 @@ Expected result (excerpt):
   <ext:UBLExtensions><ext:UBLExtension><ext:ExtensionContent/></ext:UBLExtension></ext:UBLExtensions>
   <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
   <cbc:CustomizationID>2.0</cbc:CustomizationID>
-  <cbc:ID>F001-00000042</cbc:ID>
+  <cbc:ID>F001-42</cbc:ID>
   <cbc:IssueDate>2026-10-22</cbc:IssueDate>
   <cbc:InvoiceTypeCode listID="0101" listAgencyName="PE:SUNAT" listName="Tipo de Documento"
     listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01">01</cbc:InvoiceTypeCode>

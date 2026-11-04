@@ -1,0 +1,59 @@
+{
+  "title": "Catálogo 09 — Códigos de tipo de nota de crédito electrónica",
+  "source": "Annex 8 catalogs — Annex E RS 245-2017/SUNAT (https://www.sunat.gob.pe/legislacion/superin/2017/anexoE-245-2017.pdf); Catalog 08 also Annex D RS 357-2015 (https://www.sunat.gob.pe/legislacion/superin/2015/anexoD-357-2015.pdf)",
+  "retrieved": "2026-11-04",
+  "codes": [
+    {
+      "code": "01",
+      "description": "Anulación de la operación"
+    },
+    {
+      "code": "02",
+      "description": "Anulación por error en el RUC"
+    },
+    {
+      "code": "03",
+      "description": "Corrección por error en la descripción"
+    },
+    {
+      "code": "04",
+      "description": "Descuento global"
+    },
+    {
+      "code": "05",
+      "description": "Descuento por ítem"
+    },
+    {
+      "code": "06",
+      "description": "Devolución total"
+    },
+    {
+      "code": "07",
+      "description": "Devolución por ítem"
+    },
+    {
+      "code": "08",
+      "description": "Bonificación"
+    },
+    {
+      "code": "09",
+      "description": "Disminución en el valor"
+    },
+    {
+      "code": "10",
+      "description": "Otros Conceptos"
+    },
+    {
+      "code": "11",
+      "description": "Ajustes de operaciones de exportación"
+    },
+    {
+      "code": "12",
+      "description": "Ajustes afectos al IVAP"
+    },
+    {
+      "code": "13",
+      "description": "Corrección del monto neto pendiente de pago y/o la(s) fechas(s) de vencimiento del pago único o de las cuotas y/o los montos correspondientes a cada cuota, de ser el caso"
+    }
+  ]
+}

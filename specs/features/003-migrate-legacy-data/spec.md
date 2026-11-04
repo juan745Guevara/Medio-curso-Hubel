@@ -66,7 +66,7 @@ AC-45 (FR-34) — Reconciliation
 AC-46 (FR-35) — nro_documento is not a document
   Given a record with nro_documento "F001-123"
   When it is migrated
-  Then it is stored as an internal reference and no Document F001-00000123 exists
+  Then it is stored as an internal reference and no Document F001-123 exists
 
 AC-47 (FR-36) — Unclassified product
   Given a Product in PENDING_CLASSIFICATION

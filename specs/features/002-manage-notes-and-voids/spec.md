@@ -36,32 +36,32 @@ AC-28 (FR-18) — Note without reason
   Then the system blocks it with "Reason is required"
 
 AC-29 (FR-18) — Return per item
-  Given the ACCEPTED Invoice F001-00000042 with 10 units of P-001
+  Given the ACCEPTED Invoice F001-42 with 10 units of P-001
   When the Salesperson issues a credit note with reason 07 for 3 units
-  Then the Note references F001-00000042 and its amount corresponds to 3 units
+  Then the Note references F001-42 and its amount corresponds to 3 units
 
 AC-30 (FR-19) — Note on a rejected document
-  Given Document F001-00000043 in REJECTED status
+  Given Document F001-43 in REJECTED status
   When the Salesperson tries to issue a credit note on it
   Then the system blocks it
 
 AC-31 (FR-20) — Series of the note
-  Given a credit note on Sales receipt B001-00000010
+  Given a credit note on Sales receipt B001-10
   When the Series is assigned
   Then the Series starts with B
 
 AC-32 (FR-21) — Note on two documents
-  Given a credit note referencing F001-00000042 and F001-00000044
+  Given a credit note referencing F001-42 and F001-44
   When the Salesperson tries to issue it
   Then the system blocks it with "A note modifies a single document"
 
 AC-33 (FR-22) — Excess credit
-  Given F001-00000042 for 118.00 with a previous credit note of 100.00
+  Given F001-42 for 118.00 with a previous credit note of 100.00
   When the Salesperson issues another credit note for 20.00
   Then the system blocks it
 
 AC-34 (FR-23) — Voiding accepted
-  Given Invoice F001-00000045 issued yesterday
+  Given Invoice F001-45 issued yesterday
   When the Administrator voids it with reason "Error in description"
   Then a Voiding notice is sent, a Ticket is obtained and on receiving an accepted CDR the Invoice becomes VOIDED
 
@@ -84,6 +84,16 @@ AC-38 (FR-27) — Manual resend
   Given a Document in PENDING_RESEND
   When the Salesperson presses resend and the SUNAT validator responds with code 0
   Then the SUNAT status becomes ACCEPTED
+
+AC-75 (FR-18) — Debit note is its own document
+  Given an ACCEPTED Invoice F001-42 and a debit note with reason 02 (increase in value) of 2 units × S/ 5.00 plus IGV, S/ 11.80
+  When the UBL XML of the note is generated
+  Then its root is DebitNote with cac:BillingReference to F001-42, cac:DebitNoteLine lines and cac:RequestedMonetaryTotal/cbc:PayableAmount = 11.80 (no LegalMonetaryTotal)
+
+AC-76 (FR-23) — Voiding notice XML
+  Given the ACCEPTED Invoice F001-43 voided on 21/10/2026 with reason "Error in the buyer"
+  When the Voiding notice is generated
+  Then its cbc:ID is RA-20261021-1, its line carries DocumentTypeCode 01, DocumentSerialID F001, DocumentNumberID 43 and the reason, and it validates against SUNAT's VoidedDocuments XSD
 
 ## Out of scope
 - Notes for export adjustments (export reason 13).

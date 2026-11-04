@@ -1,0 +1,16 @@
+{
+  "type": "07",
+  "series": "FC01",
+  "reason": {
+    "code": "07",
+    "description": "DEVOLUCION DE 3 BOTELLAS DE ACEITE"
+  },
+  "items": [
+    {
+      "productCode": "P-001",
+      "quantity": "3",
+      "unit": "NIU",
+      "unitValue": "5.00"
+    }
+  ]
+}

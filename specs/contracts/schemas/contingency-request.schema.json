@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/contingency-request.schema.json",
+  "title": "ContingencyRequest",
+  "description": "Paper documents issued during a Contingency (FR-16), reported to SUNAT within 7 calendar days (AC-26).",
+  "type": "object",
+  "required": [
+    "reason",
+    "documents"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reason": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 250,
+      "description": "Documented failure that justified the contingency"
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "series",
+          "number",
+          "issueDate",
+          "buyer",
+          "totalAmount",
+          "currency"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "enum": [
+              "01",
+              "03",
+              "07",
+              "08"
+            ]
+          },
+          "series": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$",
+            "description": "Series of the authorized paper forms (numeric, 4 digits)"
+          },
+          "number": {
+            "$ref": "common.schema.json#/$defs/SequenceNumber"
+          },
+          "issueDate": {
+            "$ref": "common.schema.json#/$defs/Date"
+          },
+          "buyer": {
+            "$ref": "common.schema.json#/$defs/IdentityDocument"
+          },
+          "totalAmount": {
+            "$ref": "common.schema.json#/$defs/Amount"
+          },
+          "currency": {
+            "$ref": "common.schema.json#/$defs/Currency"
+          }
+        }
+      }
+    }
+  }
+}
