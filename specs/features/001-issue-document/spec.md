@@ -42,6 +42,7 @@ ABC Software Corp sells groceries wholesale and retail and today cannot issue va
 - **FR-49** (Ubiquitous): The system shall assign Series and Sequence numbers and sign only on the server. Each point of issue (till, establishment) has its own Series per document type, assigned by the Administrator; a client app never numbers, signs or stores the Digital certificate, and its offline queue only holds unsent requests with their `Idempotency-Key`.
 - **FR-50** (Ubiquitous): The system shall issue in two transactions: (1) validate, number, generate the XML, validate the XSD, sign, store as SIGNED and write the submission to the outbox, committing in one database transaction that holds the Series row lock only while it runs; (2) a dispatcher sends the outbox entries to the SUNAT validator outside that transaction and records the CDR.
 - **FR-51** (Event-driven): When the Administrator creates a Series, the system shall validate the pattern by document type (`^F[A-Z0-9]{3}$` for 01, `^B[A-Z0-9]{3}$` for 03, notes with the letter of the documents they modify), its establishment and point of issue, start it at 0 and never allow its last Sequence number to be lowered.
+- **FR-52** (Unwanted behaviour): If the UBL XML that passed the XSD breaks one of SUNAT's validation rules cited in the regulatory matrix (§G, internal code `SUNAT_RULES`) with a code from `2000` to `3999`, then the system shall stop before signing, neither sign nor send, and return every broken rule with SUNAT's code and text; a rule with a code `4000` or more shall not stop the process and shall be recorded with the Document as an observation.
 
 ## Non-functional requirements
 - **NFR-01**: Issuing an Invoice of up to 50 Items, from confirmation to signed XML, shall take ≤ 2 s at the 95th percentile.
@@ -258,6 +259,16 @@ AC-74 (FR-51) — Sequence cannot go back
   Given Series F001 has last Sequence number 62
   When the Administrator tries to set it to 40
   Then the system rejects it with 409 and the Series keeps 62
+
+AC-77 (FR-52) — A SUNAT rejection rule stops issuance
+  Given a confirmed Invoice whose XML validates against the XSD but whose Buyer has Identity document type 1
+  When the SUNAT rules are checked
+  Then the process stops with SUNAT_RULES and code 2800, and nothing is signed or sent
+
+AC-78 (FR-52) — A SUNAT observation rule does not stop issuance
+  Given a confirmed Invoice whose item IGV differs by more than 1.00 from 18 % of its base
+  When the SUNAT rules are checked
+  Then the Document is signed and sent, and observation 4290 is recorded with it
 
 ## Out of scope
 - Dispatch guides (*guía de remisión*), withholding and perception documents, purchase settlements.

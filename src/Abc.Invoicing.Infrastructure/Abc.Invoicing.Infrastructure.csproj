@@ -16,5 +16,7 @@
   <ItemGroup>
     <!-- The official XSDs travel with the build output, so validation works wherever it runs (ADR 0003). -->
     <None Include="..\..\xsd\ubl-2.1\**\*.xsd" Link="xsd\ubl-2.1\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Catalog 51 is data in specs/catalogs (CLAUDE.md); the SUNAT rules validator reads the same file. -->
+    <None Include="..\..\specs\catalogs\catalog-51.json" Link="catalogs\catalog-51.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

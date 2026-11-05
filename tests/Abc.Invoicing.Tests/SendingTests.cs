@@ -57,7 +57,7 @@ public class SendingTests
         var fake = new FakeSunat(answer);
         var client = new SunatBillServiceClient(new HttpClient(fake), Credentials, SunatBillServiceClient.BetaEndpoint);
         var cert = ValidationAndSigningTests.TestCertificate();
-        return (new IssueDocument(new Ubl21InvoiceGenerator(), new OasisXsdValidator(), new XmlDsigSigner(cert), client), fake);
+        return (new IssueDocument(new Ubl21InvoiceGenerator(), new OasisXsdValidator(), new SunatRulesValidator(), new XmlDsigSigner(cert), client), fake);
     }
 
     [Fact(DisplayName = "ZIP named RUC-TT-SERIES-NUMBER.zip holds the signed XML RUC-TT-SERIES-NUMBER.xml")]
@@ -132,7 +132,7 @@ public class SendingTests
         var fake = new FakeSunat(_ => throw new InvalidOperationException("must not be called"));
         var client = new SunatBillServiceClient(new HttpClient(fake), Credentials, SunatBillServiceClient.BetaEndpoint);
         var broken = new BrokenGenerator();
-        var useCase = new IssueDocument(broken, new OasisXsdValidator(), new XmlDsigSigner(ValidationAndSigningTests.TestCertificate()), client);
+        var useCase = new IssueDocument(broken, new OasisXsdValidator(), new SunatRulesValidator(), new XmlDsigSigner(ValidationAndSigningTests.TestCertificate()), client);
         var ex = await Assert.ThrowsAsync<DomainException>(() => useCase.ExecuteAsync(Examples.Cash42()));
         Assert.Equal("INVALID_XSD", ex.Code);
         Assert.Null(fake.LastRequest);

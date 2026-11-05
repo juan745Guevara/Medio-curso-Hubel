@@ -665,7 +665,7 @@ components:
       description: "State conflict (sequence number, note on a non-accepted document, resend of an already accepted document, duplicate product or batch). AC-02, AC-30, AC-44."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     Unprocessable:
-      description: "Business rule violated: INVALID_RUC, SERIES_NOT_ALLOWED (Series of another point of issue, ADR 0008), CONTINGENCY_PAST_DEADLINE, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT, INVALID_CERTIFICATE, PLE_INCOMPLETE_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
+      description: "Business rule violated: INVALID_RUC, SERIES_NOT_ALLOWED (Series of another point of issue, ADR 0008), CONTINGENCY_PAST_DEADLINE, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, INVALID_XSD, SUNAT_RULES, INCONSISTENT_TOTALS, INVALID_ISC_SYSTEM, INVALID_SIGNATURE, MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED, VOIDING_PAST_DEADLINE, UNCLASSIFIED_PRODUCT, INVALID_CERTIFICATE, PLE_INCOMPLETE_PRODUCT. Mapping to SUNAT errors in regulatory-matrix.md §G."
       content: { application/problem+json: { schema: { $ref: './schemas/error.schema.json' } } }
     BadGateway:
       description: "The SUNAT validator or OSE answered with a service error (SUNAT exception codes 0100–1999, FR-45) or an unreadable CDR. The document, if any, stays PENDING_RESEND; `detail` carries its id and `sunatCode` the validator's code."

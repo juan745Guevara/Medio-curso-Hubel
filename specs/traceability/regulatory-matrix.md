@@ -180,6 +180,7 @@ Each rule is validated **before** sending, with the API's internal code (`error.
 | `DOCUMENT_NOT_ACCEPTED` | Modified document ACCEPTED/OBSERVED | 2119, 2120, 2121 | AC-30 |
 | `VOIDING_PAST_DEADLINE` | 7 calendar days | 2374 | AC-35 |
 | `SUBMISSION_PAST_DEADLINE` (alert) | Submission deadline | 2108, 2600 | AC-20 |
+| `SUNAT_RULES` | SUNAT rules on the XML before signing (`SunatRulesValidator`, FR-52); 2000–3999 stop, 4000+ are kept as observations | 1001, 2071, 2072, 2074, 2076, 2416, 2641, 2716, 2721, 2752, 2800, 2802, 2024, 3014, 3205, 3206, 3244, 3249, 3251, 3265, 3266, 3267, 4211, 4288, 4290, 4301, 4309, 4312 | AC-77, AC-78 |
 | `INVALID_SIGNATURE` | Verify signature after signing; do not reformat | 1059, 2335, 2336 | AC-16 |
 
 ## G2. CDR return code ranges → SUNAT status (FR-45, ADR 0007)

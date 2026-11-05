@@ -23,7 +23,7 @@
     },
     "code": {
       "type": "string",
-      "description": "Stable internal code, e.g. INVALID_RUC, INVOICE_REQUIRES_RUC, INVALID_XSD. Internal code → SUNAT errors table in traceability/regulatory-matrix.md §G"
+      "description": "Stable internal code, e.g. INVALID_RUC, INVOICE_REQUIRES_RUC, INVALID_XSD, SUNAT_RULES. Internal code → SUNAT errors table in traceability/regulatory-matrix.md §G"
     },
     "detail": {
       "type": "string"

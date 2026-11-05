@@ -38,6 +38,10 @@ public sealed class Xml
         n.ParentNode!.RemoveChild(n);
     }
 
+    public void Set(string xpath, string value) => Node(xpath)!.InnerText = value;
+
+    public void SetAttr(string xpath, string attribute, string value) => Node(xpath)!.SetAttribute(attribute, value);
+
     public byte[] Bytes()
     {
         using var ms = new MemoryStream();

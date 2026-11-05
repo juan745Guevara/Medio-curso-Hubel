@@ -57,7 +57,7 @@ public static class Examples
         it.TryGetProperty("discount", out var d) ? Dec(d) : 0m)).ToList();
 
     /// <summary>An IssueDocumentRequest example, numbered by the server as in specs/examples/xml/cases.json.</summary>
-    public static ElectronicDocument Document(string requestFile, int number, string issueTime)
+    public static ElectronicDocument Document(string requestFile, int number, string issueTime, DateOnly? issueDate = null, Issuer? issuer = null)
     {
         var r = Read("valid/" + requestFile);
         var b = r.GetProperty("buyer");
@@ -72,11 +72,11 @@ public static class Examples
         return new ElectronicDocument(
             r.GetProperty("type").GetString() == "01" ? DocumentType.Invoice : DocumentType.SalesReceipt,
             r.GetProperty("series").GetString()!, number,
-            DateOnly.Parse(r.GetProperty("issueDate").GetString()!, CultureInfo.InvariantCulture),
+            issueDate ?? DateOnly.Parse(r.GetProperty("issueDate").GetString()!, CultureInfo.InvariantCulture),
             TimeOnly.Parse(issueTime, CultureInfo.InvariantCulture),
             r.GetProperty("currency").GetString()!,
             r.TryGetProperty("exchangeRate", out var x) ? Dec(x) : null,
-            r.GetProperty("operationType").GetString()!, Issuer(),
+            r.GetProperty("operationType").GetString()!, issuer ?? Issuer(),
             new Buyer(doc.GetProperty("type").GetString()!, doc.GetProperty("number").GetString()!, b.GetProperty("name").GetString()!, Str(b, "address")),
             terms, Items(r.GetProperty("items")));
     }

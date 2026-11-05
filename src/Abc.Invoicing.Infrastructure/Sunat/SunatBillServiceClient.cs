@@ -77,9 +77,13 @@ public sealed class SunatBillServiceClient(HttpClient http, SunatCredentials cre
         if (fault is not null)
         {
             var codeText = (string?)fault.Element("faultcode") ?? "";
+            var faultString = (string?)fault.Element("faultstring") ?? "";
+            // SUNAT puts the code in faultcode (soap-env:Client.0111) or, with soap-env:Server, in faultstring ("2800").
             var digits = new string(codeText.Where(char.IsAsciiDigit).ToArray());
+            if (digits.Length == 0)
+                digits = new string(faultString.TakeWhile(char.IsAsciiDigit).ToArray());
             var code = int.TryParse(digits, out var c) ? c : 100;
-            return new CdrResult(code, (string?)fault.Element("faultstring") ?? "", [], null);
+            return new CdrResult(code, faultString, [], null);
         }
         var b64 = x.Descendants("applicationResponse").FirstOrDefault()?.Value
                   ?? throw new XmlException("sendBillResponse without applicationResponse");

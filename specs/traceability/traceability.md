@@ -78,6 +78,8 @@ One row per acceptance criterion across all features. Test names follow the C# (
 | 001 | US-04 | FR-50 | AC-72 | UC-08 | `Ac72_CrashAfterSigning()` |
 | 001 | US-06 | FR-51 | AC-73 | UC-11 | `Ac73_SeriesOfTheWrongLetter()` + example `invalid/series-wrong-letter.json` |
 | 001 | US-06 | FR-51 | AC-74 | UC-11 | `Ac74_SequenceCannotGoBack()` |
+| 001 | US-01 | FR-52 | AC-77 | UC-01 | `Ac77_SunatRejectionRuleStopsIssuance()` |
+| 001 | US-01 | FR-52 | AC-78 | UC-01 | `Ac78_SunatObservationRuleDoesNotStop()` |
 | 002 | US-08 | FR-18 | AC-75 | UC-05 | `Ac75_DebitNoteIsItsOwnDocument()` + XML `20131312955-08-FD01-1.xml` |
 | 002 | US-09 | FR-23 | AC-76 | UC-06 | `Ac76_VoidingNoticeXml()` + XML `20131312955-RA-20261021-1.xml` |
 
@@ -100,13 +102,14 @@ The C# names above are the target names of the full product; the second exam imp
 | AC-14 | `GenerationTests.Ac14_header` |
 | AC-15 | `ValidationAndSigningTests.Ac15_missing_issue_date_is_rejected`, `SendingTests.Nothing_is_sent_when_invalid` |
 | AC-16 | `ValidationAndSigningTests.Ac16_signature`, `…Signature_value_matches_in_place_canonicalization`, `…Altered_signed_xml_does_not_verify` |
-| AC-17 | `SendingTests.Ac17_accepted` |
+| AC-17 | `SendingTests.Ac17_accepted`; against the real service: `SunatBetaTests.Ac17_sunat_beta_accepts_the_invoice` (runs with `SUNAT_BETA=1`) |
 | AC-21, AC-22 | `GenerationTests.Ac21_payment_terms`, `DomainTests.Ac21_ac22_credit_rules` |
 | AC-25 | `GenerationTests.Ac25_amount_in_words`, `DomainTests.Ac25_amount_in_words` |
 | AC-31 | `DomainTests.Receipt_with_f_series_is_refused` |
 | AC-61, AC-62, AC-63 | `SendingTests.Ac61_exception_keeps_pending`, `SendingTests.Ac62_rejected`, `SendingTests.Ac63_observed`, `DomainTests.Fr45_return_codes` |
 | AC-64, AC-65 | `DomainTests.Ac64_usd_requires_exchange_rate`, `GenerationTests.Ac65_usd_exchange_rate` |
 | AC-66, AC-67 | `DomainTests.Ac66_free_line_with_value`, `GenerationTests.Ac67_free_of_charge_line` |
+| AC-77, AC-78 | `SunatRulesTests.Ac77_reference_invoices_break_no_rule` (5), `SunatRulesTests.Ac77_each_rule_returns_its_sunat_code` (28 rules), `SunatRulesTests.Ac77_rejection_rule_stops_before_signing`, `SunatRulesTests.Ac78_observation_rule_still_sends` |
 | FR-08 (all cases) | `GenerationTests.Generated_xml_is_valid_against_the_official_xsd`, `ReferenceXmlTests.*` |
 | ADR 0001 | `ArchitectureTests.*` |
 
