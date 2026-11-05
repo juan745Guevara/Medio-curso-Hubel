@@ -287,11 +287,11 @@ AC-78 (FR-52) — A SUNAT observation rule does not stop issuance
 - Online payments or payment gateway.
 
 ## Clarifications
-- [NEEDS CLARIFICATION] Will the Issuer send directly to SUNAT (SEE-Del contribuyente) or through an OSE? Which OSE?
-- [NEEDS CLARIFICATION] Does ABC have its own Digital certificate or will it use a PSE's?
-- [NEEDS CLARIFICATION] Which Products are subject to ISC (spirits, beer, cigarettes, sugary drinks) and with which ISC system and rate or amount?
-- [NEEDS CLARIFICATION] Are plastic bags handed out at the point of sale (ICBPER)?
-- Resolved (FR-46): USD sales use SUNAT's published *tipo de cambio venta* of the issue date. [NEEDS CLARIFICATION] Does ABC sell in US dollars at all?
-- Resolved (FR-49, [ADR 0008](../../adr/0008-server-numbering-series-per-point-of-issue.md)): one Series per document type and point of issue. [NEEDS CLARIFICATION] How many tills does each store have?
-- [NEEDS CLARIFICATION] Do wholesale sales apply volume discounts? Per Item or global?
+- Resolved ([D-13](../../clarifications.md)): SEE-Del contribuyente, directly to SUNAT; an OSE is another adapter chosen by configuration.
+- Resolved ([D-14](../../clarifications.md)): own Digital certificate, kept only on the server (ADR 0006).
+- Resolved ([D-15](../../clarifications.md)): ISC is Product configuration set by the Administrator; initial catalog beer, spirits and sugary drinks as in `products.json`.
+- Resolved ([D-16](../../clarifications.md)): yes, plastic bags are handed out at every till (ICBPER S/ 0.50 per bag).
+- Resolved (FR-46): USD sales use SUNAT's published *tipo de cambio venta* of the issue date. Resolved ([D-17](../../clarifications.md)): USD is allowed but optional, PEN by default.
+- Resolved (FR-49, [ADR 0008](../../adr/0008-server-numbering-series-per-point-of-issue.md)): one Series per document type and point of issue. Resolved ([D-18](../../clarifications.md)): configurable; initially 1 establishment with 2 tills (F001/B001, F002/B002).
+- Resolved ([D-19](../../clarifications.md)): discounts per Item only (catalog 53 code 00); global discounts are out of scope of this version.
 - Resolved (FR-49, ADR 0008): the app queues requests offline but never issues offline; when the server itself cannot reach SUNAT the Document is issued and stays PENDING_RESEND; paper Contingency (FR-16) is only for a failure of the whole system.

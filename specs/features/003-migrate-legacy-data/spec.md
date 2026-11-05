@@ -78,8 +78,8 @@ AC-47 (FR-36) — Unclassified product
 - Migrating prices or customers (the problem statement does not say they exist in the legacy data).
 
 ## Clarifications
-- [NEEDS CLARIFICATION] In what format can the legacy data be exported (CSV, Excel, database)?
-- [NEEDS CLARIFICATION] Are "ingreso" and "salida" quantities or amounts? In which unit?
-- [NEEDS CLARIFICATION] Is "producto" a free-text name or a code? Is the same product written in several ways?
-- [NEEDS CLARIFICATION] Is nro_documento unique? What does it represent (dispatch guide, paper receipt, internal voucher)?
-- [NEEDS CLARIFICATION] How many years of history and roughly how many rows are there?
+- Resolved ([D-05](../../clarifications.md)): CSV UTF-8 with header row; an Excel file is exported to CSV before the upload.
+- Resolved ([D-06](../../clarifications.md)): quantities in the unit of the product, never amounts.
+- Resolved ([D-07](../../clarifications.md)): free text with variants, unified with the equivalence table of the migration.
+- Resolved ([D-08](../../clarifications.md)): not unique; an internal legacy reference kept for traceability, never a SUNAT document.
+- Resolved ([D-09](../../clarifications.md)): 5 years, up to 100,000 rows (NFR-10).

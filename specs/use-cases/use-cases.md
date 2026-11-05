@@ -67,4 +67,4 @@ flowchart LR
 | Changing OSE provider | `SunatValidatorPort` port with interchangeable adapters (ADR 0001) |
 
 ## Clarifications
-- [NEEDS CLARIFICATION] May the Salesperson issue notes, or only the Administrator?
+- Resolved ([D-01](../clarifications.md)): only the Administrator issues notes and voids.

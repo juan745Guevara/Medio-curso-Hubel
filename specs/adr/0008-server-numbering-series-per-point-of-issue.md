@@ -23,4 +23,4 @@ The app runs natively on Windows (MSI) and Android (APK) (NFR-04), possibly on s
 # Consequences
 + No duplicate numbers by construction; the 14.1 register has no gaps.
 + The certificate exists only in the server (ADR 0006).
-– A sale captured offline is not a legal document until the server issues it; the Salesperson can hand over a provisional ticket marked "not a payment voucher" and the Printed representation afterwards. [NEEDS CLARIFICATION] Does management accept this for stores with poor connectivity?
+– A sale captured offline is not a legal document until the server issues it; the Salesperson can hand over a provisional ticket marked "not a payment voucher" and the Printed representation afterwards. Resolved ([D-20](../clarifications.md)): accepted by the client for stores with poor connectivity.

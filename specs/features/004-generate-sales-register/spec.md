@@ -96,6 +96,6 @@ AC-60 (FR-44) — Voided document in the register
 - Purchase register and accounting books.
 
 ## Clarifications
-- [NEEDS CLARIFICATION] What tax regime does ABC have and which books must it keep under RS 234-2006?
-- [NEEDS CLARIFICATION] Is ABC obliged to keep the Sales register in SIRE (RVIE)? The 14.1 structure is generated in any case and is the base of the RVIE proposal.
-- [NEEDS CLARIFICATION] Must the stock card be valued (weighted average cost) or only in units? The legacy data has no costs.
+- Resolved ([D-02](../../clarifications.md)): Régimen General; Sales register 14.1 and permanent inventory in physical units 12.1 (Reglamento LIR art. 35, 500–1,500 UIT).
+- Resolved ([D-03](../../clarifications.md)): the 14.1 structure is always generated and reconciled with the RVIE proposal; the SIRE obligation is an Issuer parameter.
+- Resolved ([D-04](../../clarifications.md)): units only (12.1); the valued inventory 13.1 is out of scope because the legacy data has no costs.

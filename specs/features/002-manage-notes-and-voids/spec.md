@@ -100,7 +100,7 @@ AC-76 (FR-23) — Voiding notice XML
 - Reversals of withholding and perception.
 
 ## Clarifications
-- [NEEDS CLARIFICATION] Who may issue notes and voids? The Salesperson or only the Administrator?
-- [NEEDS CLARIFICATION] Will ABC send Sales receipts via Daily summary or individually? (the regulation allows both)
-- [NEEDS CLARIFICATION] Do physical returns re-enter inventory automatically?
-- [NEEDS CLARIFICATION] The "one note, one document" rule applies to SEE-OSE from 1/1/2027 (RS 000048-2026); it is adopted now. Does management approve?
+- Resolved ([D-01](../../clarifications.md)): notes, voiding notices and daily summaries only by the Administrator; the Salesperson issues invoices and receipts.
+- Resolved ([D-10](../../clarifications.md)): Sales receipts individually with sendBill (accepted by SUNAT beta); the Daily summary stays as fallback and for voiding receipts.
+- Resolved ([D-11](../../clarifications.md)): yes, automatically, only for credit notes of reason 07 and only for the returned items.
+- Resolved ([D-12](../../clarifications.md)): the "one note, one document" rule (RS 000048-2026, SEE-OSE from 1/1/2027) is approved and applied now.

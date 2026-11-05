@@ -5,7 +5,7 @@ status: accepted
 origin: problem statement
 ---
 # Context
-Every Electronic document is signed with the Issuer's Digital certificate (FR-09). Whoever holds the private key can issue documents in ABC's name, so its custody is a security decision, not an implementation detail. NFR-05 requires it to be encrypted and never appear in logs or responses; constitution 15 forbids versioning it. Pending clarification: own certificate or a PSE's (spec 001).
+Every Electronic document is signed with the Issuer's Digital certificate (FR-09). Whoever holds the private key can issue documents in ABC's name, so its custody is a security decision, not an implementation detail. NFR-05 requires it to be encrypted and never appear in logs or responses; constitution 15 forbids versioning it. Resolved ([D-14](../clarifications.md)): ABC uses its own certificate, not a PSE's.
 
 # Decision
 1. **Single location: the server.** Signing happens only in the monolith (`SignerPort`). The Windows and Android apps never receive, store or use the certificate.

@@ -15,4 +15,4 @@
 | Administrator | Everything the Salesperson does + notes, voids, configuration, migration |
 | Accountant | Registers and stock card (read-only) |
 
-`[NEEDS CLARIFICATION]` Final role matrix (see clarifications in 002).
+Resolved ([D-01](clarifications.md)): the Salesperson issues invoices and sales receipts; credit and debit notes, voiding notices and daily summaries are Administrator only.

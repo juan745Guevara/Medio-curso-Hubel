@@ -30,7 +30,8 @@ Do not create other projects (Web, MAUI, persistence) until the specs ask for th
 - Certificate only on the server, encrypted, with rotation — [ADR 0006](specs/adr/0006-certificate-custody.md).
 - Two transactions + outbox; CDR handled by return-code range — [ADR 0007](specs/adr/0007-two-step-issuance-outbox.md).
 - Numbering and signing only on the server; one Series per point of issue — [ADR 0008](specs/adr/0008-server-numbering-series-per-point-of-issue.md).
-- Amazonía IGV exemption as establishment configuration (proposed) — [ADR 0009](specs/adr/0009-amazonia-igv-exemption.md).
+- Amazonía IGV exemption as establishment configuration, off by default (D-21) — [ADR 0009](specs/adr/0009-amazonia-igv-exemption.md).
+- Open questions: none; the client's decisions D-01..D-21 are in [specs/clarifications.md](specs/clarifications.md).
 - Signature: in-place C14N of SignedInfo, ds: prefix — [ADR 0010](specs/adr/0010-signature-in-place-canonicalization.md).
 
 ## Rules for everyone

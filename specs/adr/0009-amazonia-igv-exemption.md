@@ -1,7 +1,7 @@
 ---
 id: 0009
 title: Amazonía IGV exemption (Law 27037) as configuration of the establishment, not as code
-status: proposed
+status: accepted
 origin: judgment (relevant for a company in the jungle region)
 ---
 # Context
@@ -23,4 +23,4 @@ The exam is set at UNAS, Tingo María (province of Leoncio Prado, Huánuco). Law
 + A branch inside and another outside the zone issue correctly from the same system.
 – The Administrator must keep the attribute and the Products' exclusions up to date.
 
-[NEEDS CLARIFICATION] Is ABC (or any of its establishments) located in the Amazonía under Law 27037 and does it meet art. 11.2?
+Resolved ([D-21](../clarifications.md)): not applied in this version; `amazoniaLaw27037` stays false for every establishment until ABC's accountant certifies art. 11.2. The configuration of this ADR is kept so that turning it on needs no code change.
