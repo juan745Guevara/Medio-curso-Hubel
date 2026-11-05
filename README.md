@@ -13,7 +13,7 @@ dotnet test          # .NET SDK 10 — 120 tests: generation, XSD + SUNAT rules,
 ```
 
 Real submission to SUNAT's test service (needs internet). **Already done on 2026-11-04: SUNAT beta answered code 0,
-"La Factura numero F001-93840690, ha sido aceptada"** — signed XML and CDR in [`specs/examples/sunat-beta/`](specs/examples/sunat-beta/README.md):
+"La Factura numero F001-93840690, ha sido aceptada"** and **"La Boleta numero B001-93854286, ha sido aceptada"** — signed XML and CDR in [`specs/examples/sunat-beta/`](specs/examples/sunat-beta/README.md):
 
 ```powershell
 $env:SUNAT_BETA="1"; dotnet test --filter "FullyQualifiedName~SunatBetaTests"
