@@ -1,10 +1,15 @@
 # Instructions for agents — ABC Invoicing project (Spec-First)
 
-## Current phase: specification. No product code is written.
-Do not create `backend/`, `frontend/` or `src/`. Only `specs/`, `.claude/`, `xsd/` (official schemas, never edited) and the root files are edited. The only code allowed is `tools/`: scripts that **verify** the specs (validator, reference XML builder, diagram exporter), never product code.
+## Current phase: second exam — implementation of the UBL XML generation
+Phase 1 (spec-first) is closed. Phase 2 implements, in the stack of ADR 0002 (C# .NET 10), the generation of the
+Invoice XML from the UBL 2.1 XSD, its validation and its sending, with unit tests. Code lives only in:
+- `src/Abc.Ubl/` — classes generated from `xsd/ubl-2.1` (ADR 0005); `Generated/` is never edited, only regenerated.
+- `src/Abc.Invoicing.Domain`, `.Application`, `.Infrastructure` — the hexagonal core of ADR 0001 (dependency rule checked by `ArchitectureTests`).
+- `tests/Abc.Invoicing.Tests/` — xUnit; one test per AC it covers, named `AcNN_…` or with the AC in `DisplayName`.
+Do not create other projects (Web, MAUI, persistence) until the specs ask for them. `tools/` keeps verifying the specs.
 
 ## Before every commit
-`python tools/validate_specs.py` must end with 0 failed. If you change a contract, an example, the matrix or an XSD, run it; if you change examples, rebuild the reference XML with `python tools/ubl_build.py`; if you change a Mermaid diagram, run `python tools/render_diagrams.py`.
+`dotnet test` and `python tools/validate_specs.py` must both end with 0 failed. If you change a contract, an example, the matrix or an XSD, run it; if you change examples, rebuild the reference XML with `python tools/ubl_build.py`; if you change a Mermaid diagram, run `python tools/render_diagrams.py`.
 
 ## Mandatory flow
 1. Problem statement → `specs/problem-analysis.md`
@@ -26,6 +31,7 @@ Do not create `backend/`, `frontend/` or `src/`. Only `specs/`, `.claude/`, `xsd
 - Two transactions + outbox; CDR handled by return-code range — [ADR 0007](specs/adr/0007-two-step-issuance-outbox.md).
 - Numbering and signing only on the server; one Series per point of issue — [ADR 0008](specs/adr/0008-server-numbering-series-per-point-of-issue.md).
 - Amazonía IGV exemption as establishment configuration (proposed) — [ADR 0009](specs/adr/0009-amazonia-igv-exemption.md).
+- Signature: in-place C14N of SignedInfo, ds: prefix — [ADR 0010](specs/adr/0010-signature-in-place-canonicalization.md).
 
 ## Rules for everyone
 - Read `specs/00-constitution.md` and `specs/glossary.md` before any task.

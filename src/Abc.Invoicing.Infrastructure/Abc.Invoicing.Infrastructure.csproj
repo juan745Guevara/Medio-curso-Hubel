@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Infrastructure (ADR 0001): adapters of the output ports. The only project that references Abc.Ubl. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- System.Security.Cryptography.Xml (SignedXml) comes with the ASP.NET Core shared framework: no NuGet needed. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Abc.Invoicing.Application\Abc.Invoicing.Application.csproj" />
+    <ProjectReference Include="..\Abc.Ubl\Abc.Ubl.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The official XSDs travel with the build output, so validation works wherever it runs (ADR 0003). -->
+    <None Include="..\..\xsd\ubl-2.1\**\*.xsd" Link="xsd\ubl-2.1\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

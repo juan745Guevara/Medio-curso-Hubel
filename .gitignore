@@ -8,3 +8,9 @@ node_modules/
 *.p12
 *.key
 *.jks
+# .NET build output
+bin/
+obj/
+.vs/
+*.user
+TestResults/

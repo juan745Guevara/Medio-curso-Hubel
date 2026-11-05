@@ -1,5 +1,33 @@
 # ABC Software Corp electronic invoicing — Spec-First kit
 
+## Second exam (2nd partial): XML generation from the Invoice 2.1 XSD — C# .NET 10
+
+> **Entrega del 2.º parcial.** Generación del XML de la factura a partir de `UBL-Invoice-2.1.xsd` en el lenguaje del
+> dominio (C# .NET 10, ADR 0002), con validación contra el XSD oficial, firma, envío y **78 pruebas unitarias**.
+
+```bash
+git clone https://github.com/juan745Guevara/Medio-curso-Hubel.git
+cd Medio-curso-Hubel
+dotnet test          # .NET SDK 10 — 78 tests: generation, XSD validation, signature, sending, domain, architecture
+```
+
+| Step (class notes) | Where | How |
+|---|---|---|
+| **1. Generate the XML from the XSD 2.1 (Invoice)** — classes, not templates | [`src/Abc.Ubl/Generated/`](src/Abc.Ubl/Generated/) (classes generated from [`xsd/ubl-2.1/maindoc/UBL-Invoice-2.1.xsd`](xsd/ubl-2.1/maindoc/UBL-Invoice-2.1.xsd) with XmlSchemaClassGenerator, [`regenerate.sh`](src/Abc.Ubl/regenerate.sh)) · mapper [`Ubl21InvoiceGenerator`](src/Abc.Invoicing.Infrastructure/Ubl/Ubl21InvoiceGenerator.cs) | Domain `ElectronicDocument` → generated `InvoiceType` → `XmlSerializer` (ADR 0005). Order and cardinality come from the XSD; the SUNAT customization (catalog attributes, `FormaPago`, `TierRange`, legends…) follows the regulatory matrix rows cited in the code |
+| **2. Validate the XML** against the official schema | [`OasisXsdValidator`](src/Abc.Invoicing.Infrastructure/Ubl/OasisXsdValidator.cs) | `XmlSchemaSet` over the official OASIS 2.1 OS XSDs that travel with the build; before signing and again after (ADR 0003) |
+| **3. Send the XML** | [`XmlDsigSigner`](src/Abc.Invoicing.Infrastructure/Signing/XmlDsigSigner.cs) · [`SunatBillServiceClient`](src/Abc.Invoicing.Infrastructure/Sunat/SunatBillServiceClient.cs) · use case [`IssueDocument`](src/Abc.Invoicing.Application/IssueDocument.cs) | XMLDSig enveloped in `ext:ExtensionContent` (ADR 0010), ZIP `RUC-01-F001-42.zip`, SOAP `sendBill` with WS-Security, CDR read by return-code range (FR-45). Tests use a fake SUNAT, no network |
+| Domain rules | [`src/Abc.Invoicing.Domain/`](src/Abc.Invoicing.Domain/) | `TaxCalculator` (ISC catalog 08 before IGV, ICBPER, free lines), `Ruc` (modulo 11), `AmountInWords` (legend 1000), invariants of spec 001 |
+| Tests | [`tests/Abc.Invoicing.Tests/`](tests/Abc.Invoicing.Tests/) | `GenerationTests` (23), `ReferenceXmlTests` (10), `ValidationAndSigningTests` (8), `SendingTests` (7), `DomainTests` (26), `ArchitectureTests` (4) — 78 in total |
+
+The tests read the same JSON examples as the specs ([`specs/examples/valid/`](specs/examples/valid/)) and compare the
+C# output with the signed reference XML of [`specs/examples/xml/`](specs/examples/xml/): one contract, two independent
+implementations. Outside `dotnet test`, the signed C# output was also checked with libxmlsec1 and signxml (signature)
+and lxml (XSD).
+
+Architecture of the code = the hexagonal core of ADR 0001: `Domain` ← `Application` (ports `IUblGenerator`,
+`IXsdValidator`, `IXmlSigner`, `ISunatValidator`) ← `Infrastructure` (adapters, the only project that sees `Abc.Ubl`);
+`ArchitectureTests` fails the build if that rule breaks.
+
 Software Architecture mid-term exam, Group A, UNAS (19/10/2026). Phase 1 **Spec-First**: rules, data contracts, validations and interfaces **before writing code**. That is why the repository only contains `specs/`, `.claude/agents/` and `.claude/skills/`; there are no code folders.
 
 ## Problem statement deliverable → where it is

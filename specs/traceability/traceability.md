@@ -82,3 +82,31 @@ One row per acceptance criterion across all features. Test names follow the C# (
 | 002 | US-09 | FR-23 | AC-76 | UC-06 | `Ac76_VoidingNoticeXml()` + XML `20131312955-RA-20261021-1.xml` |
 
 Total: 76 AC. The JSON examples and reference XML named in the Test column live in [`specs/examples/`](../examples/) and are checked by `python tools/validate_specs.py` on every change.
+
+## Implemented tests (second exam, `tests/Abc.Invoicing.Tests`, xUnit)
+
+The C# names above are the target names of the full product; the second exam implements the XML generation, validation, signature and sending, and these are the tests that already run with `dotnet test`:
+
+| AC | Implemented test (class → method) |
+|---|---|
+| AC-01 | `GenerationTests.Ac01_id_and_file_name` |
+| AC-03, AC-04 | `DomainTests.Ac03_ruc` |
+| AC-05 | `DomainTests.Ac05_invoice_requires_ruc` |
+| AC-06 | `DomainTests.Ac06_receipt_over_700` |
+| AC-08, AC-12 | `DomainTests.Ac08_taxed_item`, `GenerationTests.Ac08_ac12_lines`, `DomainTests.Unit_outside_catalog_03` |
+| AC-09, AC-10, AC-68 | `DomainTests.Ac09_ad_valorem_isc`, `DomainTests.Ac10_fixed_amount_isc`, `DomainTests.Ac68_isc_per_litre`, `GenerationTests.Ac09_isc_systems_in_tier_range` |
+| AC-11 | `DomainTests.Ac11_icbper`, `GenerationTests.Ac11_icbper` |
+| AC-13 | `DomainTests.Ac13_totals`, `GenerationTests.Ac13_totals` |
+| AC-14 | `GenerationTests.Ac14_header` |
+| AC-15 | `ValidationAndSigningTests.Ac15_missing_issue_date_is_rejected`, `SendingTests.Nothing_is_sent_when_invalid` |
+| AC-16 | `ValidationAndSigningTests.Ac16_signature`, `…Signature_value_matches_in_place_canonicalization`, `…Altered_signed_xml_does_not_verify` |
+| AC-17 | `SendingTests.Ac17_accepted` |
+| AC-21, AC-22 | `GenerationTests.Ac21_payment_terms`, `DomainTests.Ac21_ac22_credit_rules` |
+| AC-25 | `GenerationTests.Ac25_amount_in_words`, `DomainTests.Ac25_amount_in_words` |
+| AC-31 | `DomainTests.Receipt_with_f_series_is_refused` |
+| AC-61, AC-62, AC-63 | `SendingTests.Ac61_exception_keeps_pending`, `SendingTests.Ac62_rejected`, `SendingTests.Ac63_observed`, `DomainTests.Fr45_return_codes` |
+| AC-64, AC-65 | `DomainTests.Ac64_usd_requires_exchange_rate`, `GenerationTests.Ac65_usd_exchange_rate` |
+| AC-66, AC-67 | `DomainTests.Ac66_free_line_with_value`, `GenerationTests.Ac67_free_of_charge_line` |
+| FR-08 (all cases) | `GenerationTests.Generated_xml_is_valid_against_the_official_xsd`, `ReferenceXmlTests.*` |
+| ADR 0001 | `ArchitectureTests.*` |
+
