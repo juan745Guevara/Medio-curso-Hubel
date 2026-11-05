@@ -1,5 +1,7 @@
 # ABC Software Corp electronic invoicing — Spec-First kit
 
+[![CI](https://github.com/juan745Guevara/Medio-curso-Hubel/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/juan745Guevara/Medio-curso-Hubel/actions/workflows/ci.yml)
+
 ## Second exam (2nd partial): XML generation from the Invoice 2.1 XSD — C# .NET 10
 
 > **Entrega del 2.º parcial.** Generación del XML de la factura a partir de `UBL-Invoice-2.1.xsd` en el lenguaje del
@@ -10,6 +12,7 @@
 git clone https://github.com/juan745Guevara/Medio-curso-Hubel.git
 cd Medio-curso-Hubel
 dotnet test          # .NET SDK 10 — 120 tests: generation, XSD + SUNAT rules, signature, sending, domain, architecture
+# with coverage: dotnet test --collect "Code Coverage" --settings coverage.runsettings --results-directory TestResults
 ```
 
 Real submission to SUNAT's test service (needs internet). **Already done on 2026-11-04: SUNAT beta answered code 0,
@@ -25,6 +28,7 @@ $env:SUNAT_BETA="1"; dotnet test --filter "FullyQualifiedName~SunatBetaTests"
 | **2. Validate the XML** against the official schema | [`OasisXsdValidator`](src/Abc.Invoicing.Infrastructure/Ubl/OasisXsdValidator.cs) | `XmlSchemaSet` over the official OASIS 2.1 OS XSDs that travel with the build; before signing and again after (ADR 0003). Then [`SunatRulesValidator`](src/Abc.Invoicing.Infrastructure/Ubl/SunatRulesValidator.cs) (FR-52): 28 SUNAT rules the XSD cannot express (series by type, catalog 51, currency, buyer RUC, totals, `FormaPago`, installments…), each with SUNAT's own code; 2000–3999 stop before signing, 4000+ are kept as observations |
 | **3. Send the XML** | [`XmlDsigSigner`](src/Abc.Invoicing.Infrastructure/Signing/XmlDsigSigner.cs) · [`SunatBillServiceClient`](src/Abc.Invoicing.Infrastructure/Sunat/SunatBillServiceClient.cs) · use case [`IssueDocument`](src/Abc.Invoicing.Application/IssueDocument.cs) | XMLDSig enveloped in `ext:ExtensionContent` (ADR 0010), ZIP `RUC-01-F001-42.zip`, SOAP `sendBill` with WS-Security, CDR read by return-code range (FR-45). No answer → PENDING_RESEND; the retry ([`ResolvePendingSubmission`](src/Abc.Invoicing.Application/ResolvePendingSubmission.cs)) asks `getStatusCdr` first and resends the same signed file only if SUNAT has no CDR (ADR 0007). Unit tests use a fake SUNAT; `SunatBetaTests` sends to the real beta (`e-beta.sunat.gob.pe`, MODDATOS) |
 | Domain rules | [`src/Abc.Invoicing.Domain/`](src/Abc.Invoicing.Domain/) | `TaxCalculator` (ISC catalog 08 before IGV, ICBPER, free lines), `Ruc` (modulo 11), `AmountInWords` (legend 1000), invariants of spec 001 |
+| CI and coverage | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) · [`coverage.runsettings`](coverage.runsettings) · [`tools/coverage_gate.py`](tools/coverage_gate.py) | On every push GitHub runs `validate_specs.py` and `dotnet test` with line coverage of Domain, Application and Infrastructure (the XSD-generated classes are excluded): 87 % today, the build fails below 80 % |
 | Tests | [`tests/Abc.Invoicing.Tests/`](tests/Abc.Invoicing.Tests/) | `GenerationTests` (23), `ReferenceXmlTests` (10), `ValidationAndSigningTests` (8), `SunatRulesTests` (35), `SendingTests` (7), `PendingSubmissionTests` (7), `DomainTests` (26), `ArchitectureTests` (4) — 120 in total, plus `SunatBetaTests` (2, opt-in: invoice and sales receipt) |
 
 The tests read the same JSON examples as the specs ([`specs/examples/valid/`](specs/examples/valid/)) and compare the
