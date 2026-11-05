@@ -6,6 +6,7 @@ Deliverable 3 of the exam ("Services" part). These are the interfaces that make 
 
 | Port | Operation | Pre | Post | Errors | FR |
 |---|---|---|---|---|---|
+| `ResolvePendingSubmission` | `execute(document, signedXml) → status, CDR?, resent` | Document in PENDING_RESEND with its stored signed file | `getStatusCdr` first; resend the same signed file only when SUNAT has no CDR ([ADR 0007](../adr/0007-two-step-issuance-outbox.md)) | — (stays PENDING_RESEND if SUNAT does not answer) | FR-11, FR-45 |
 | `IssueDocument` | `execute(IssueDocumentRequest) → ElectronicDocumentResponse` | Series belongs to the user's point of issue; Products classified; Certificate valid | T1 committed: number assigned, signed XML stored, outbox entry written ([ADR 0007](../adr/0007-two-step-issuance-outbox.md)); CDR result if it arrives within 30 s | INVALID_RUC, INVOICE_REQUIRES_RUC, RECEIPT_REQUIRES_DOCUMENT, CREDIT_WITHOUT_INSTALLMENTS, INSTALLMENTS_MISMATCH, EXCHANGE_RATE_REQUIRED, FREE_LINE_WITH_VALUE, INVALID_XSD, UNCLASSIFIED_PRODUCT, SERIES_NOT_ALLOWED | FR-01..FR-15, FR-46..FR-50 |
 | `IssueNote` | `execute(IssueNoteRequest) → ElectronicDocumentResponse` | Modified document ACCEPTED/OBSERVED | Note issued | MULTIPLE_DOCUMENT_NOTE, DOCUMENT_NOT_ACCEPTED, CREDIT_EXCEEDED | FR-18..FR-22 |
 | `SubmitVoiding` | `execute(SubmitVoidingRequest) → BatchSubmissionResponse` | Within the deadline | Ticket recorded | VOIDING_PAST_DEADLINE | FR-23, FR-24 |

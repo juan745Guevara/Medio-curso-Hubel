@@ -31,7 +31,15 @@ public sealed class IssueDocument(IUblGenerator generator, IXsdValidator validat
         if (errors.Count > 0)
             throw new DomainException("INVALID_SIGNATURE", "Signed XML no longer validates: " + string.Join(" | ", errors));
 
-        var cdr = await sunat.SendBillAsync(document.FileName, signed.Xml, ct);
-        return new IssueResult(document, cdr.Status, signed, cdr, violations);
+        try
+        {
+            var cdr = await sunat.SendBillAsync(document.FileName, signed.Xml, ct);
+            return new IssueResult(document, cdr.Status, signed, cdr, violations);
+        }
+        catch (SunatUnreachableException)
+        {
+            // FR-11 / AC-19: no answer. The signed file is kept as is; ResolvePendingSubmission queries before resending.
+            return new IssueResult(document, SunatStatus.PendingResend, signed, null, violations);
+        }
     }
 }

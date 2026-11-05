@@ -122,5 +122,8 @@ public class SunatRulesTests
             onSend();
             return Task.FromResult(new CdrResult(0, "aceptada", [], null));
         }
+
+        public Task<CdrResult?> GetStatusCdrAsync(string ruc, DocumentType type, string series, int number, CancellationToken ct = default) =>
+            Task.FromResult<CdrResult?>(null);
     }
 }

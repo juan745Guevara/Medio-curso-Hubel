@@ -29,6 +29,10 @@ The API keeps its contract: after T1 commits, the controller waits up to 30 s fo
 
 The same outbox carries the Daily summary (RC) and the Voiding notice (RA), whose answer is a ticket queried with `getStatus` (FR-26).
 
+Implemented (second exam): `IssueDocument` leaves the Document in PENDING_RESEND when `sendBill` gets no answer
+(AC-19), and `ResolvePendingSubmission` runs the retry: `getStatusCdr` on billConsultService, then the same signed file
+only if SUNAT has no CDR (AC-79, AC-80). SUNAT offers billConsultService in production only, so the tests use a fake.
+
 # Alternatives evaluated
 | Option | Lock time | Crash between sign and send | Result |
 |---|---|---|---|

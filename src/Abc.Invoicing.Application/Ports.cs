@@ -45,8 +45,19 @@ public sealed record CdrResult(int Code, string Description, IReadOnlyList<(stri
     public SunatStatus Status => ResponseCodeClassifier.Classify(Code, Observations.Count);
 }
 
-/// <summary>SunatValidatorPort (FR-10): sendBill to SUNAT or an OSE; one adapter per provider (NFR-07).</summary>
+/// <summary>The SUNAT validator could not be reached or did not answer in time (FR-11): the outcome is unknown.</summary>
+public sealed class SunatUnreachableException(string message, Exception? inner = null) : Exception(message, inner);
+
+/// <summary>SunatValidatorPort (FR-10, FR-11): sendBill to SUNAT or an OSE; one adapter per provider (NFR-07).</summary>
 public interface ISunatValidator
 {
+    /// <exception cref="SunatUnreachableException">No answer: the document may or may not have been received.</exception>
     Task<CdrResult> SendBillAsync(string fileName, byte[] signedXml, CancellationToken ct = default);
+
+    /// <summary>
+    /// getStatusCdr (ADR 0007): the CDR SUNAT already has for this document, or <c>null</c> when it has none (the
+    /// document never arrived, so it can be resent). A result with an exception code means the query itself failed.
+    /// </summary>
+    /// <exception cref="SunatUnreachableException">No answer to the query.</exception>
+    Task<CdrResult?> GetStatusCdrAsync(string ruc, DocumentType type, string series, int number, CancellationToken ct = default);
 }

@@ -28,7 +28,7 @@ ABC Software Corp sells groceries wholesale and retail and today cannot issue va
 - **FR-08** (Unwanted behaviour): If the UBL XML does not validate against the OASIS XSD, then the system shall stop the process, neither sign nor send, and log the structure error.
 - **FR-09** (Ubiquitous): The system shall sign the UBL XML with the Issuer's Digital certificate using XMLDSig enveloped inside `ext:UBLExtensions` before sending it.
 - **FR-10** (Event-driven): When a Document becomes SIGNED, the system shall send it to the configured SUNAT validator (SUNAT or OSE) in a ZIP named `RUC-TT-SERIES-NUMBER`, and record the CDR with its code and description.
-- **FR-11** (Unwanted behaviour): If the SUNAT validator does not respond or there is a network failure, then the system shall leave the Document in PENDING_RESEND, retry automatically and alert when 1 day remains before the submission deadline.
+- **FR-11** (Unwanted behaviour): If the SUNAT validator does not respond or there is a network failure, then the system shall leave the Document in PENDING_RESEND, retry automatically and alert when 1 day remains before the submission deadline; before each retry it shall ask SUNAT for the Document's CDR (`getStatusCdr`) and resend the same signed file only if SUNAT has no CDR for it ([ADR 0007](../../adr/0007-two-step-issuance-outbox.md)).
 - **FR-12** (Ubiquitous): The system shall record the Invoice Payment terms: Cash, or Credit with Outstanding amount and each Installment with amount and due date.
 - **FR-13** (Event-driven): When the Document is ACCEPTED or OBSERVED, the system shall generate the Printed representation with a QR code and allow downloading it together with the XML and the CDR.
 - **FR-14** (Optional feature): Where the Buyer has a registered e-mail address, the system shall send them the Printed representation and the XML once ACCEPTED.
@@ -154,6 +154,16 @@ AC-20 (FR-11) — Deadline alert
   Given an Invoice in PENDING_RESEND issued 2 calendar days ago
   When the deadline check runs
   Then an expiry alert is raised for the Administrator
+
+AC-79 (FR-11) — Lost answer, SUNAT already has the CDR
+  Given F001-42 is in PENDING_RESEND because the answer to sendBill was lost
+  When the retry runs and getStatusCdr returns a CDR with code 0
+  Then F001-42 becomes ACCEPTED with that CDR and it is not sent again
+
+AC-80 (FR-11) — Lost answer, SUNAT has no CDR
+  Given F001-42 is in PENDING_RESEND and getStatusCdr returns no CDR
+  When the retry runs
+  Then the same signed file 20131312955-01-F001-42.zip is sent again with the same number and its CDR is recorded
 
 AC-21 (FR-12) — Credit without installments
   Given an Invoice with Credit payment terms and no Installments

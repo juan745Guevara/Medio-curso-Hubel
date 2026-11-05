@@ -193,7 +193,7 @@ The 1,710 codes are versioned in [`catalogs/sunat-return-codes.json`](../catalog
 | `ResponseCode` = 0 with `cbc:Note` coded 4000+ | Observation | 4287 unit price differs | OBSERVED (valid document) | Issued | AC-63 |
 | SOAP fault 0100–1999 | Exception: not processed | 0109 authentication service down; 0130 no ticket | PENDING_RESEND; resend the same signed file | Kept | AC-61 |
 | `ResponseCode` 2000–3999 | Rejection | 2800 buyer document type | REJECTED | Consumed, never reused | AC-62, AC-18 |
-| No answer in 30 s | Unknown | timeout | PENDING_RESEND; query `getStatusCdr` before resending | Kept | AC-19 |
+| No answer in 30 s | Unknown | timeout | PENDING_RESEND; query `getStatusCdr` before resending: CDR found → its status, no resend; no CDR → resend the same signed file | Kept | AC-19, AC-79, AC-80 |
 
 ## H. Cross-reference with feature and port
 
