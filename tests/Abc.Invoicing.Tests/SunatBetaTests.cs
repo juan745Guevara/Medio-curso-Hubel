@@ -26,28 +26,34 @@ public sealed class BetaFactAttribute : FactAttribute
 public class SunatBetaTests
 {
     [BetaFact(DisplayName = "AC-17 SUNAT beta accepts the generated, validated and signed invoice (CDR code 0)")]
-    public async Task Ac17_sunat_beta_accepts_the_invoice()
+    public Task Ac17_sunat_beta_accepts_the_invoice() => SendToBetaAsync("issue-invoice-cash.json");
+
+    [BetaFact(DisplayName = "AC-17 SUNAT beta accepts the generated, validated and signed sales receipt with a free line (CDR code 0)")]
+    public Task Ac17_sunat_beta_accepts_the_sales_receipt() => SendToBetaAsync("issue-receipt-free-line.json");
+
+    private static async Task SendToBetaAsync(string requestFile)
     {
         var ruc = Environment.GetEnvironmentVariable("SUNAT_BETA_RUC") ?? Examples.Issuer().Ruc.Value;
         var issuer = Examples.Issuer() with { Ruc = new Ruc(ruc) };
-        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTime.UtcNow, LimaTimeZone()));
+        var lima = TimeZoneInfo.ConvertTime(DateTime.UtcNow, LimaTimeZone());
         // A different number on every run, so the beta never sees the same Series-number twice.
         var number = (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 99_999_999) + 1;
-        var document = Examples.Document("issue-invoice-cash.json", number, DateTime.UtcNow.AddHours(-5).ToString("HH:mm:ss"), today, issuer);
+        var document = Examples.Document(requestFile, number, lima.ToString("HH:mm:ss"), DateOnly.FromDateTime(lima), issuer);
 
         using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
         var sunat = new SunatBillServiceClient(http, new SunatCredentials(ruc, "MODDATOS", "moddatos"), SunatBillServiceClient.BetaEndpoint);
         using var cert = ValidationAndSigningTests.TestCertificate();
         var result = await new IssueDocument(new Ubl21InvoiceGenerator(), new OasisXsdValidator(), new SunatRulesValidator(),
             new XmlDsigSigner(cert), sunat).ExecuteAsync(document);
+        Assert.True(result.Cdr is not null, "SUNAT beta did not answer (PENDING_RESEND)");
 
         var folder = Path.Combine(RepositoryRoot(), "specs", "examples", "sunat-beta");
         Directory.CreateDirectory(folder);
         await File.WriteAllBytesAsync(Path.Combine(folder, document.FileName + ".xml"), result.SignedXml.Xml);
-        if (result.Cdr?.CdrZip is { } cdr)
+        if (result.Cdr!.CdrZip is { } cdr)
             await File.WriteAllBytesAsync(Path.Combine(folder, "R-" + document.FileName + ".zip"), cdr);
         await File.WriteAllTextAsync(Path.Combine(folder, "R-" + document.FileName + ".txt"),
-            $"Sent {DateTime.UtcNow:O} to {SunatBillServiceClient.BetaEndpoint}\nResponseCode: {result.Cdr!.Code}\nDescription: {result.Cdr.Description}\n"
+            $"Sent {DateTime.UtcNow:O} to {SunatBillServiceClient.BetaEndpoint}\nResponseCode: {result.Cdr.Code}\nDescription: {result.Cdr.Description}\n"
             + string.Concat(result.Cdr.Observations.Select(o => $"Observation: {o.Code} - {o.Text}\n")));
 
         Assert.True(result.Cdr.Code == 0, $"SUNAT beta answered {result.Cdr.Code}: {result.Cdr.Description}");

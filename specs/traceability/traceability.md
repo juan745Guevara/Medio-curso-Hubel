@@ -104,7 +104,7 @@ The C# names above are the target names of the full product; the second exam imp
 | AC-14 | `GenerationTests.Ac14_header` |
 | AC-15 | `ValidationAndSigningTests.Ac15_missing_issue_date_is_rejected`, `SendingTests.Nothing_is_sent_when_invalid` |
 | AC-16 | `ValidationAndSigningTests.Ac16_signature`, `…Signature_value_matches_in_place_canonicalization`, `…Altered_signed_xml_does_not_verify` |
-| AC-17 | `SendingTests.Ac17_accepted`; against the real service: `SunatBetaTests.Ac17_sunat_beta_accepts_the_invoice` (runs with `SUNAT_BETA=1`; accepted with code 0 on 2026-11-04, CDR in [`examples/sunat-beta/`](../examples/sunat-beta/README.md)) |
+| AC-17 | `SendingTests.Ac17_accepted`; against the real service: `SunatBetaTests.Ac17_sunat_beta_accepts_the_invoice` and `…Ac17_sunat_beta_accepts_the_sales_receipt` (run with `SUNAT_BETA=1`; accepted with code 0 on 2026-11-04, CDR in [`examples/sunat-beta/`](../examples/sunat-beta/README.md)) |
 | AC-19 | `PendingSubmissionTests.Ac19_no_answer_leaves_pending_resend` |
 | AC-79, AC-80 | `PendingSubmissionTests.Ac79_cdr_found_is_not_resent`, `…Ac79_rejected_cdr_found`, `…Ac80_no_cdr_resends_the_same_signed_file`, `…GetStatusCdr_envelope`, `…Query_exception_keeps_pending`, `…Query_without_answer_keeps_pending` |
 | AC-21, AC-22 | `GenerationTests.Ac21_payment_terms`, `DomainTests.Ac21_ac22_credit_rules` |
