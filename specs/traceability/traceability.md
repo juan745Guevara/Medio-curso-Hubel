@@ -102,7 +102,7 @@ The C# names above are the target names of the full product; the second exam imp
 | AC-14 | `GenerationTests.Ac14_header` |
 | AC-15 | `ValidationAndSigningTests.Ac15_missing_issue_date_is_rejected`, `SendingTests.Nothing_is_sent_when_invalid` |
 | AC-16 | `ValidationAndSigningTests.Ac16_signature`, `…Signature_value_matches_in_place_canonicalization`, `…Altered_signed_xml_does_not_verify` |
-| AC-17 | `SendingTests.Ac17_accepted`; against the real service: `SunatBetaTests.Ac17_sunat_beta_accepts_the_invoice` (runs with `SUNAT_BETA=1`) |
+| AC-17 | `SendingTests.Ac17_accepted`; against the real service: `SunatBetaTests.Ac17_sunat_beta_accepts_the_invoice` (runs with `SUNAT_BETA=1`; accepted with code 0 on 2026-11-04, CDR in [`examples/sunat-beta/`](../examples/sunat-beta/README.md)) |
 | AC-21, AC-22 | `GenerationTests.Ac21_payment_terms`, `DomainTests.Ac21_ac22_credit_rules` |
 | AC-25 | `GenerationTests.Ac25_amount_in_words`, `DomainTests.Ac25_amount_in_words` |
 | AC-31 | `DomainTests.Receipt_with_f_series_is_refused` |

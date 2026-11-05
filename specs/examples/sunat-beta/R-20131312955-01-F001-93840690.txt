@@ -1,0 +1,3 @@
+Sent 2026-11-05T01:04:34.5144952Z to https://e-beta.sunat.gob.pe/ol-ti-itcpfegem-beta/billService
+ResponseCode: 0
+Description: La Factura numero F001-93840690, ha sido aceptada
