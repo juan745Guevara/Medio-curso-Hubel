@@ -80,8 +80,13 @@ One row per acceptance criterion across all features. Test names follow the C# (
 | 001 | US-06 | FR-51 | AC-74 | UC-11 | `Ac74_SequenceCannotGoBack()` |
 | 001 | US-04 | FR-11 | AC-79 | UC-08 | `Ac79_CdrFoundIsNotResent()` |
 | 001 | US-04 | FR-11 | AC-80 | UC-08 | `Ac80_NoCdrResendsTheSameSignedFile()` |
+| 001 | US-04 | FR-11 | AC-85 | UC-08 | `Ac85_SunatStatusOnDemand()` |
 | 001 | US-01 | FR-52 | AC-77 | UC-01 | `Ac77_SunatRejectionRuleStopsIssuance()` |
 | 001 | US-01 | FR-52 | AC-78 | UC-01 | `Ac78_SunatObservationRuleDoesNotStop()` |
+| 004 | US-17 | FR-53 | AC-81 | UC-16 | `Ac81_PurchaseEntersTheStockCard()` + example `valid/goods-receipt.json` |
+| 004 | US-17 | FR-54 | AC-82 | UC-16 | `Ac82_InvalidGoodsReceiptCreatesNothing()` + example `invalid/goods-receipt-zero-quantity.json` |
+| 004 | US-17 | FR-55 | AC-83 | UC-12 | `Ac83_ProductChangeAppliesForward()` + example `valid/update-product-description.json` |
+| 004 | US-17 | FR-55 | AC-84 | UC-12 | `Ac84_InactiveProductCannotBeSold()` + example `valid/update-product-deactivate.json` |
 | 002 | US-08 | FR-18 | AC-75 | UC-05 | `Ac75_DebitNoteIsItsOwnDocument()` + XML `20131312955-08-FD01-1.xml` |
 | 002 | US-09 | FR-23 | AC-76 | UC-06 | `Ac76_VoidingNoticeXml()` + XML `20131312955-RA-20261021-1.xml` |
 

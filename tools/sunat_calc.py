@@ -217,9 +217,25 @@ def calculate(items: list[dict], products: dict[str, dict] | None = None) -> Tot
 
 
 # --- Business rules the JSON Schema cannot express (422 layer) ---------------------------------------
+def goods_receipt_errors(doc: dict, products: dict[str, dict]) -> list[str]:
+    """FR-54: a Goods receipt is rejected as a whole if any item has quantity 0, another unit or an unknown Product."""
+    errors: list[str] = []
+    for it in doc["items"]:
+        product = products.get(it["productCode"])
+        if product is None or product.get("active") is False:
+            errors.append("UNKNOWN_OR_INACTIVE_PRODUCT")
+        elif it["unit"] != product["unit"]:
+            errors.append("UNIT_MISMATCH")
+        if D(it["quantity"]) == 0:
+            errors.append("INVALID_QUANTITY")
+    return errors
+
+
 def business_errors(kind: str, doc: dict, products: dict[str, dict] | None = None) -> list[str]:
     """Returns the internal error codes (regulatory-matrix §G) a request would get."""
     errors: list[str] = []
+    if kind == "goods":
+        return goods_receipt_errors(doc, products or load_products())
     if kind != "issue":
         return errors
     products = products or load_products()

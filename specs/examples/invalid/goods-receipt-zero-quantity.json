@@ -1,0 +1,9 @@
+{
+  "establishment": "0000",
+  "supplier": { "ruc": "20609876540", "name": "DISTRIBUIDORA ANDINA DE ABARROTES S.A.C." },
+  "supportingDocument": { "type": "01", "series": "F050", "number": "1201", "issueDate": "2026-11-03" },
+  "items": [
+    { "productCode": "P-001", "quantity": "60", "unit": "NIU" },
+    { "productCode": "P-002", "quantity": "0", "unit": "KGM" }
+  ]
+}

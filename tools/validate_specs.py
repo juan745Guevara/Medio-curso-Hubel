@@ -139,7 +139,8 @@ def group_b() -> None:
 
 # ---------------------------------------------------------------------------------------------------- C
 SCHEMA_OF = {"issue": "issue-document-request", "note": "note-request", "void": "void-request", "series": "series",
-             "contingency": "contingency-request", "legacy": "legacy-record", "product": "product"}
+             "contingency": "contingency-request", "legacy": "legacy-record", "product": "product",
+             "goods": "goods-receipt-request", "update": "product-update"}
 
 
 def group_c() -> None:

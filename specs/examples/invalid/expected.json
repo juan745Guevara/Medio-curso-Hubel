@@ -152,5 +152,40 @@
     "expect": "minimum",
     "ac": "AC-74",
     "why": "Sequence numbers start at 0 and never go back"
+  },
+  "goods-receipt-zero-quantity.json": {
+    "schema": "goods-receipt-request",
+    "layer": "business",
+    "expect": "INVALID_QUANTITY",
+    "ac": "AC-82",
+    "why": "An item with quantity 0 rejects the whole Goods receipt"
+  },
+  "goods-receipt-unit-mismatch.json": {
+    "schema": "goods-receipt-request",
+    "layer": "business",
+    "expect": "UNIT_MISMATCH",
+    "ac": "AC-82",
+    "why": "P-001 is sold in NIU, not KGM"
+  },
+  "goods-receipt-without-items.json": {
+    "schema": "goods-receipt-request",
+    "layer": "schema",
+    "expect": "minItems",
+    "ac": "AC-82",
+    "why": "A Goods receipt needs at least one item"
+  },
+  "update-product-changes-code.json": {
+    "schema": "product-update",
+    "layer": "schema",
+    "expect": "additionalProperties",
+    "ac": "AC-83",
+    "why": "The Product code never changes"
+  },
+  "update-product-empty.json": {
+    "schema": "product-update",
+    "layer": "schema",
+    "expect": "minProperties",
+    "ac": "AC-83",
+    "why": "An update must change at least one field"
   }
 }

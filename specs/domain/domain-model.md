@@ -11,7 +11,7 @@ Separated from the start so that moving to microservices is just cutting along t
 | **Invoicing** | Issue Electronic documents, calculate taxes, SUNAT status, daily summaries and voiding notices | ElectronicDocument, Series, DailySummary, VoidingNotice, OutboxEntry |
 | **Configuration** | Issuer, establishments, points of issue, certificate | Issuer, Establishment, PointOfIssue |
 | **Catalog** | Products, customers, SUNAT catalogs | Product, Buyer, SunatCatalog |
-| **Inventory** | Movements and stock card | InventoryMovement |
+| **Inventory** | Movements, goods receipts (purchases, FR-53) and stock card | InventoryMovement, GoodsReceipt |
 | **Migration** | Batches and traceability to legacy data | MigrationBatch |
 | **Registers** | Sales register (PLE 14.1) and stock card (PLE 12.1) | (read views: SalesRegisterRow, StockCard) |
 
@@ -95,6 +95,7 @@ classDiagram
     +Table5ExistenceType existenceType
     +Text unspscCode
     +ProductStatus status
+    +Boolean active
   }
   class PaymentTerms {
     <<value object>>
@@ -148,6 +149,15 @@ classDiagram
     +Text series
     +Text number
     +Date issueDate
+  }
+  class GoodsReceipt {
+    <<aggregate root>>
+    +Id id
+    +EstablishmentCode establishment
+    +Ruc supplierRuc
+    +Text supplierName
+    +SupportingDocument supportingDocument
+    +List~GoodsReceiptItem~ items
   }
   class MigrationOrigin {
     <<value object>>
@@ -232,6 +242,7 @@ classDiagram
   InventoryMovement *-- "1" SupportingDocument
   MigrationOrigin ..> MigrationBatch
   InventoryMovement ..> ElectronicDocument : supports
+  InventoryMovement ..> GoodsReceipt : purchase (Table 12 code 02)
   Issuer *-- "1..*" Establishment
   Establishment *-- "1..*" PointOfIssue
   PointOfIssue ..> Series : issues in

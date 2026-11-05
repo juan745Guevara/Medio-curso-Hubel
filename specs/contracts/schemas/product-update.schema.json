@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/product-update.schema.json",
+  "title": "ProductUpdate",
+  "description": "JSON Merge Patch (RFC 7396) of a Product (FR-55, UC-12). The code never changes; a change applies only to Documents issued afterwards; `active: false` deactivates the Product (no delete: it stays in history, the Sales register and the stock card). Role: Administrator.",
+  "type": "object",
+  "minProperties": 1,
+  "additionalProperties": false,
+  "properties": {
+    "description": { "type": "string", "maxLength": 500 },
+    "unit": { "$ref": "common.schema.json#/$defs/UnitOfMeasure" },
+    "igvTreatment": { "$ref": "common.schema.json#/$defs/IgvTreatment" },
+    "isc": { "$ref": "product.schema.json#/properties/isc" },
+    "iscUnitsPerItem": { "$ref": "product.schema.json#/properties/iscUnitsPerItem" },
+    "isPlasticBag": { "type": "boolean" },
+    "existenceType": { "$ref": "common.schema.json#/$defs/Table5ExistenceType" },
+    "unspscCode": { "$ref": "product.schema.json#/properties/unspscCode" },
+    "active": { "$ref": "product.schema.json#/properties/active" }
+  }
+}

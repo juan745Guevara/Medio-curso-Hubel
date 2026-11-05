@@ -160,6 +160,11 @@ AC-79 (FR-11) — Lost answer, SUNAT already has the CDR
   When the retry runs and getStatusCdr returns a CDR with code 0
   Then F001-42 becomes ACCEPTED with that CDR and it is not sent again
 
+AC-85 (FR-11) — SUNAT status on demand
+  Given F001-42 is in PENDING_RESEND
+  When the Administrator asks for its SUNAT status
+  Then the system queries getStatusCdr, returns the status SUNAT reports and stores the CDR if SUNAT has one, without sending the document
+
 AC-80 (FR-11) — Lost answer, SUNAT has no CDR
   Given F001-42 is in PENDING_RESEND and getStatusCdr returns no CDR
   When the retry runs

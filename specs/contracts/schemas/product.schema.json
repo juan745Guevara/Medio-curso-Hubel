@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://abc-software.pe/schemas/product.schema.json",
   "title": "Product",
-  "description": "Product of the Catalog context. Tax classification (Catalogs 07 and 08, ICBPER) for FR-05 and FR-36; PLE classification (Table 5, UNSPSC) for formats 12.1 (FR-40, FR-43).",
+  "description": "Product of the Catalog context. Tax classification (Catalogs 07 and 08, ICBPER) for FR-05 and FR-36; PLE classification (Table 5, UNSPSC) for formats 12.1 (FR-40, FR-43). Changed or deactivated with product-update.schema.json (FR-55).",
   "type": "object",
   "required": [
     "code",
@@ -145,6 +145,11 @@
       "type": "string",
       "pattern": "^[0-9]{8}$",
       "description": "UNSPSC code (Catalog 25) for cac:CommodityClassification and PLE 12.1 field 9."
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "FR-55. False = deactivated: refused in new Documents (PRODUCT_INACTIVE), kept in history and in the stock card."
     },
     "status": {
       "type": "string",

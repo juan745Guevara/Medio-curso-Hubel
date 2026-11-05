@@ -266,6 +266,51 @@ sequenceDiagram
   C-->>App: 201 (status) or 202 + PDF/XML/CDR links
 ```
 
+## 6b. Deployment view (physical)
+
+Where each piece runs (ADR 0002, ADR 0004, ADR 0006, ADR 0008; decisions D-13, D-14, D-18). The hosting of the server
+(own machine in the main store or a rented VM) is chosen at go-live; the view is the same.
+
+```mermaid
+flowchart TB
+  subgraph store[Store · establishment 0000]
+    till1[Till 1 · Windows 10+ PC<br/>MAUI app installed by MSI<br/>Series F001/B001]
+    till2[Till 2 · Windows 10+ PC<br/>MAUI app installed by MSI<br/>Series F002/B002]
+    phone[Android 10+ device<br/>MAUI app installed by APK<br/>sales and stock checks]
+    printer[Receipt printer<br/>Printed representation + QR]
+    till1 & till2 --- printer
+  end
+  subgraph server[ABC server · Linux or Windows host]
+    proxy[Reverse proxy<br/>TLS 1.2+ certificate]
+    app[ASP.NET Core MVC monolith .NET 10<br/>API + admin views + outbox dispatcher]
+    db[(PostgreSQL<br/>documents, series, outbox, inventory)]
+    files[(File storage<br/>signed XML, CDR, PDF · 5 years · daily backup)]
+    keys[(Key ring + encrypted certificate<br/>Data Protection · never in the repo)]
+    proxy --> app
+    app --- db
+    app --- files
+    app --- keys
+  end
+  subgraph sunat[SUNAT]
+    bill[billService<br/>sendBill · sendSummary · getStatus]
+    consult[billConsultService<br/>getStatusCdr]
+    sire[SIRE API<br/>RVIE proposal]
+  end
+  dist[Installers<br/>MSI signed · APK signed with ABC keystore]
+  till1 & till2 & phone -- HTTPS JSON · JWT<br/>invoicing-api.yaml --> proxy
+  app -- SOAP WS-Security · ZIP --> bill
+  app -- SOAP WS-Security --> consult
+  app -- HTTPS OAuth --> sire
+  dist -. install / update .-> till1 & till2 & phone
+```
+
+| Node | Runs | Talks to | Why there |
+|---|---|---|---|
+| Till PC (Windows, MSI) | MAUI client, local queue of unsent requests (no numbers) | Server over HTTPS | NFR-04; numbering and signing only on the server (FR-49, ADR 0008) |
+| Android device (APK) | MAUI client | Server over HTTPS | NFR-04 |
+| Server | Monolith, outbox dispatcher, scheduled jobs | PostgreSQL, storage, SUNAT | ADR 0001, ADR 0007; the certificate never leaves it (ADR 0006) |
+| SUNAT | billService, billConsultService, SIRE | — | Direct SEE-Del contribuyente (D-13); an OSE replaces `bill`/`consult` by configuration (NFR-07) |
+
 ## 7. Proposed folder structure (described, not created in this phase)
 
 ```

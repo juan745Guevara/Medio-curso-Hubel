@@ -10,6 +10,7 @@ RS 234-2006/SUNAT requires formal books and registers. With the system's Electro
 ## User stories
 - US-15: As an Accountant, I want the Period's Sales register in format 14.1 with all Electronic documents to reconcile with SUNAT.
 - US-16: As an Administrator, I want the stock card per Product in format 12.1 (inflows, outflows, balance) from the first migrated movement.
+- US-17: As an Administrator, I want to record the goods ABC buys and keep the Product catalog up to date, so the stock card reflects purchases and no discontinued Product is sold.
 
 ## Functional requirements
 - **FR-37** (Event-driven): When the Accountant requests the Sales register of a Period, the system shall list each Electronic document of the Period with the 35 fields of SUNAT PLE format 14.1 (Registro de Ventas e Ingresos, RS 108-2020/SUNAT Annex IV) in their order, filled from the UBL origin defined in `regulatory-matrix.md` §I.
@@ -20,6 +21,10 @@ RS 234-2006/SUNAT requires formal books and registers. With the system's Electro
 - **FR-42** (Event-driven): When the Accountant exports the inventory register of a Period, the system shall generate the PLE TXT file `LE<RUC><AAAAMM00>120100<00><1><content><currency>1.txt` with fields 1–19 of format 12.1 for every Product and establishment, with the first row of the first Period in operation being the opening balance (Table 12 code 16) equal to the reconciled legacy balance.
 - **FR-43** (Unwanted behaviour): If a Product with movements in the Period has no Table 5 stock type or its unit has no Table 6 code, then the system shall block the 12.1 export with `PLE_INCOMPLETE_PRODUCT` and list the Products to complete.
 - **FR-44** (Ubiquitous): The system shall assign field 35 of format 14.1 as follows: `1` for ACCEPTED or OBSERVED documents of the Period; `2`, with all amounts at 0.00, for documents VOIDED in the Period; `8` for documents of a previous Period accepted after that Period was exported.
+
+- **FR-53** (Event-driven): When the Administrator records a Goods receipt (supplier with RUC, supporting document of PLE Table 10 with Series, number and issue date, establishment and at least one item with Product, quantity and unit), the system shall create one INFLOW Inventory movement per item with PLE Table 12 operation type `02` (purchase) and that supporting document, so that the 12.1 stock card and its running balance include it.
+- **FR-54** (Unwanted behaviour): If an item of a Goods receipt has a quantity of zero, a unit different from the Product's unit, or a Product that is unknown, PENDING_CLASSIFICATION or inactive, then the system shall reject the whole Goods receipt with 422 and create no Inventory movement.
+- **FR-55** (Event-driven): When the Administrator updates a Product, the system shall keep its code, apply the change only to Documents issued afterwards and, when the Product is deactivated (`active` = false), refuse it in new Documents with `PRODUCT_INACTIVE` while keeping it in the issued Documents, the Sales register and the stock card.
 
 ## Non-functional requirements
 - **NFR-12**: The Sales register of a Period with 20,000 Electronic documents shall be generated in ≤ 30 s.
@@ -89,6 +94,26 @@ AC-60 (FR-44) — Voided document in the register
   Given Invoice F001-45 for 118.00 VOIDED in 2026-10
   When the 2026-10 Register is generated
   Then its row has status 2 and every amount is 0.00
+
+AC-81 (FR-53) — Purchase enters the stock card
+  Given Product P-001 has a balance of 40 NIU in establishment 0000
+  When the Administrator records Goods receipt 01 F050-1200 of supplier 20609876540 with 60 NIU of P-001
+  Then an INFLOW movement of 60 with Table 12 type 02 and document 01 F050-1200 is created and the balance becomes 100
+
+AC-82 (FR-54) — Invalid Goods receipt creates nothing
+  Given a Goods receipt with two items, one with quantity 0
+  When the Administrator records it
+  Then the system answers 422 with INVALID_QUANTITY and no Inventory movement is created
+
+AC-83 (FR-55) — Product change applies forward
+  Given Invoice F001-42 was issued with Product P-001 described as "ACEITE VEGETAL BOTELLA 1 L"
+  When the Administrator changes the description to "ACEITE VEGETAL 1 L"
+  Then F001-42 keeps the old description and the next Document uses the new one
+
+AC-84 (FR-55) — Inactive product cannot be sold
+  Given Product P-010 was deactivated
+  When the Salesperson issues a Document with P-010
+  Then the system answers 422 with PRODUCT_INACTIVE and P-010 still appears in its stock card
 
 ## Out of scope
 - Uploading the TXT to SUNAT (the Accountant does it with the PLE program or SIRE).

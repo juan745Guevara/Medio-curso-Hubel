@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abc-software.pe/schemas/goods-receipt-request.schema.json",
+  "title": "GoodsReceiptRequest",
+  "description": "Goods bought from a supplier (FR-53, FR-54, UC-16). Each item becomes an INFLOW Inventory movement with PLE Table 12 operation type 02 (purchase) and this supporting document, which feeds the 12.1 stock card (FR-40). Role: Administrator.",
+  "type": "object",
+  "required": ["establishment", "supplier", "supportingDocument", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "establishment": { "$ref": "common.schema.json#/$defs/EstablishmentCode" },
+    "supplier": {
+      "type": "object",
+      "required": ["ruc", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "ruc": { "$ref": "common.schema.json#/$defs/Ruc" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 }
+      }
+    },
+    "supportingDocument": {
+      "type": "object",
+      "description": "Document received from the supplier: 12.1 fields 10 to 13 (Table 10 type, Series, number, date).",
+      "required": ["type", "series", "number", "issueDate"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "$ref": "common.schema.json#/$defs/Table10DocumentType" },
+        "series": { "type": "string", "minLength": 1, "maxLength": 20 },
+        "number": { "type": "string", "pattern": "^[0-9]{1,20}$" },
+        "issueDate": { "$ref": "common.schema.json#/$defs/Date" }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["productCode", "quantity", "unit"],
+        "additionalProperties": false,
+        "properties": {
+          "productCode": { "type": "string", "maxLength": 24 },
+          "quantity": { "$ref": "common.schema.json#/$defs/Quantity", "description": "Greater than zero (FR-54, business rule INVALID_QUANTITY)" },
+          "unit": { "$ref": "common.schema.json#/$defs/UnitOfMeasure", "description": "Must be the Product's unit (FR-54, UNIT_MISMATCH)" }
+        }
+      }
+    }
+  }
+}
