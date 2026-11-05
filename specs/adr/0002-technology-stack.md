@@ -1,7 +1,7 @@
 ---
 id: 0002
 title: Technology stack — .NET 10 (ASP.NET Core MVC + .NET MAUI) and PostgreSQL
-status: proposed
+status: accepted
 origin: criteria
 ---
 # Context
